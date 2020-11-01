@@ -40,3 +40,10 @@ export const averageHW = (value: number): number => {
     return (hp(value) + wp(value) * 4 * w) / 5;
   }
 };
+
+// default: 812 x 375, iPhone 11 Pro
+const percentageWidth: number = width / 375;
+
+export const pxToPercentage = (value: number): number => {
+  return percentageWidth * value;
+};

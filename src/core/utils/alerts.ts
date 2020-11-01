@@ -43,7 +43,7 @@ const alert = (params: AlertParams) => {
     params.message,
     [
       {
-        text: I18n.t('common.alert.ok'),
+        text: 'OK',
         onPress: () => params.onResult ? params.onResult() : {},
       },
     ],
