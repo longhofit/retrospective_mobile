@@ -48,6 +48,8 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
 
     if(!formData || isEmpty(formData.password) || isEmpty(formData.username)){
       alerts.alert({ message: 'Please enter Username and Password.' })
+    } else{
+      props.onSignUpPress(formData);
     }
 
     // if (isEmpty(formData.username)) {
