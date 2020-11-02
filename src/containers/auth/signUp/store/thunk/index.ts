@@ -11,22 +11,13 @@ export const onThunkSignUpReq = (data: SignUpFormData,
   const authService = new AuthService();
   const signUpReq: SignUpReq = {
     username: data.username,
-    password:data.password,
+    password: data.password,
   };
 
   try {
-    // const res = await authService.signUp(signUpReq);
-    // const res: ApiResult={
-    //   success:false,
-    //   error_message:'Sign up failed!'
-    // }
-    const res: ApiResult={
-      success:true,
-      message:'Sign up successful!'
-    }
-    if (res.success) {
-      alerts.alert({ message: res.message });
-      onSuccess();
+    const res = await authService.signUp(signUpReq);
+    if (res) {
+      alerts.alert({ message: 'Login successful!', onResult: onSuccess });
     } else {
       alerts.alert({ message: res.message || res.error_message });
       onError();

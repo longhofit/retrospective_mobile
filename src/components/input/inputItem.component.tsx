@@ -133,7 +133,7 @@ export const InputItem = withStyles(InputItemComponent, (theme: ThemeType) => ({
     flex: 1,
     paddingVertical: 0,
     marginLeft: pxToPercentage(17),
-    fontSize: pxToPercentage(17),
+    fontSize: pxToPercentage(14),
     color: theme['color-basic-dark-100'],
     ...textStyle.robotoRegular,
   },
@@ -152,10 +152,5 @@ export const InputItem = withStyles(InputItemComponent, (theme: ThemeType) => ({
     fontSize: pxToPercentage(13),
     color: theme['color-basic-dark-600'],
     ...textStyle.robotoMedium,
-  },
-  txtPlaceholder: {
-    fontSize: pxToPercentage(17),
-    color: theme['color-basic-dark-600'],
-    ...textStyle.robotoRegular,
   },
 }));

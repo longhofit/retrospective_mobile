@@ -29,6 +29,7 @@ import {
 import I18n from '@src/assets/i18n';
 import { SignUpFormData } from '@src/core/models/signUp/signUp.model';
 import { SignupForm as SignUpForm } from './signUpForm.component';
+import { EmailValidator } from '@src/core/validators';
 interface ComponentProps {
   onSignUpPress: (formData: SignUpFormData) => void;
   onBackPress: () => void;
@@ -42,27 +43,21 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
     password: '',
   });
 
-  const onSingUpButtonPress = (): void => {
-    console.log(formData);
+  const onSignUpButtonPress = (): void => {
     Keyboard.dismiss();
 
-    if(!formData || isEmpty(formData.password) || isEmpty(formData.username)){
+    if (!formData || isEmpty(formData.password) || isEmpty(formData.username)) {
       alerts.alert({ message: 'Please enter Username and Password.' })
-    } else{
+    } else if (formData.username.length < 6 || formData.password.length < 6) {
+      alerts.alert({ message: 'Password and Username at least 6 characters.' })
+    } else if (!EmailValidator(formData.username)) {
+      alerts.alert({ message: 'Invalid email!' })
+    } else {
       props.onSignUpPress(formData);
     }
-
-    // if (isEmpty(formData.username)) {
-    //   alerts.alert({ message: 'Please enter Username' })
-    // } else if (isEmpty(formData.password)) {
-    //   alerts.alert({ message: 'Please enter Password' });
-    // } else {
-    //   props.onSignUpPress(formData);
-    // }
   };
 
   const onFormDataChange = (formDataParam: SignUpFormData): void => {
-    console.log(formDataParam, 'check')
     setFormData(formDataParam);
   };
 
@@ -80,15 +75,42 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
           {'Sign up for your acccount'}
         </Text>
       </View>
+      <View style={themedStyle.sectionLogo}>
+        <View style={[themedStyle.viewLogo, { overflow: 'hidden' }]}>
+          <Text style={themedStyle.txtLogo}>
+            {'F'}
+          </Text>
+          <View style={[{
+            backgroundColor: 'orange',
+            width: pxToPercentage(35),
+            height: pxToPercentage(35),
+            position: 'absolute',
+            alignSelf: 'flex-start',
+            left: pxToPercentage(-20),
+            top:pxToPercentage(-20),
+          },
+          {
+            transform: [{ rotate: "-45deg" }]
+          }
+          ]} />
+        </View>
+        <Text style={[
+          themedStyle.txtLogo,
+          themedStyle.txtLogo2,
+        ]}>
+          {'Retro'}
+        </Text>
+      </View>
+
       <View style={{ paddingHorizontal: pxToPercentage(20), width: '100%' }}>
         <SignUpForm
-          style={{ marginTop: pxToPercentage(200) }}
+          style={{ marginTop: pxToPercentage(80) }}
           formData={formData}
           onDataChange={onFormDataChange} />
         <TouchableOpacity
-        activeOpacity={0.75}
+          activeOpacity={0.75}
           style={themedStyle.viewButton}
-          onPress={onSingUpButtonPress}>
+          onPress={onSignUpButtonPress}>
           <Text style={themedStyle.txtSignUp}>
             {'SIGN UP'}
           </Text>
@@ -103,6 +125,27 @@ export const SignUp = withStyles(SignUpComponent, (theme: ThemeType) => ({
   container: {
     alignItems: 'center',
     flex: 1,
+  },
+  sectionLogo: {
+    marginTop: pxToPercentage(150),
+    flexDirection: 'row',
+  },
+  viewLogo: {
+    flexDirection: 'row',
+    width: pxToPercentage(60),
+    backgroundColor: theme['color-app'],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  txtLogo: {
+    ...textStyle.proDisplayBlackItalic,
+    color: theme['color-basic-light-100'],
+    fontSize: pxToPercentage(60),
+  },
+  txtLogo2: {
+    marginLeft: pxToPercentage(2),
+    color: theme['color-app'],
+    fontSize: pxToPercentage(55),
   },
   viewHeader: {
     backgroundColor: theme['color-app'],

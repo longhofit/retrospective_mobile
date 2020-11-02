@@ -90,23 +90,26 @@ const SignupFormComponent: React.FunctionComponent<SignupFormProps> = (props) =>
         style,
       ]}
       {...restProps}>
-        <InputItem
+      <InputItem
+        keyboardType={'email-address'}
+        autoFocus={true}
         placeholder={'Enter email'}
         title={'Email'}
         inputContainerStyle={themedStyle.viewInput}
-        onInputTextChange={onUsernameInputTextChange}/>
-         <InputItem
+        onInputTextChange={onUsernameInputTextChange} />
+      <InputItem
+        secureTextEntry={true}
         placeholder={'Enter password'}
         title={'Password'}
-        inputContainerStyle={[themedStyle.viewInput,{marginTop:pxToPercentage(12)}]}
-        onInputTextChange={onPasswordnputTextChange}/>
+        inputContainerStyle={[themedStyle.viewInput, { marginTop: pxToPercentage(12) }]}
+        onInputTextChange={onPasswordnputTextChange} />
     </View>
   );
 };
 
 export const SignupForm = withStyles(SignupFormComponent, (theme: ThemeType) => ({
   container: {
-    
+
   },
   txtPlaceholder: {
     color: theme['color-basic-dark-100'],
@@ -114,6 +117,6 @@ export const SignupForm = withStyles(SignupFormComponent, (theme: ThemeType) => 
     ...textStyle.proDisplayRegular,
   },
   viewInput: {
-    height:pxToPercentage(40),
+    height: pxToPercentage(40),
   }
 }));

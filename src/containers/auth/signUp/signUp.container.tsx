@@ -10,15 +10,22 @@ export const SignUpContainer: React.FunctionComponent<NavigationInjectedProps> =
   const navigationKey: string = 'SignUpContainer';
   const dispatch: Dispatch<any> = useDispatch();
 
-  const onSuccess = (): void => {
-
+  const onSuccess = (name: string): void => {
+    props.navigation.navigate({
+      routeName: 'Home',
+      key: navigationKey,
+      params: {
+        name
+      },
+    })
   };
+
   const onError = (): void => {
 
   };
 
   const onSignUpPress = (data: SignUpFormData): void => {
-    dispatch(onThunkSignUpReq(data,onSuccess,onError));
+    dispatch(onThunkSignUpReq(data, () => onSuccess(data.username), onError));
   };
 
   const onBackPress = (): void => {

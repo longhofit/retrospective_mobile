@@ -29,3 +29,11 @@ export const OtherFaceIDIcon = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const EvaArrowIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./eva/arrow-ios-back.png'),
+  };
+
+  return Icon(source, style);
+}; 
+
