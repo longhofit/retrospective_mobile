@@ -1,10 +1,10 @@
+export class SignInFormData {
+  username: string | undefined;
+  password: string | undefined;
+}
 export class SignInReq {
   username: string;
   password: string;
-  device_code: string;
-  device_name: string;
-  device_type: number;
-  version: string;
 
   constructor() {
     this.username = undefined;
