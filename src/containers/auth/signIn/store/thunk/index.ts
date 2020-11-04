@@ -15,10 +15,8 @@ export const onThunkSignInReq = (data: SignInFormData,
   };
   try {
     const res = await authService.signIn(signInReq);
-    console.log(res,"res");
     if (res) {
       alerts.alert({ message: 'Login successful!', onResult: onSuccess });
-      console.log(res,"minhhien");
     } else {
       alerts.alert({ message: res.message || res.error_message });
       onError();
@@ -26,6 +24,5 @@ export const onThunkSignInReq = (data: SignInFormData,
   } catch (e) {
     const { message }: ApiResult = e;
     onError();
-    alerts.alert({ message });
   }
 };

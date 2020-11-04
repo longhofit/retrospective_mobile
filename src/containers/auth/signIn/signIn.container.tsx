@@ -38,17 +38,14 @@ const SignIn = (props) => {
     return name.trim() == '';
   };
   const onSuccess = (): void => {
-    Alert.alert('Success');
   };
   const onError = (): void => {
-    Alert.alert('Fail');
+    Alert.alert('Username or password incorrect');
   };
   const onSignInPress = (): void => {
     dispatch(onThunkSignInReq(signInFormData, () => onSuccess, onError));
   };
   const onPressButton = () => {
-    console.log(signInFormData.username + "123123123");
-    console.log(signInFormData.password + "123123123");
     if (hasErrorEmail()) {
       Alert.alert('Username is empty');
     }
