@@ -35,5 +35,29 @@ export const EvaArrowIcon = (style: StyleProp<ImageStyle>): IconElement => {
   };
 
   return Icon(source, style);
-}; 
+};
+
+export const AddIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/add.png'),
+  };
+
+  return Icon(source, style);
+};
+
+export const UncheckIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/check_box_outline.png'),
+  };
+
+  return Icon(source, style);
+};
+
+export const CheckIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/check_box.png'),
+  };
+
+  return Icon(source, style);
+};
 
