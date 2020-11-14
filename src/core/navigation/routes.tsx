@@ -10,11 +10,13 @@ import {
 import { HomeContainer } from '@src/containers/home/home.container';
 import { TestContainer } from '@src/containers/test/test.container';
 import { SignUpContainer } from '@src/containers/auth/signUp/signUp.container';
+import SignIn from '@src/containers/auth/signIn/signIn.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
     ['SignUp']:SignUpContainer,
     ['Home']: HomeContainer,
+    ['SignIn']: SignIn,
   },
   {
     defaultNavigationOptions: {
@@ -30,7 +32,7 @@ const createAppRouter = (container: NavigationContainer): NavigationContainer =>
       ['App']: container,
     },
     {
-      initialRouteName: 'App',
+      initialRouteName: 'Test',
     },
   ));
 };
