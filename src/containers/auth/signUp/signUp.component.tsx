@@ -6,11 +6,10 @@ import {
 } from '@kitten/theme';
 import {
   View,
-  ImageBackground,
   Text,
-  TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
 import {
   textStyle,
@@ -19,14 +18,8 @@ import {
   isEmpty,
   pxToPercentage,
 } from '@src/core/utils/utils';
-import { ImageSource, imageBackground1 } from '@src/assets/images';
-import { IconElement } from '@src/assets/icons/icon.component';
+import { WebView } from 'react-native-webview';
 import { alerts } from '@src/core/utils/alerts';
-import {
-  heightPercentageToDP,
-  widthPercentageToDP,
-} from 'react-native-responsive-screen';
-import I18n from '@src/assets/i18n';
 import { SignUpFormData } from '@src/core/models/signUp/signUp.model';
 import { SignupForm as SignUpForm } from './signUpForm.component';
 import { EmailValidator } from '@src/core/validators';
@@ -68,62 +61,15 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
   const { themedStyle } = props;
 
   return (
-    <View
-      style={themedStyle.container}>
-      <View style={themedStyle.viewHeader}>
-        <Text style={themedStyle.txtHeader}>
-          {'Sign up for your acccount'}
-        </Text>
-      </View>
-      <View style={themedStyle.sectionLogo}>
-        <View style={[themedStyle.viewLogo, { overflow: 'hidden' }]}>
-          <Text style={themedStyle.txtLogo}>
-            {'F'}
-          </Text>
-          <View style={[{
-            backgroundColor: 'orange',
-            width: pxToPercentage(35),
-            height: pxToPercentage(35),
-            position: 'absolute',
-            alignSelf: 'flex-start',
-            left: pxToPercentage(-20),
-            top:pxToPercentage(-20),
-          },
-          {
-            transform: [{ rotate: "-45deg" }]
-          }
-          ]} />
-        </View>
-        <Text style={[
-          themedStyle.txtLogo,
-          themedStyle.txtLogo2,
-        ]}>
-          {'Retro'}
-        </Text>
-      </View>
-
-      <View style={{ paddingHorizontal: pxToPercentage(20), width: '100%' }}>
-        <SignUpForm
-          style={{ marginTop: pxToPercentage(80) }}
-          formData={formData}
-          onDataChange={onFormDataChange} />
-        <TouchableOpacity
-          activeOpacity={0.75}
-          style={themedStyle.viewButton}
-          onPress={onSignUpButtonPress}>
-          <Text style={themedStyle.txtSignUp}>
-            {'SIGN UP'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-
+    <SafeAreaView style={themedStyle.container}>
+      <WebView source={{ uri: 'http://115.78.232.219:3000/' }} />
+    </SafeAreaView>
   );
 };
 
 export const SignUp = withStyles(SignUpComponent, (theme: ThemeType) => ({
   container: {
-    alignItems: 'center',
+  //  alignItems: 'center',
     flex: 1,
   },
   sectionLogo: {
