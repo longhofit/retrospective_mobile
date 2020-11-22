@@ -14,8 +14,8 @@ import SignIn from '@src/containers/auth/signIn/signIn.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
-    ['SignUp']:SignUpContainer,
     ['Home']: HomeContainer,
+    ['SignUp']:SignUpContainer,
     ['SignIn']: SignIn,
   },
   {
@@ -32,7 +32,7 @@ const createAppRouter = (container: NavigationContainer): NavigationContainer =>
       ['App']: container,
     },
     {
-      initialRouteName: 'Test',
+      initialRouteName: 'App',
     },
   ));
 };
