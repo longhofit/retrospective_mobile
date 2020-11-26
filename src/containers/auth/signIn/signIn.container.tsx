@@ -18,6 +18,7 @@ import { SignInFormData } from '@src/core/models/signUp/signInReq.model';
 import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
 import { onThunkSignInReq } from './store/thunk';
+import CookieManager from 'react-native-cookies'
 const SignIn = (props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
