@@ -1,33 +1,45 @@
-import axios, {
-  AxiosRequestConfig,
-  Method,
-} from 'axios';
-import {
-  SERVER_ADDRESS,
-  API_URL,
-} from '../../../config';
-import { store } from '../store';
+import axios, {AxiosRequestConfig, Method} from 'axios';
+import {SERVER_ADDRESS, API_URL} from '../../../config';
+import {store} from '../store';
 
 interface RequestHeader {
-  'Accept': string;
+  Accept: string;
   'Content-Type': string;
-  'Authorization'?: string;
+  Authorization?: string;
 }
 
 export default class ApiService {
-  protected apiGet<T>(url: string, params: object = null, hasToken: boolean = false): Promise<T> {
+  protected apiGet<T>(
+    url: string,
+    params: object = null,
+    hasToken: boolean = false,
+  ): Promise<T> {
     return this.apiRun<T>('get', url, null, params, hasToken);
   }
 
-  protected apiPost<T>(url: string, body: any = null, params: object = {}, hasToken: boolean = false): Promise<T> {
+  protected apiPost<T>(
+    url: string,
+    body: any = null,
+    params: object = {},
+    hasToken: boolean = false,
+  ): Promise<T> {
     return this.apiRun<T>('post', url, body, params, hasToken);
   }
 
-  protected apiPut<T>(url: string, body: any = null, params: object = {}, hasToken: boolean = false): Promise<T> {
+  protected apiPut<T>(
+    url: string,
+    body: any = null,
+    params: object = {},
+    hasToken: boolean = false,
+  ): Promise<T> {
     return this.apiRun<T>('put', url, body, params, hasToken);
   }
 
-  protected apiDelete<T>(url: string, params: object = {}, hasToken: boolean = false): Promise<T> {
+  protected apiDelete<T>(
+    url: string,
+    params: object = {},
+    hasToken: boolean = false,
+  ): Promise<T> {
     return this.apiRun<T>('delete', url, null, params, hasToken);
   }
 
@@ -51,11 +63,12 @@ export default class ApiService {
       axios(requestConfig)
         .then((a) => {
           resolve(a.data);
+          if (a.status !== 200) {
+            reject(a.data);
+          }
         })
         .catch((error) => {
-          const errorData = !error.response
-            ? undefined
-            : error.response.data;
+          const errorData = !error.response ? undefined : error.response.data;
           reject(errorData);
         });
     });
@@ -63,7 +76,7 @@ export default class ApiService {
 
   private appendHeaders(hasToken: boolean = false): RequestHeader {
     const headers: RequestHeader = {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
     };
 

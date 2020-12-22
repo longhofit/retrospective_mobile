@@ -9,22 +9,31 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Home } from './home.component';
 import { HomeState } from './store/reducer/types';
-import { onThunkGetPrePublicBoardsReq } from './store/thunk';
+import { onThunkCreateBoardReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
 
 export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
-  const navigationKey: string = 'HomeContainer';
-  const sessionId: string = props.navigation.getParam('sessionId');
   const { user }: UserState = useSelector((state: AppState) => state.user);
   const { session }: SessionState = useSelector((state: AppState) => state.session);
   const { boards }: HomeState = useSelector((state: AppState) => state.home);
   const dispatch: Dispatch<any> = useDispatch();
 
+  useEffect(() => {
+    onGetPrePublicBoards();
+  }, []);
+
+  const onBoardPress = (sessionId: string): void => {
+    props.navigation.navigate({
+      routeName: 'Board',
+      params: {
+        sessionId,
+      }
+    })
+  };
+
   const receivePost = (post: Post): void => {
-    dispatch(onReceivePost(post));
   }
 
   const receiveBoard = (board: Session): void => {
-    dispatch(onReceiveBoard(board));
   }
 
   const onBackPress = (): void => {
@@ -33,22 +42,33 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
 
   const onGetBoardSuccess = (): void => {
   };
+
   const onGetBoardError = (): void => {
   };
+
+  const onCreateBoardSuccess = (): void => {
+    onGetPrePublicBoards();
+  };
+
 
   const onGetPrePublicBoards = (): void => {
     dispatch(onThunkGetPrePublicBoardsReq(
       onGetBoardSuccess,
       onGetBoardError,
     ));
-  }
+  };
 
-  useEffect(() => {
-    onGetPrePublicBoards();
-  }, [])
+  const onCreateBoard = (): void => {
+    dispatch(onThunkCreateBoardReq(
+      onCreateBoardSuccess,
+      () => { },
+    ));
+  };
 
   return (
     <Home
+      onBoardPress={onBoardPress}
+      onCreateBoard={onCreateBoard}
       boards={boards}
       onReceiveBoard={receiveBoard}
       session={session}

@@ -11,12 +11,14 @@ import { HomeContainer } from '@src/containers/home/home.container';
 import { TestContainer } from '@src/containers/test/test.container';
 import { SignUpContainer } from '@src/containers/auth/signUp/signUp.container';
 import SignIn from '@src/containers/auth/signIn/signIn.container';
+import { BoardContainer } from '@src/containers/board/board.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
     ['SignIn']: SignIn,
     ['Home']: HomeContainer,
     ['SignUp']:SignUpContainer,
+    ['Board']:BoardContainer,
   },
   {
     defaultNavigationOptions: {

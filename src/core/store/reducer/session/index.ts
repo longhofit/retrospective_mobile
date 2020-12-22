@@ -16,33 +16,21 @@ const initialState: SessionState = {
     columns: [],
     options: undefined,
     createdBy: undefined,
-
   },
   panelOpen: false,
 };
 
-export const sessionReducer = (state = initialState, action: SessionActionTypes): SessionState => {
-  console.log(action.type)
+export const sessionReducer = (
+  state = initialState,
+  action: SessionActionTypes,
+): SessionState => {
+  console.log(action.type, action.payload);
+
   switch (action.type) {
     case RECEIVE_POST: {
-
       if (!state.session) {
         return state;
       }
-
-      // console.log('action.payload', action.payload)
-
-      // const newState = {
-      //   ...state,
-      //   session: {
-      //     ...state.session,
-      //     posts: [...state.session.posts, action.payload],
-      //   },
-      // }
-
-      // console.log('action.newState', newState)
-
-      console.log(state.session.posts)
 
       return {
         ...state,
@@ -54,10 +42,6 @@ export const sessionReducer = (state = initialState, action: SessionActionTypes)
     }
 
     case RECEIVE_BOARD:
-      console.log('REDUER', {
-        ...state,
-        session: action.payload,
-      })
       return {
         ...state,
         session: action.payload,

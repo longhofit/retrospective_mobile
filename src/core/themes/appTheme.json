@@ -91,5 +91,7 @@
   "color-basic-news-header-icon-200": "rgba(108, 99, 255, 1)",
   "color-basic-news-header-icon-300": "rgba(255, 149, 0, 1)",
   "color-basic-news-header-icon-400": "rgba(0, 122, 255, 1)",
-  "color-basic-news-header-icon-500": "rgba(191, 90, 242, 1)"
+  "color-basic-news-header-icon-500": "rgba(191, 90, 242, 1)",
+  "color-grey-1":"#585858",
+  "color-green-1":"#8FDA97"
 }

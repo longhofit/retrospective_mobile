@@ -1,26 +1,11 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-} from 'react';
-import {
-  withStyles,
-  ThemeType,
-  ThemedComponentProps,
-} from '@kitten/theme';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Picker,
-  TextInput,
-} from 'react-native';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView } from 'react-native';
 import { EvaArrowIcon, AddIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
-import { BoardRepository } from 'react-native-draganddrop-board'
-import { Board } from 'react-native-draganddrop-board'
+import { BoardRepository } from 'react-native-draganddrop-board';
+import { Board } from 'react-native-draganddrop-board';
 import Modal from 'react-native-modal';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
@@ -29,8 +14,9 @@ import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
 
-
 interface ComponentProps {
+  onBoardPress: (sessionId: string) => void;
+  onCreateBoard: () => void;
   boards: BoardMetaData[];
   session: Session;
   onReceivePost: (post: Post) => void;
@@ -51,19 +37,22 @@ const fakeData = [
       {
         id: '1',
         name: 'Analyze your audience',
-        description: 'Learn more about the audience to whom you will be speaking'
+        description:
+          'Learn more about the audience to whom you will be speaking',
       },
       {
         id: '2',
         name: 'Select a topic',
-        description: 'Select a topic that is of interest to the audience and to you'
+        description:
+          'Select a topic that is of interest to the audience and to you',
       },
       {
         id: '3',
         name: 'Define the objective',
-        description: 'Write the objective of the presentation in a single concise statement'
-      }
-    ]
+        description:
+          'Write the objective of the presentation in a single concise statement',
+      },
+    ],
   },
   {
     id: 2,
@@ -72,19 +61,20 @@ const fakeData = [
       {
         id: '4',
         name: 'Look at drawings',
-        description: 'How did they use line and shape? How did they shade?'
+        description: 'How did they use line and shape? How did they shade?',
       },
       {
         id: '5',
         name: 'Draw from drawings',
-        description: 'Learn from the masters by copying them'
+        description: 'Learn from the masters by copying them',
       },
       {
         id: '6',
         name: 'Draw from photographs',
-        description: 'For most people, it’s easier to reproduce an image that’s already two-dimensional'
-      }
-    ]
+        description:
+          'For most people, it’s easier to reproduce an image that’s already two-dimensional',
+      },
+    ],
   },
   {
     id: 3,
@@ -93,16 +83,16 @@ const fakeData = [
       {
         id: '7',
         name: 'Draw from life',
-        description: 'Do you enjoy coffee? Draw your coffee cup'
+        description: 'Do you enjoy coffee? Draw your coffee cup',
       },
       {
         id: '8',
         name: 'Take a class',
-        description: 'Check your local university extension'
-      }
-    ]
-  }
-]
+        description: 'Check your local university extension',
+      },
+    ],
+  },
+];
 
 const boardRepositoryFake = new BoardRepository(fakeData);
 
@@ -119,96 +109,10 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [cardID, setCardID] = useState<string>('');
   const [socket, setSocket] = useState(null);
 
-  const onReceivePost = (post: Post): void => {
-    console.log('post', post);
-    props.onReceivePost(post);
-  }
-
-  console.log(props.boards)
-
-  const onReceiveBoard = (board: Session): void => {
-    console.log('board', board);
-    props.onReceiveBoard(board);
-  }
-
-  function sendFactory(socket, sessionId) {
-    return function (action, payload?) {
-      console.log(action)
-      if (socket) {
-        const messagePayload = {
-          sessionId: sessionId,
-          payload,
-        };
-
-        console.log('Sending message to socket', action, messagePayload);
-
-        socket.emit(action, messagePayload);
-      }
-    };
-  }
-
-  const send = useMemo(() => (socket ? sendFactory(socket, props.sessionId) : null), [
-    socket,
-    props.sessionId,
-  ]);
-
-  useEffect(() => {
-    console.log('run useEffect')
-    const newSocket = io('http://10.0.2.2:8082');
-    setSocket(newSocket);
-
-    const send = sendFactory(newSocket, props.sessionId);
-
-    // Socket events listeners
-    newSocket.on(Actions.RECEIVE_POST, (post: Post) => {
-      console.log('Receive new post:');
-
-      onReceivePost(post);
-    });
-
-    newSocket.on('disconnect', () => {
-      console.log('Server disconnected');
-    });
-
-    newSocket.on('connect', () => {
-      console.log('Connected to the socket');
-
-      send(Actions.JOIN_SESSION);
-
-
-    });
-
-    newSocket.on(Actions.RECEIVE_BOARD, (board: Session) => {
-      console.log('Receive entire board: ');
-
-      onReceiveBoard(board);
-    });
-
-
-  }, [])
 
   const onCancle = (): void => {
     setIsShowPicker(false);
   };
-
-
-  const onAddPost = useCallback((columnIndex: number, content: string, rank: string) => {
-    if (send) {
-      const post = {
-        content,
-        action: null,
-        giphy: null,
-        votes: [],
-        id: 'asdasd-sdsdsd-sdsds-sxxxxxx',
-        column: columnIndex,
-        user: props.user!,
-        group: null,
-        rank,
-      };
-
-      send(Actions.ADD_POST_SUCCESS, post);
-    }
-  }, [send]);
 
   const onOkPress = (): void => {
     if (!isEdit) {
@@ -220,7 +124,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       boardRepository.forEach((item, itemIndex) => {
         item.rows.forEach((row, rowIndex) => {
           if (row.id === cardID) {
-            newData[itemIndex].rows[rowIndex]['name'] = cardName;
+            newData[itemIndex].rows[rowIndex].name = cardName;
           }
         });
       });
@@ -238,14 +142,16 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     boardRepository.forEach((item, index) => {
       item.rows.forEach((card) => {
         if (card.id === cardID) {
-          newData[index].rows = newData[index].rows.filter(row => { return row.id !== idCard });
+          newData[index].rows = newData[index].rows.filter((row) => {
+            return row.id !== idCard;
+          });
         }
       });
     });
 
     boardRepositoryFake.updateData(newData);
     setBoardRepository(newData);
-  }
+  };
 
   const onAddCard = (idColumn: number, card?: any): void => {
     const newData = boardRepository;
@@ -259,12 +165,12 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
           newItem = {
             id: `${lastId + 1}`,
             name: cardName,
-            description: ''
+            description: '',
           };
         }
-        newData[index].rows.push(newItem)
-        setLastId(lastId + 1)
-      };
+        newData[index].rows.push(newItem);
+        setLastId(lastId + 1);
+      }
     });
 
     boardRepositoryFake.updateData(newData);
@@ -277,16 +183,14 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     setIsEdit(false);
   };
 
-  const onDragEnd = (): void => {
-
-  };
+  const onDragEnd = (): void => { };
 
   const onCancelAddPress = (): void => {
-    onAddPost(0, 'mic check', 'rankkkk');
   };
 
   const onIconAddPress = (): void => {
-    setIsShowPicker(true);
+    // setIsShowPicker(true);
+    props.onCreateBoard();
   };
 
   const onColumnPress = (id: number): void => {
@@ -296,7 +200,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     setTimeout(() => {
       setIsShowAdd(true);
     }, 500);
-  }
+  };
 
   const renderAddCard = (): React.ReactElement => {
     return (
@@ -311,33 +215,27 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             {'Enter card'}
           </Text>
           <TextInput
-            textAlignVertical='top'
+            textAlignVertical="top"
             style={themedStyle.inputNote}
             autoFocus
             multiline
             value={cardName}
-            onChangeText={text => setCardName(text)}
+            onChangeText={(text) => setCardName(text)}
           />
           <View style={themedStyle.viewAddNotificationsBottom2}>
             {isEdit && (
-              <TouchableOpacity
-                activeOpacity={0.75}
-                onPress={onDeletePress}>
+              <TouchableOpacity activeOpacity={0.75} onPress={onDeletePress}>
                 <Text style={themedStyle.txtCloseAddNotificationsModal}>
                   {'DELETE'}
                 </Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={onCancelAddPress}>
+            <TouchableOpacity activeOpacity={0.75} onPress={onCancelAddPress}>
               <Text style={themedStyle.txtCloseAddNotificationsModal}>
                 {'CANCEL'}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={onOkPress}>
+            <TouchableOpacity activeOpacity={0.75} onPress={onOkPress}>
               <Text style={themedStyle.txtCloseAddNotificationsModal}>
                 {'OK'}
               </Text>
@@ -345,8 +243,8 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
           </View>
         </View>
       </Modal>
-    )
-  }
+    );
+  };
 
   const renderPicker = (): React.ReactElement => {
     return (
@@ -367,18 +265,14 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
                   <TouchableOpacity
                     activeOpacity={0.75}
                     onPress={() => onColumnPress(item.id)}>
-                    <Text>
-                      {item.name}
-                    </Text>
+                    <Text>{item.name}</Text>
                   </TouchableOpacity>
                 </View>
               </React.Fragment>
-            )
+            );
           })}
           <View style={themedStyle.viewAddNotificationsBottom}>
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={onCancle}>
+            <TouchableOpacity activeOpacity={0.75} onPress={onCancle}>
               <Text style={themedStyle.txtCloseAddNotificationsModal}>
                 {'CANCEL'}
               </Text>
@@ -386,92 +280,85 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
           </View>
         </View>
       </Modal>
-    )
-  }
+    );
+  };
 
   const renderCard = (item): React.ReactElement => {
     return (
-
       <View style={themedStyle.card}>
-        <Text>
-          {item.name}
-        </Text>
+        <Text>{item.name}</Text>
       </View>
-    )
-  }
+    );
+  };
 
   const onItemPress = (item): void => {
-    setCardID(item.id)
+    setCardID(item.id);
     setCardName(item.name);
     setIsShowAdd(true);
     setIsEdit(true);
-  }
+  };
+
+  const onBoardPress = (sessionId: string) => {
+    props.onBoardPress(sessionId);
+  };
 
   const renderBoard = (board: BoardMetaData): React.ReactElement => {
     return (
-      <View style={themedStyle.viewBoard}>
+      <TouchableOpacity
+        onPress={() => onBoardPress(board.id)}
+        activeOpacity={0.75}
+        style={themedStyle.viewBoard}>
         <View style={themedStyle.sectionText}>
-          <Text style={themedStyle.txtDate}>
-            {board.created}
-          </Text>
-          <Text style={themedStyle.txtBoardTitle}>
-            {'My Retrospective'}
-          </Text>
+          <Text style={themedStyle.txtDate}>{board.created}</Text>
+          <Text style={themedStyle.txtBoardTitle}>{'My Retrospective'}</Text>
           <Text style={themedStyle.txtBoardTitle}>
             {`Create by ${board.createdBy.name}`}
           </Text>
         </View>
         <View style={themedStyle.viewBoardInfomation}>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>
-              {board.numberOfPosts}
-            </Text>
-            <Text>
-              {'Post'}
-            </Text>
+            <Text>{board.numberOfPosts}</Text>
+            <Text>{'Post'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>
-              {board.participants.length}
-            </Text>
-            <Text>
-              {'Participants'}
-            </Text>
+            <Text>{board.participants.length}</Text>
+            <Text>{'Participants'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
             <Text>
               {board.numberOfPositiveVotes + board.numberOfNegativeVotes}
             </Text>
-            <Text>
-              {'Votes'}
-            </Text>
+            <Text>{'Votes'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>
-              {board.numberOfActions}
-            </Text>
-            <Text>
-              {'Actions'}
-            </Text>
+            <Text>{board.numberOfActions}</Text>
+            <Text>{'Actions'}</Text>
           </View>
         </View>
         <View style={themedStyle.viewParticipants}>
-          {board.participants.map(item => {
-            return (
-              <View style={themedStyle.viewviewParticipantPhoto}>
-              </View>
-            )
+          {board.participants.map((item) => {
+            return <View style={themedStyle.viewviewParticipantPhoto} />;
           })}
         </View>
-      </View>
+      </TouchableOpacity>
     );
-  }
+  };
 
   return (
     <View style={themedStyle.container}>
-      {boards.map(item => {
-        return renderBoard(item);
-      })}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ padding: pxPhone(20) }}>
+        {boards.map((item) => {
+          return renderBoard(item);
+        })}
+      </ScrollView>
+      <TouchableOpacity
+        onPress={onIconAddPress}
+        activeOpacity={0.75}
+        style={themedStyle.viewAdd}>
+        {AddIcon(themedStyle.iconAdd)}
+      </TouchableOpacity>
 
       {/* <View style={themedStyle.viewHeader}>
         <View style={{
@@ -502,7 +389,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       />
       <TouchableOpacity
         onPress={onIconAddPress}
-        activeOpacity={0.75}  
+        activeOpacity={0.75}
         style={themedStyle.viewAdd}>
         {AddIcon(themedStyle.iconAdd)}
       </TouchableOpacity>
@@ -513,6 +400,15 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  viewAddButton: {
+    width: pxPhone(50),
+    height: pxPhone(50),
+    borderRadius: pxPhone(25),
+    backgroundColor: theme['color-grey-1'],
+    position: 'absolute',
+    bottom: pxPhone(6),
+    right: pxPhone(6),
+  },
   viewParticipants: {
     marginLeft: pxPhone(15),
     flexDirection: 'row',
@@ -541,7 +437,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     marginTop: pxPhone(15),
     justifyContent: 'center',
     backgroundColor: theme['color-basic-light-100'],
-    width: pxToPercentage(250),
+    width: pxToPercentage(300),
     height: pxToPercentage(150),
     borderRadius: pxToPercentage(10),
     ...viewStyle.shadow2,
@@ -609,12 +505,13 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'flex-end',
-    top: pxToPercentage(25),
-    right: pxToPercentage(25),
+    position: 'absolute',
+    bottom: pxPhone(30),
+    right: pxPhone(30),
     width: pxToPercentage(50),
     height: pxToPercentage(50),
     borderRadius: pxToPercentage(25),
-    backgroundColor: theme['color-app'],
+    backgroundColor: theme['color-green-1'],
   },
   iconAdd: {
     width: pxToPercentage(30),
