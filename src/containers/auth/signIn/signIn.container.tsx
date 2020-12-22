@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Alert, TextInput} from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import axios from 'axios';
 import {
@@ -18,14 +18,16 @@ import { SignInFormData } from '@src/core/models/signUp/signInReq.model';
 import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
 import { onThunkSignInReq } from './store/thunk';
-import CookieManager from 'react-native-cookies'
-const SignIn = (props) => {
+import { NavigationInjectedProps } from 'react-navigation';
+import { onSetUser } from '@src/core/store/reducer/user/actions';
+export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) => {
+  const navigationKey: string = 'SignInContainer';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [signInFormData, setSignInFormData] = useState<SignInFormData>({
-    username: '',
-    password: '',
+    username: 'longhoimt3',
+    password: '123456',
   });
   const dispatch: Dispatch<any> = useDispatch();
 
@@ -39,13 +41,24 @@ const SignIn = (props) => {
     return name.trim() == '';
   };
   const onSuccess = (): void => {
+    props.navigation.navigate({
+      routeName: 'Home',
+      key: navigationKey,
+      params: {
+        sessionId: '124',
+      }
+    })
   };
   const onError = (): void => {
     Alert.alert('Username or password incorrect');
   };
+
+  dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
+
   const onSignInPress = (): void => {
-    dispatch(onThunkSignInReq(signInFormData, () => onSuccess, onError));
+    dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
   };
+
   const onPressButton = () => {
     if (hasErrorEmail()) {
       Alert.alert('Username is empty');
@@ -78,7 +91,7 @@ const SignIn = (props) => {
         <Text style={styles.text}>Password</Text>
         <TextInput
           value={password}
-          onChangeText={(password) =>{
+          onChangeText={(password) => {
             setPassword(password);
             setSignInFormData({ ...signInFormData, password });
           }}
@@ -98,19 +111,19 @@ const SignIn = (props) => {
         </Text>
         <Text style={styles.header}>Or</Text>
         <View style={styles.containerAnonymous}>
-        <Text style={styles.header1}>Anonymous Login</Text>
-        <Text style={styles.notify}>This will create an anonymous account. Some features won't be available.</Text>
-        <TextInput
-          style={styles.textinputAno} 
-          placeholder='please enter a name or nickname here'
-          value={name}
-          onChangeText={(name) => setName(name)}
-        />
-        <TouchableOpacity style={styles.buttonAno} disabled ={hasName()}>
-          <Text>
-            LET'S START
+          <Text style={styles.header1}>Anonymous Login</Text>
+          <Text style={styles.notify}>This will create an anonymous account. Some features won't be available.</Text>
+          <TextInput
+            style={styles.textinputAno}
+            placeholder='please enter a name or nickname here'
+            value={name}
+            onChangeText={(name) => setName(name)}
+          />
+          <TouchableOpacity style={styles.buttonAno} disabled={hasName()}>
+            <Text>
+              LET'S START
           </Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </ScrollView>
@@ -126,7 +139,7 @@ const styles = StyleSheet.create({
     marginRight: 30,
     marginTop: 40,
   },
-  containerAnonymous:{
+  containerAnonymous: {
     borderWidth: 1,
     marginBottom: 15,
   },
@@ -169,7 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 5,
     alignSelf: 'flex-end',
-    backgroundColor:'#673ab7',
+    backgroundColor: '#673ab7',
     marginBottom: 15,
   },
   buttontext: {
@@ -178,14 +191,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'white',
   },
-  header:{
+  header: {
     fontSize: 25,
     marginTop: 15,
     marginBottom: 15,
     color: 'black',
     textAlign: 'center',
   },
-  header1:{
+  header1: {
     fontSize: 22,
     marginTop: 15,
     color: 'black',
@@ -202,7 +215,7 @@ const styles = StyleSheet.create({
     color: '#09577b',
     textAlign: 'center',
   },
-  notify:{
+  notify: {
     backgroundColor: '#e8f4fd',
     margin: 10,
   }

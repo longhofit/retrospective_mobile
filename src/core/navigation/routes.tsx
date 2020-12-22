@@ -14,9 +14,9 @@ import SignIn from '@src/containers/auth/signIn/signIn.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
+    ['SignIn']: SignIn,
     ['Home']: HomeContainer,
     ['SignUp']:SignUpContainer,
-    ['SignIn']: SignIn,
   },
   {
     defaultNavigationOptions: {

@@ -4,14 +4,15 @@ import { ApiResult } from '../dataTransfer/apiResult';
 import { SignUpReq } from '../models/signUp/signUp.model';
 import {SignInReq} from '../models/signUp/signInReq.model'
 import { SendOTPReq, ForgotPwReq } from '../models/signUp/forgotpwReq.model';
+import { User } from '../models/user/user.model';
 
 export default class AuthService extends ApiService {
   public signIn(data: SignInReq) {
-    return this.apiPost<SignInApiResult>('/session/signin', data, null, false);
+    return this.apiPost<User>('/auth/session/signin', data, null, false);
   }
 
   public signUp(data: SignUpReq) {
-    return this.apiPost<ApiResult>('/sign-up', data, null, false);
+    return this.apiPost<ApiResult>('/auth/sign-up', data, null, false);
   }
 
   public sendOTP(data: SendOTPReq) {

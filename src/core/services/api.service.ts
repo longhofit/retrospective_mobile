@@ -45,12 +45,12 @@ export default class ApiService {
       params,
       data: body,
       headers: this.appendHeaders(hasToken),
+      withCredentials: true,
     };
-
     return new Promise<T>((resolve, reject) => {
       axios(requestConfig)
-        .then(({ data }) => {
-          resolve(data);
+        .then((a) => {
+          resolve(a.data);
         })
         .catch((error) => {
           const errorData = !error.response

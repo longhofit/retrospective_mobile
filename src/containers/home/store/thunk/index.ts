@@ -5,27 +5,27 @@ import { ApiResult } from '@src/core/dataTransfer/apiResult';
 import { SignInFormData, SignInReq } from '@src/core/models/signUp/signInReq.model';
 import { onSetUser } from '@src/core/store/reducer/user/actions';
 import { User } from '@src/core/models/user/user.model';
+import HomeService from '@src/core/services/home.service';
+import { BoardMetaData } from '@src/core/models/board/board.model';
+import { onGetPrevPublicBoard } from '../reducer/actions';
 
-export const onThunkSignInReq = (data: SignInFormData,
+export const onThunkGetPrePublicBoardsReq = (
   onSuccess: () => void,
   onError: () => void,
 ): ThunkActionTypes => async dispatch => {
-  const authService = new AuthService();
-  const signInReq: SignInReq = {
-    username: data.username,
-    password: data.password,
-  };
+  const homeService = new HomeService();
   try {
-    const res: User = await authService.signIn(signInReq);
+    const res: BoardMetaData[] = await homeService.getPrevPublicBoards();
     if (res) {
-      dispatch(onSetUser(res))
-      alerts.alert({ message: 'Login successfully!', onResult: onSuccess });
+      dispatch(onGetPrevPublicBoard(res));
+      onSuccess();
     } else {
-      alerts.alert({ message: 'Login no successfully' });
+      alerts.alert({ message: 'Get public boards not successfully' });
       onError();
     }
   } catch (e) {
-    const { message }: ApiResult = e;
+    // const { message }: ApiResult = e;
+    alerts.alert({ message: 'Get public boards not successfully' });
     onError();
   }
 };

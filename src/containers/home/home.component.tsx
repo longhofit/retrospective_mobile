@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
 import {
   withStyles,
   ThemeType,
@@ -10,351 +15,543 @@ import {
   TouchableOpacity,
   Picker,
   TextInput,
-  SafeAreaView,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { EvaArrowIcon, AddIcon, UncheckIcon } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
-import { pxToPercentage } from '@src/core/utils/utils';
+import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board'
 import { Board } from 'react-native-draganddrop-board'
 import Modal from 'react-native-modal';
+import io from 'socket.io-client';
+import { Actions } from '@src/core/utils/constants';
+import { User } from '@src/core/models/user/user.model';
+import { Post, Session } from '@src/core/models/type';
+import { viewStyle } from '@src/components/viewStyle';
+import { BoardMetaData } from '@src/core/models/board/board.model';
 
 
 interface ComponentProps {
+  boards: BoardMetaData[];
+  session: Session;
+  onReceivePost: (post: Post) => void;
+  onReceiveBoard: (board: Session) => void;
+  user: User;
   name: string;
   onBackPress: () => void;
+  sessionId: string;
 }
 
 export type HomeProps = ComponentProps & ThemedComponentProps;
 
-// const fakeData = [
-//   {
-//     id: 1,
-//     name: 'TO DO',
-//     rows: [
-//       {
-//         id: '1',
-//         name: 'Analyze your audience',
-//         description: 'Learn more about the audience to whom you will be speaking'
-//       },
-//       {
-//         id: '2',
-//         name: 'Select a topic',
-//         description: 'Select a topic that is of interest to the audience and to you'
-//       },
-//       {
-//         id: '3',
-//         name: 'Define the objective',
-//         description: 'Write the objective of the presentation in a single concise statement'
-//       }
-//     ]
-//   },
-//   {
-//     id: 2,
-//     name: 'IN PROGRESS',
-//     rows: [
-//       {
-//         id: '4',
-//         name: 'Look at drawings',
-//         description: 'How did they use line and shape? How did they shade?'
-//       },
-//       {
-//         id: '5',
-//         name: 'Draw from drawings',
-//         description: 'Learn from the masters by copying them'
-//       },
-//       {
-//         id: '6',
-//         name: 'Draw from photographs',
-//         description: 'For most people, it’s easier to reproduce an image that’s already two-dimensional'
-//       }
-//     ]
-//   },
-//   {
-//     id: 3,
-//     name: 'DONE',
-//     rows: [
-//       {
-//         id: '7',
-//         name: 'Draw from life',
-//         description: 'Do you enjoy coffee? Draw your coffee cup'
-//       },
-//       {
-//         id: '8',
-//         name: 'Take a class',
-//         description: 'Check your local university extension'
-//       }
-//     ]
-//   }
-// ]
+const fakeData = [
+  {
+    id: 1,
+    name: 'TO DO',
+    rows: [
+      {
+        id: '1',
+        name: 'Analyze your audience',
+        description: 'Learn more about the audience to whom you will be speaking'
+      },
+      {
+        id: '2',
+        name: 'Select a topic',
+        description: 'Select a topic that is of interest to the audience and to you'
+      },
+      {
+        id: '3',
+        name: 'Define the objective',
+        description: 'Write the objective of the presentation in a single concise statement'
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: 'IN PROGRESS',
+    rows: [
+      {
+        id: '4',
+        name: 'Look at drawings',
+        description: 'How did they use line and shape? How did they shade?'
+      },
+      {
+        id: '5',
+        name: 'Draw from drawings',
+        description: 'Learn from the masters by copying them'
+      },
+      {
+        id: '6',
+        name: 'Draw from photographs',
+        description: 'For most people, it’s easier to reproduce an image that’s already two-dimensional'
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: 'DONE',
+    rows: [
+      {
+        id: '7',
+        name: 'Draw from life',
+        description: 'Do you enjoy coffee? Draw your coffee cup'
+      },
+      {
+        id: '8',
+        name: 'Take a class',
+        description: 'Check your local university extension'
+      }
+    ]
+  }
+]
 
-// const boardRepositoryFake = new BoardRepository(fakeData);
+const boardRepositoryFake = new BoardRepository(fakeData);
 
 const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
-  const { themedStyle } = props;
+  const { themedStyle, boards } = props;
 
-  // const [isShowPicker, setIsShowPicker] = useState<boolean>(false);
-  // const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
-  // const [idColumnAddSelected, setColumnAddSelected] = useState<number>(0);
-  // const [cardName, setCardName] = useState<string>('');
-  // const [boardRepository, setBoardRepository] = useState(fakeData);
-  // const [lastId, setLastId] = useState<number>(8);
-  // const [isEdit, setIsEdit] = useState<boolean>(false);
-  // const [cardID, setCardID] = useState<string>('');
+  const [isShowPicker, setIsShowPicker] = useState<boolean>(false);
+  const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
+  const [idColumnAddSelected, setColumnAddSelected] = useState<number>(0);
+  const [cardName, setCardName] = useState<string>('');
+  const [boardRepository, setBoardRepository] = useState(fakeData);
+  const [lastId, setLastId] = useState<number>(8);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [cardID, setCardID] = useState<string>('');
+  const [socket, setSocket] = useState(null);
 
-  // const onCancle = (): void => {
-  //   setIsShowPicker(false);
-  // };
+  const onReceivePost = (post: Post): void => {
+    console.log('post', post);
+    props.onReceivePost(post);
+  }
 
-  // const onOkPress = (): void => {
-  //   if (!isEdit) {
-  //     onAddCard(idColumnAddSelected);
-  //     setIsShowAdd(false);
-  //   } else {
-  //     const newData = boardRepository;
+  console.log(props.boards)
 
-  //     boardRepository.forEach((item, itemIndex) => {
-  //       item.rows.forEach((row, rowIndex) => {
-  //         if (row.id === cardID) {
-  //           newData[itemIndex].rows[rowIndex]['name'] = cardName;
-  //         }
-  //       });
-  //     });
+  const onReceiveBoard = (board: Session): void => {
+    console.log('board', board);
+    props.onReceiveBoard(board);
+  }
 
-  //     boardRepositoryFake.updateData(newData);
-  //     setBoardRepository(newData);
-  //     setIsShowAdd(false);
-  //     setIsEdit(false);
-  //   }
-  // };
+  function sendFactory(socket, sessionId) {
+    return function (action, payload?) {
+      console.log(action)
+      if (socket) {
+        const messagePayload = {
+          sessionId: sessionId,
+          payload,
+        };
 
-  // const onRemoveCard = (idCard: string): void => {
-  //   const newData = boardRepository;
+        console.log('Sending message to socket', action, messagePayload);
 
-  //   boardRepository.forEach((item, index) => {
-  //     item.rows.forEach((card) => {
-  //       if (card.id === cardID) {
-  //         newData[index].rows = newData[index].rows.filter(row => { return row.id !== idCard });
-  //       }
-  //     });
-  //   });
+        socket.emit(action, messagePayload);
+      }
+    };
+  }
 
-  //   boardRepositoryFake.updateData(newData);
-  //   setBoardRepository(newData);
-  // }
+  const send = useMemo(() => (socket ? sendFactory(socket, props.sessionId) : null), [
+    socket,
+    props.sessionId,
+  ]);
 
-  // const onAddCard = (idColumn: number, card?: any): void => {
-  //   const newData = boardRepository;
+  useEffect(() => {
+    console.log('run useEffect')
+    const newSocket = io('http://10.0.2.2:8082');
+    setSocket(newSocket);
 
-  //   boardRepository.forEach((item, index) => {
-  //     if (item.id === idColumn) {
-  //       let newItem: any;
-  //       if (card) {
-  //         newItem = card;
-  //       } else {
-  //         newItem = {
-  //           id: `${lastId + 1}`,
-  //           name: cardName,
-  //           description: ''
-  //         };
-  //       }
-  //       newData[index].rows.push(newItem)
-  //       setLastId(lastId + 1)
-  //     };
-  //   });
+    const send = sendFactory(newSocket, props.sessionId);
 
-  //   boardRepositoryFake.updateData(newData);
-  //   setBoardRepository(newData);
-  // };
+    // Socket events listeners
+    newSocket.on(Actions.RECEIVE_POST, (post: Post) => {
+      console.log('Receive new post:');
 
-  // const onDeletePress = (): void => {
-  //   onRemoveCard(cardID);
-  //   setIsShowAdd(false);
-  //   setIsEdit(false);
-  // };
+      onReceivePost(post);
+    });
 
-  // const onDragEnd = (): void => {
+    newSocket.on('disconnect', () => {
+      console.log('Server disconnected');
+    });
 
-  // };
+    newSocket.on('connect', () => {
+      console.log('Connected to the socket');
 
-  // const onCancelAddPress = (): void => {
-  //   setIsShowAdd(false);
-  // };
+      send(Actions.JOIN_SESSION);
 
-  // const onIconAddPress = (): void => {
-  //   setIsShowPicker(true);
-  // };
 
-  // const onColumnPress = (id: number): void => {
-  //   setCardName('');
-  //   setIsShowPicker(false);
-  //   setColumnAddSelected(id);
-  //   setTimeout(() => {
-  //     setIsShowAdd(true);
-  //   }, 500);
-  // }
+    });
 
-  // const renderAddCard = (): React.ReactElement => {
-  //   return (
-  //     <Modal
-  //       animationIn={'fadeIn'}
-  //       animationOut={'fadeOut'}
-  //       animationInTiming={500}
-  //       isVisible={isShowAdd}
-  //       style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
-  //       <View style={themedStyle.sectionAddNotifications}>
-  //         <Text style={themedStyle.txtAddNotificationsModal}>
-  //           {'Enter card'}
-  //         </Text>
-  //         <TextInput
-  //           textAlignVertical='top'
-  //           style={themedStyle.inputNote}
-  //           autoFocus
-  //           multiline
-  //           value={cardName}
-  //           onChangeText={text => setCardName(text)}
-  //         />
-  //         <View style={themedStyle.viewAddNotificationsBottom2}>
-  //           {isEdit && (
-  //             <TouchableOpacity
-  //               activeOpacity={0.75}
-  //               onPress={onDeletePress}>
-  //               <Text style={themedStyle.txtCloseAddNotificationsModal}>
-  //                 {'DELETE'}
-  //               </Text>
-  //             </TouchableOpacity>
-  //           )}
-  //           <TouchableOpacity
-  //             activeOpacity={0.75}
-  //             onPress={onCancelAddPress}>
-  //             <Text style={themedStyle.txtCloseAddNotificationsModal}>
-  //               {'CANCEL'}
-  //             </Text>
-  //           </TouchableOpacity>
-  //           <TouchableOpacity
-  //             activeOpacity={0.75}
-  //             onPress={onOkPress}>
-  //             <Text style={themedStyle.txtCloseAddNotificationsModal}>
-  //               {'OK'}
-  //             </Text>
-  //           </TouchableOpacity>
-  //         </View>
-  //       </View>
-  //     </Modal>
-  //   )
-  // }
+    newSocket.on(Actions.RECEIVE_BOARD, (board: Session) => {
+      console.log('Receive entire board: ');
 
-  // const renderPicker = (): React.ReactElement => {
-  //   return (
-  //     <Modal
-  //       animationIn={'fadeIn'}
-  //       animationOut={'fadeOut'}
-  //       animationInTiming={500}
-  //       isVisible={isShowPicker}
-  //       style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
-  //       <View style={themedStyle.sectionAddNotifications}>
-  //         <Text style={themedStyle.txtAddNotificationsModal}>
-  //           {'Select column'}
-  //         </Text>
-  //         {fakeData.map((item, index) => {
-  //           return (
-  //             <React.Fragment key={index}>
-  //               <View style={themedStyle.card}>
-  //                 <TouchableOpacity
-  //                   activeOpacity={0.75}
-  //                   onPress={() => onColumnPress(item.id)}>
-  //                   <Text>
-  //                     {item.name}
-  //                   </Text>
-  //                 </TouchableOpacity>
-  //               </View>
-  //             </React.Fragment>
-  //           )
-  //         })}
-  //         <View style={themedStyle.viewAddNotificationsBottom}>
-  //           <TouchableOpacity
-  //             activeOpacity={0.75}
-  //             onPress={onCancle}>
-  //             <Text style={themedStyle.txtCloseAddNotificationsModal}>
-  //               {'CANCEL'}
-  //             </Text>
-  //           </TouchableOpacity>
-  //         </View>
-  //       </View>
-  //     </Modal>
-  //   )
-  // }
+      onReceiveBoard(board);
+    });
 
-  // const renderCard = (item): React.ReactElement => {
-  //   return (
 
-  //     <View style={themedStyle.card}>
-  //       <Text>
-  //         {item.name}
-  //       </Text>
-  //     </View>
-  //   )
-  // }
+  }, [])
 
-  // const onItemPress = (item): void => {
-  //   setCardID(item.id)
-  //   setCardName(item.name);
-  //   setIsShowAdd(true);
-  //   setIsEdit(true);
-  // }
+  const onCancle = (): void => {
+    setIsShowPicker(false);
+  };
+
+
+  const onAddPost = useCallback((columnIndex: number, content: string, rank: string) => {
+    if (send) {
+      const post = {
+        content,
+        action: null,
+        giphy: null,
+        votes: [],
+        id: 'asdasd-sdsdsd-sdsds-sxxxxxx',
+        column: columnIndex,
+        user: props.user!,
+        group: null,
+        rank,
+      };
+
+      send(Actions.ADD_POST_SUCCESS, post);
+    }
+  }, [send]);
+
+  const onOkPress = (): void => {
+    if (!isEdit) {
+      onAddCard(idColumnAddSelected);
+      setIsShowAdd(false);
+    } else {
+      const newData = boardRepository;
+
+      boardRepository.forEach((item, itemIndex) => {
+        item.rows.forEach((row, rowIndex) => {
+          if (row.id === cardID) {
+            newData[itemIndex].rows[rowIndex]['name'] = cardName;
+          }
+        });
+      });
+
+      boardRepositoryFake.updateData(newData);
+      setBoardRepository(newData);
+      setIsShowAdd(false);
+      setIsEdit(false);
+    }
+  };
+
+  const onRemoveCard = (idCard: string): void => {
+    const newData = boardRepository;
+
+    boardRepository.forEach((item, index) => {
+      item.rows.forEach((card) => {
+        if (card.id === cardID) {
+          newData[index].rows = newData[index].rows.filter(row => { return row.id !== idCard });
+        }
+      });
+    });
+
+    boardRepositoryFake.updateData(newData);
+    setBoardRepository(newData);
+  }
+
+  const onAddCard = (idColumn: number, card?: any): void => {
+    const newData = boardRepository;
+
+    boardRepository.forEach((item, index) => {
+      if (item.id === idColumn) {
+        let newItem: any;
+        if (card) {
+          newItem = card;
+        } else {
+          newItem = {
+            id: `${lastId + 1}`,
+            name: cardName,
+            description: ''
+          };
+        }
+        newData[index].rows.push(newItem)
+        setLastId(lastId + 1)
+      };
+    });
+
+    boardRepositoryFake.updateData(newData);
+    setBoardRepository(newData);
+  };
+
+  const onDeletePress = (): void => {
+    onRemoveCard(cardID);
+    setIsShowAdd(false);
+    setIsEdit(false);
+  };
+
+  const onDragEnd = (): void => {
+
+  };
+
+  const onCancelAddPress = (): void => {
+    onAddPost(0, 'mic check', 'rankkkk');
+  };
+
+  const onIconAddPress = (): void => {
+    setIsShowPicker(true);
+  };
+
+  const onColumnPress = (id: number): void => {
+    setCardName('');
+    setIsShowPicker(false);
+    setColumnAddSelected(id);
+    setTimeout(() => {
+      setIsShowAdd(true);
+    }, 500);
+  }
+
+  const renderAddCard = (): React.ReactElement => {
+    return (
+      <Modal
+        animationIn={'fadeIn'}
+        animationOut={'fadeOut'}
+        animationInTiming={500}
+        isVisible={isShowAdd}
+        style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
+        <View style={themedStyle.sectionAddNotifications}>
+          <Text style={themedStyle.txtAddNotificationsModal}>
+            {'Enter card'}
+          </Text>
+          <TextInput
+            textAlignVertical='top'
+            style={themedStyle.inputNote}
+            autoFocus
+            multiline
+            value={cardName}
+            onChangeText={text => setCardName(text)}
+          />
+          <View style={themedStyle.viewAddNotificationsBottom2}>
+            {isEdit && (
+              <TouchableOpacity
+                activeOpacity={0.75}
+                onPress={onDeletePress}>
+                <Text style={themedStyle.txtCloseAddNotificationsModal}>
+                  {'DELETE'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={onCancelAddPress}>
+              <Text style={themedStyle.txtCloseAddNotificationsModal}>
+                {'CANCEL'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={onOkPress}>
+              <Text style={themedStyle.txtCloseAddNotificationsModal}>
+                {'OK'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  const renderPicker = (): React.ReactElement => {
+    return (
+      <Modal
+        animationIn={'fadeIn'}
+        animationOut={'fadeOut'}
+        animationInTiming={500}
+        isVisible={isShowPicker}
+        style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
+        <View style={themedStyle.sectionAddNotifications}>
+          <Text style={themedStyle.txtAddNotificationsModal}>
+            {'Select column'}
+          </Text>
+          {fakeData.map((item, index) => {
+            return (
+              <React.Fragment key={index}>
+                <View style={themedStyle.card}>
+                  <TouchableOpacity
+                    activeOpacity={0.75}
+                    onPress={() => onColumnPress(item.id)}>
+                    <Text>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </React.Fragment>
+            )
+          })}
+          <View style={themedStyle.viewAddNotificationsBottom}>
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={onCancle}>
+              <Text style={themedStyle.txtCloseAddNotificationsModal}>
+                {'CANCEL'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  const renderCard = (item): React.ReactElement => {
+    return (
+
+      <View style={themedStyle.card}>
+        <Text>
+          {item.name}
+        </Text>
+      </View>
+    )
+  }
+
+  const onItemPress = (item): void => {
+    setCardID(item.id)
+    setCardName(item.name);
+    setIsShowAdd(true);
+    setIsEdit(true);
+  }
+
+  const renderBoard = (board: BoardMetaData): React.ReactElement => {
+    return (
+      <View style={themedStyle.viewBoard}>
+        <View style={themedStyle.sectionText}>
+          <Text style={themedStyle.txtDate}>
+            {board.created}
+          </Text>
+          <Text style={themedStyle.txtBoardTitle}>
+            {'My Retrospective'}
+          </Text>
+          <Text style={themedStyle.txtBoardTitle}>
+            {`Create by ${board.createdBy.name}`}
+          </Text>
+        </View>
+        <View style={themedStyle.viewBoardInfomation}>
+          <View style={themedStyle.viewBoardInfoItem}>
+            <Text>
+              {board.numberOfPosts}
+            </Text>
+            <Text>
+              {'Post'}
+            </Text>
+          </View>
+          <View style={themedStyle.viewBoardInfoItem}>
+            <Text>
+              {board.participants.length}
+            </Text>
+            <Text>
+              {'Participants'}
+            </Text>
+          </View>
+          <View style={themedStyle.viewBoardInfoItem}>
+            <Text>
+              {board.numberOfPositiveVotes + board.numberOfNegativeVotes}
+            </Text>
+            <Text>
+              {'Votes'}
+            </Text>
+          </View>
+          <View style={themedStyle.viewBoardInfoItem}>
+            <Text>
+              {board.numberOfActions}
+            </Text>
+            <Text>
+              {'Actions'}
+            </Text>
+          </View>
+        </View>
+        <View style={themedStyle.viewParticipants}>
+          {board.participants.map(item => {
+            return (
+              <View style={themedStyle.viewviewParticipantPhoto}>
+              </View>
+            )
+          })}
+        </View>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={themedStyle.container}>
-      <WebView source={{ uri: 'http://retrospective.ai/' }} />
-    </SafeAreaView>
-    // <View
-    //   style={themedStyle.container}>
-    //   <View style={themedStyle.viewHeader}>
-    //     <View style={{
-    //       marginTop: pxToPercentage(40), justifyContent: 'center',
-    //       alignItems: 'center',
-    //       flexDirection: 'row',
-    //     }}>
-    //       <TouchableOpacity
-    //         style={themedStyle.viewIcon}
-    //         onPress={props.onBackPress}
-    //         activeOpacity={0.75}>
-    //         {EvaArrowIcon(themedStyle.icon)}
-    //       </TouchableOpacity>
-    //       <View style={{ flex: 1, alignItems: 'center' }}>
-    //         <Text style={themedStyle.txtHeader}>
-    //           {'Home'}
-    //         </Text>
-    //       </View>
-    //     </View>
-    //   </View>
-    //   {/* <Text style={themedStyle.txtHome}>
-    //   </Text> */}
-    //   <Board
-    //     boardRepository={boardRepositoryFake}
-    //     open={onItemPress}
-    //     onDragEnd={(srcColumnId, destColumnId, draggedItem) => { }}
-    //     cardContent={(item) => renderCard(item)}
-    //   />
-    //   <TouchableOpacity
-    //     onPress={onIconAddPress}
-    //     activeOpacity={0.75}
-    //     style={themedStyle.viewAdd}>
-    //     {AddIcon(themedStyle.iconAdd)}
-    //   </TouchableOpacity>
-    //   {renderPicker()}
-    //   {renderAddCard()}
-    // </View>
+    <View style={themedStyle.container}>
+      {boards.map(item => {
+        return renderBoard(item);
+      })}
+
+      {/* <View style={themedStyle.viewHeader}>
+        <View style={{
+          marginTop: pxToPercentage(40), justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+        }}>
+          <TouchableOpacity
+            style={themedStyle.viewIcon}
+            onPress={props.onBackPress}
+            activeOpacity={0.75}>
+            {EvaArrowIcon(themedStyle.icon)}
+          </TouchableOpacity>
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={themedStyle.txtHeader}>
+              {'Home'}
+            </Text>
+          </View>
+        </View>
+      </View>
+      {/* <Text style={themedStyle.txtHome}>
+      </Text> */}
+      {/* <Board
+        boardRepository={boardRepositoryFake}
+        open={onItemPress}
+        onDragEnd={(srcColumnId, destColumnId, draggedItem) => { }}
+        cardContent={(item) => renderCard(item)}
+      />
+      <TouchableOpacity
+        onPress={onIconAddPress}
+        activeOpacity={0.75}  
+        style={themedStyle.viewAdd}>
+        {AddIcon(themedStyle.iconAdd)}
+      </TouchableOpacity>
+      {renderPicker()}
+      {renderAddCard()}  */}
+    </View>
   );
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  viewParticipants: {
+    marginLeft: pxPhone(15),
+    flexDirection: 'row',
+    width: '100%',
+  },
+  viewviewParticipantPhoto: {
+    marginRight: pxPhone(5),
+    width: pxPhone(35),
+    height: pxPhone(35),
+    borderRadius: pxPhone(25),
+    backgroundColor: theme['color-purple'],
+    ...viewStyle.shadow2,
+  },
+  viewBoardInfoItem: {
+    alignItems: 'center',
+  },
+  viewBoardInfomation: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-around',
+  },
+  sectionText: {
+    marginLeft: pxPhone(15),
+  },
+  viewBoard: {
+    marginTop: pxPhone(15),
+    justifyContent: 'center',
+    backgroundColor: theme['color-basic-light-100'],
+    width: pxToPercentage(250),
+    height: pxToPercentage(150),
+    borderRadius: pxToPercentage(10),
+    ...viewStyle.shadow2,
+  },
   iconUncheck: {
     height: pxToPercentage(20),
     width: pxToPercentage(20),
   },
   container: {
+    alignItems: 'center',
     flex: 1,
   },
   card: {

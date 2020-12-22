@@ -13,6 +13,24 @@ export const hw: boolean = height > width;
 const w: number = 1.3333333 / (width / height);
 const h: number = 1.3333333 / (height / width);
 
+const perWidthPhoneW: number = width / 414;
+const perHeightPhoneW: number = height / 414;
+const perWidthPhoneH: number = width / 896;
+const perHeightPhoneH: number = height / 896;
+
+const perWidthTabletH: number = width / 768;
+const perHeightTabletH: number = height / 768;
+const perWidthTabletW: number = width / 1024;
+const perHeightTabletW: number = height / 1024;
+
+export const pxPhone = (value: number): number => {
+  return height > width ? perWidthPhoneW * value : perHeightPhoneW * value;
+};
+
+export const pxPhoneH = (value: number): number => {
+  return height > width ? perHeightPhoneH * value : perWidthPhoneH * value;
+};
+
 export const isEmpty = (value: any): boolean => {
   return (value === undefined || value === '');
 };

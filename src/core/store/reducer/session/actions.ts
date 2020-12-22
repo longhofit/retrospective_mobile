@@ -1,16 +1,18 @@
 import {
-  SET_SESSION,
-  SessionSetAction,
-  SessionClearAction,
-  CLEAR_SESSION,
+  ReceiveBoardAction,
+  ReceivePostAction,
+  RECEIVE_BOARD,
+  RECEIVE_POST,
 } from './types';
-import { Session } from '@src/core/models/session/session.model';
+import { Post, Session } from '@src/core/models/type';
 
-export const onSetSession = (payload: Session): SessionSetAction => ({
-  type: SET_SESSION,
+export const onReceivePost = (payload: Post): ReceivePostAction => ({
+  type: RECEIVE_POST,
   payload,
 });
 
-export const onClearSession = (): SessionClearAction => ({
-  type: CLEAR_SESSION,
+export const onReceiveBoard = (payload: Session): ReceiveBoardAction => ({
+  type: RECEIVE_BOARD,
+  payload,
 });
+
