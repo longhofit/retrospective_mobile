@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput } from 'react-native';
+import React, { useState , useEffect, useCallback} from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, TextInput, Pressable, AppState } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import axios from 'axios';
 import {
@@ -16,26 +16,137 @@ import {
 } from '@src/core/utils/utils';
 import { SignInFormData } from '@src/core/models/signUp/signInReq.model';
 import { Dispatch } from 'redux';
-import { useDispatch } from 'react-redux';
-import { onThunkSignInReq } from './store/thunk';
+import { useDispatch, useSelector } from 'react-redux';
+import { onThunkSignInGGReq, onThunkSignInReq } from './store/thunk';
 import { NavigationInjectedProps } from 'react-navigation';
+
+import {
+  GoogleSigninButton,
+  GoogleSignin,
+  statusCodes
+} from '@react-native-community/google-signin'
+import io from 'socket.io-client';
+import { User } from '@src/core/models/user/user.model';
 import { onSetUser } from '@src/core/store/reducer/user/actions';
+import { SignInGGFormData } from '@src/core/models/signUp/signInGGReq.model';
+import { UserState } from '@src/core/store/reducer/user';
 export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const navigationKey: string = 'SignInContainer';
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [signInFormData, setSignInFormData] = useState<SignInFormData>({
-    username: 'longhoimt3',
+    username: 'minhhien',
     password: '123456',
   });
+  const [signInGGFormData, setSignInGGFormData] = useState<SignInGGFormData>({
+    email: '',
+    googleId: '',
+  });
+  console.log("123",signInGGFormData.email);
+  console.log("1234",signInGGFormData.googleId);
+  const API_URL = 'http://10.0.2.2:8082/api/auth';
+  const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [error, setError] = useState(null);
   const dispatch: Dispatch<any> = useDispatch();
+  useEffect(()=>{
+    const s = io("http://localhost:8082");
+    setSocket(s);
+    s.on('auth', async (_user: User) => {
+      if(userInfo!=null){
+        
+        if(error!=null){
+          setError(null);
+        }
+        
+      }
+    });
+  return () => {
+      if (s && s.connected) {
+          s.disconnect();
+      }
+  };
+  },[userInfo])
+  const handleOAuth = useCallback(
+    (provider: string) => {
+      const url = `${API_URL}/${provider}?socketId=${socket!.id}`;
+      signInWithGoogle();
+    },
+    [socket]
+  );
+  const handleGoogle = useCallback(() => handleOAuth('google'), [handleOAuth]);  
+  // login google
+  const configureGoogleSign = () => {
+    GoogleSignin.configure({
+      webClientId: "739033396860-5pm7afu96ha409v742u6p35msv5ipe42.apps.googleusercontent.com",
+      offlineAccess: true
+    })
+  };
+  useEffect(() => {
+    configureGoogleSign()
+  }, []);
+  const signInWithGoogle = async() => {
+    try {
+      await GoogleSignin.hasPlayServices()
+      const userInfo = await GoogleSignin.signIn()
+      setUserInfo(userInfo)
+      setError(null)
+      setIsLoggedIn(true)
+      console.log("userInfo:", userInfo);
+      setSignInGGFormData(pre => ({ email: userInfo.user.email, googleId: userInfo.user.id}))
+      dispatch(onThunkSignInGGReq(signInGGFormData,onSuccess, onError));
+      const user : UserState = useSelector((state: AppState) => state.user);
+      console.log("userInfoAfterLogin:", user);
+    } catch (error) {
+      setError(error)
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // when user cancels sign in process,
+       
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // when in progress already
+        
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // when play services not available
+        
+      } else {
+        // some other error
+        console.log(error.code)
+        
+      }
+      
+    }
+  };
+  const getCurrentUserInfo = async () => {
+    try {
+      const userInfo = await GoogleSignin.signInSilently()
+      setUserInfo(userInfo)
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+        // when user hasn't signed in yet
+        Alert.alert('Please Sign in')
+        setIsLoggedIn(false)
+      } else {
+        Alert.alert('Something else went wrong... ', error.toString())
+        setIsLoggedIn(false)
+      }
+    }
+  };
+  const signOut = async() => {
+    try {
+      await GoogleSignin.revokeAccess()
+      await GoogleSignin.signOut()
+      setIsLoggedIn(false)
+    } catch (error) {
+      Alert.alert('Something else went wrong... ', error.toString())
+    }
+  }
+  //
 
   const hasErrorEmail = () => {
-    return username.trim() == '';
+    return signInFormData.username.trim() == '';
   };
   const hasErrorPassword = () => {
-    return password.trim() == '';
+    return signInFormData.password.trim() == '';
   };
   const hasName = () => {
     return name.trim() == '';
@@ -53,12 +164,14 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
     Alert.alert('Username or password incorrect');
   };
 
-  dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
+  //dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
 
   const onSignInPress = (): void => {
     dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
+    
   };
-
+  const user : UserState = useSelector((state: AppState) => state.user);
+  console.log("userInfoAfterLogin:", user);
   const onPressButton = () => {
     if (hasErrorEmail()) {
       Alert.alert('Username is empty');
@@ -81,18 +194,16 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
       <ScrollView style={styles.container1}>
         <Text style={styles.text}>Username</Text>
         <TextInput
-          value={username}
+          value={signInFormData.username}
           onChangeText={(username) => {
-            setUsername(username);
             setSignInFormData({ ...signInFormData, username });
           }}
           style={styles.textinput}
         />
         <Text style={styles.text}>Password</Text>
         <TextInput
-          value={password}
+          value={signInFormData.password}
           onChangeText={(password) => {
-            setPassword(password);
             setSignInFormData({ ...signInFormData, password });
           }}
           style={styles.textinput}
@@ -101,6 +212,26 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
         <TouchableOpacity style={styles.buttonSignIn}>
           <Text style={styles.buttontext} onPress={onPressButton}>
             SIGN IN
+          </Text>
+        </TouchableOpacity>
+        <Text
+          style={{
+            fontSize: 18,
+            marginTop: 10,
+            color: '#09577b',
+            textAlign: 'center',
+          }}>
+          OR
+        </Text>
+        <GoogleSigninButton
+          style={styles.buttonGoogle}
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={() => handleGoogle()}
+        />
+        <TouchableOpacity style={styles.buttonSignIn}>
+          <Text style={styles.buttontext} onPress={signOut}>
+            SIGN OUT
           </Text>
         </TouchableOpacity>
         <Text style={styles.text1} onPress={() => console.log('1st')}>
@@ -184,6 +315,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     backgroundColor: '#673ab7',
     marginBottom: 15,
+  },
+  buttonGoogle: {
+    marginTop: 10,
+    alignSelf: 'center',
+    width: 192, 
+    height: 48
   },
   buttontext: {
     fontSize: 18,

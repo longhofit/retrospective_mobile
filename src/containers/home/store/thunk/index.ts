@@ -42,6 +42,7 @@ export const onThunkCreateBoardReq = (
       onError();
     }
   } catch (e) {
+    console.log("error:", e);
     alerts.alert({message: 'Create board not successfully'});
     onError();
   }

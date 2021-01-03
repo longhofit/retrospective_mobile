@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "739033396860",
+    "project_id": "retrospective-3c163",
+    "storage_bucket": "retrospective-3c163.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739033396860:android:1f79a496ea659f5cf77bf9",
+        "android_client_info": {
+          "package_name": "com.retrodemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "739033396860-45vo4tqss26u0mfecod6ba6dr0iuakv6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.retrodemo",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "739033396860-5pm7afu96ha409v742u6p35msv5ipe42.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAThx2fE3Kt0xN2ZC-JvvhPdy2XZOZ6uQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "739033396860-5pm7afu96ha409v742u6p35msv5ipe42.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
