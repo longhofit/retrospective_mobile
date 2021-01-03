@@ -22,12 +22,12 @@ const confirm = (params: AlertParams) => {
     params.message,
     [
       {
-        text: I18n.t('common.alert.cancel'),
+        text: 'Cancel',
         onPress: () => params.onResult ? params.onResult(false) : {},
         style: 'cancel',
       },
       {
-        text: I18n.t('common.alert.ok'),
+        text: 'Ok',
         onPress: () => params.onResult ? params.onResult(true) : {},
       },
     ],

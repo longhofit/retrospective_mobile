@@ -60,6 +60,7 @@ const InputItemComponent: React.FunctionComponent<InputItemProps> = (props) => {
     return props.icon([
       themedStyle.icon,
       iconStyle,
+      isFocus && themedStyle.iconFocus,
     ]);
   };
 
@@ -105,6 +106,9 @@ const InputItemComponent: React.FunctionComponent<InputItemProps> = (props) => {
 };
 
 export const InputItem = withStyles(InputItemComponent, (theme: ThemeType) => ({
+  iconFocus: {
+    tintColor: theme['color-app'],
+  },
   container: {
     justifyContent: 'center',
     width: '100%',

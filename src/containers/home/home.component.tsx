@@ -13,6 +13,7 @@ import { User } from '@src/core/models/user/user.model';
 import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
+import { ddMMyyyyFormatterV3, ddMMyyyyhhMMssFormatter } from '@src/core/formatters';
 
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
@@ -309,7 +310,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         activeOpacity={0.75}
         style={themedStyle.viewBoard}>
         <View style={themedStyle.sectionText}>
-          <Text style={themedStyle.txtDate}>{board.created}</Text>
+          <Text style={themedStyle.txtDate}>{ddMMyyyyhhMMssFormatter(new Date(board.created))}</Text>
           <Text style={themedStyle.txtBoardTitle}>{'My Retrospective'}</Text>
           <Text style={themedStyle.txtBoardTitle}>
             {`Create by ${board.createdBy.name}`}
@@ -335,11 +336,11 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             <Text>{'Actions'}</Text>
           </View>
         </View>
-        <View style={themedStyle.viewParticipants}>
+        {/* <View style={themedStyle.viewParticipants}>
           {board.participants.map((item) => {
             return <View style={themedStyle.viewviewParticipantPhoto} />;
           })}
-        </View>
+        </View> */}
       </TouchableOpacity>
     );
   };

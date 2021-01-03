@@ -53,7 +53,7 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
     Alert.alert('Username or password incorrect');
   };
 
-  dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
+  // dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));
 
   const onSignInPress = (): void => {
     dispatch(onThunkSignInReq(signInFormData, onSuccess, onError));

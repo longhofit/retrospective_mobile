@@ -8,7 +8,7 @@ export class BoardMetaData {
   numberOfPositiveVotes: number;
   numberOfNegativeVotes: number;
   numberOfActions: number;
-  created: Date;
+  created: string;
   createdBy: User;
   canBeDeleted: boolean;
   isPublic: boolean;

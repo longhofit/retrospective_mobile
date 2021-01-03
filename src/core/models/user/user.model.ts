@@ -1,5 +1,7 @@
+import { AccountType } from "../type";
+
 export class User {
-  accountType: string;
+  accountType: AccountType;
   created: string;
   email:string;
   freeTrialStartForm: Date;

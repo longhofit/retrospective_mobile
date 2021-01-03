@@ -1,6 +1,6 @@
 import { Post, Session } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onReceiveBoard, onReceivePost } from '@src/core/store/reducer/session/actions';
+import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onUpdatePost } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -9,9 +9,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Board } from './board.component';
 import { HomeState } from './store/reducer/types';
-import { onThunkCreateBoardReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
+import { onThunkGetPrePublicBoardsReq } from './store/thunk';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
+import uuid from 'react-native-uuid';
 
 export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const sessionId: string = props.navigation.getParam('sessionId');
@@ -20,6 +21,7 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
   const { boards }: HomeState = useSelector((state: AppState) => state.home);
   const dispatch: Dispatch<any> = useDispatch();
   const [socket, setSocket] = useState(null);
+  console.log(sessionId);
 
   // socket connection
 
@@ -72,27 +74,71 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
 
       dispatch(onReceiveBoard(board));
     });
+
+    newSocket.on(Actions.RECEIVE_EDIT_POST, (post: { post: Post }) => {
+      console.log('Receive edit post: ', post.post);
+      dispatch(onUpdatePost(post.post));
+    });
+
+    newSocket.on(Actions.RECEIVE_DELETE_POST, (post: Post) => {
+      console.log('Delete post: ', post);
+      dispatch(onDeletePost(post));
+    });
+
+    return () => {
+      console.log('Attempting disconnection');
+      if (newSocket) {
+        newSocket.disconnect();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(onClearBoard());
+    };
   }, []);
 
   const onAddPost = useCallback(
     (columnIndex: number, content: string, rank: string) => {
       if (send) {
-        const post = {
+        const post: Post = {
           content,
           action: null,
           giphy: null,
           votes: [],
-          id: 'asdasd-sdsdsd-sdsds-sxxxxxx',
+          id: uuid.v4(),
           column: columnIndex,
-          user: user!,
           group: null,
           rank,
+          user: user,
         };
 
         send(Actions.ADD_POST_SUCCESS, post);
+        dispatch(onReceivePost(post));
       }
     },
     [send],
+  );
+
+  const onEditPost = useCallback(
+    (post: Post) => {
+      if (send) {
+        dispatch(onUpdatePost(post));
+        send(Actions.EDIT_POST, { post });
+      }
+    },
+    [send]
+  );
+
+  const onDeletePostPress = useCallback(
+    (post: Post) => {
+      if (send) {
+        dispatch(onDeletePost(post));
+        send(Actions.DELETE_POST, post);
+      }
+    },
+    [send]
   );
 
   const onBackPress = (): void => {
@@ -121,6 +167,8 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
   return (
     <Board
       onAddPost={onAddPost}
+      onEditPost={onEditPost}
+      onDeletePostPress={onDeletePostPress}
       session={session} />
   );
 };

@@ -17,4 +17,9 @@ export interface CreateBoardAction {
   payload: BoardMetaData[];
 }
 
-export type HomeActionTypes = GetPrePublicBoardAction;
+export interface ClearBoardAction {
+  type: typeof CREATE_BOARD;
+  payload: BoardMetaData[];
+}
+
+export type HomeActionTypes = GetPrePublicBoardAction | ClearBoardAction;

@@ -61,3 +61,11 @@ export const CheckIcon = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const SendIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/send.png'),
+  };
+
+  return Icon(source, style);
+};
+

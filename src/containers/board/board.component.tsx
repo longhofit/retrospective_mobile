@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView } from 'react-native';
-import { EvaArrowIcon, AddIcon } from '@src/assets/icons';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList } from 'react-native';
+import { EvaArrowIcon, AddIcon, SendIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -13,10 +13,13 @@ import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
 import { InputItem } from '@src/components/input/inputItem.component';
+import { alerts } from '@src/core/utils/alerts';
 
 interface ComponentProps {
   session: Session;
   onAddPost: (columnIndex: number, content: string, rank: string) => void;
+  onEditPost: (post: Post) => void;
+  onDeletePostPress: (post: Post) => void;
 }
 
 export type BoardProps = ComponentProps & ThemedComponentProps;
@@ -24,51 +27,175 @@ export type BoardProps = ComponentProps & ThemedComponentProps;
 const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const { themedStyle } = props;
   const [post, setPost] = useState<string>('');
+  const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
+  const [postSelected, setPostSelected] = useState<Post>(undefined);
+  const [postSelectedContent, setPostSelectedContent] = useState<string>('');
 
-  const onAddPost = (): void => {
-    props.onAddPost(2,post,`ranh ${post}`);
+  const onAddPost = (columnIndex: number): void => {
+    props.onAddPost(columnIndex, post, `ranh ${post}`);
+    setPost('');
+  };
+
+  const onCancelAddPress = (): void => {
+    setIsShowAdd(false);
+  };
+
+  const onEditPress = (post: Post): void => {
+    setPostSelected(post);
+    setPostSelectedContent(post.content);
+    setIsShowAdd(true);
+  };
+
+  const onOkPress = (): void => {
+    const newPost: Post = {
+      ...postSelected,
+      content: postSelectedContent,
+    }
+
+    console.log(newPost);
+    props.onEditPost(newPost);
+    setIsShowAdd(false);
+  };
+
+  const onDeleteConfirm = (post: Post): void => {
+    props.onDeletePostPress(post);
+  };
+
+  const onDeletePress = (post: Post): void => {
+    setPostSelected(post);
+    alerts.confirm({
+      message: 'Are you sure?',
+      onResult: (result) => {
+        if (result) {
+          onDeleteConfirm(post);
+        }
+      },
+    })
+  };
+
+  const renderEditCard = (): React.ReactElement => {
+    return (
+      <Modal
+        animationIn={'fadeIn'}
+        animationOut={'fadeOut'}
+        animationInTiming={500}
+        isVisible={isShowAdd}
+        style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
+        <View style={themedStyle.sectionAddNotifications}>
+          <Text style={themedStyle.txtAddNotificationsModal}>
+            {'Enter post'}
+          </Text>
+          <TextInput
+            textAlignVertical="top"
+            style={themedStyle.inputNote}
+            autoFocus
+            multiline
+            value={postSelectedContent}
+            onChangeText={(text) => setPostSelectedContent(text)}
+          />
+          <View style={themedStyle.viewAddNotificationsBottom2}>
+            <TouchableOpacity activeOpacity={0.75} onPress={onCancelAddPress}>
+              <Text style={themedStyle.txtCloseAddNotificationsModal}>
+                {'CANCEL'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.75} onPress={onOkPress}>
+              <Text style={themedStyle.txtCloseAddNotificationsModal}>
+                {'OK'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderColumn = (columnIndex: number): React.ReactElement => {
+    return (
+      <View style={{ padding: pxPhone(12) }}>
+        <TouchableOpacity
+          activeOpacity={0.75}
+          style={themedStyle.viewButton}
+          onPress={() => onAddPost(columnIndex)}>
+          <Text style={themedStyle.txtSignUp}>
+            {columnIndex === 0 ? 'TO DO' : columnIndex === 1 ? 'IN PROGRESS' : 'DONE'}
+          </Text>
+        </TouchableOpacity>
+        <InputItem
+          onIconPress={() => onAddPost(columnIndex)}
+          icon={SendIcon}
+          placeholder={'Add new post'}
+          value={post}
+          title={'Post'}
+          inputContainerStyle={themedStyle.viewInput}
+          onInputTextChange={setPost} />
+        {props.session.posts.map((item, index) => {
+          if (item.column === columnIndex) {
+            return (
+              <View style={themedStyle.card2}>
+                <Text key={index}>
+                  {item.content}
+                </Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <TouchableOpacity
+                    onPress={() => onDeletePress(item)}
+                    activeOpacity={0.75}>
+                    <Text style={[themedStyle.txtAction, { color: 'red' }]}>
+                      {'Delete'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onEditPress(item)}
+                    activeOpacity={0.75}>
+                    <Text style={themedStyle.txtAction}>
+                      {'Edit'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+              </View>
+            );
+          }
+        })}
+      </View>
+    );
   };
 
   return (
-    <View style={themedStyle.container}>
-      {props.session.posts.map((item, index) => {
-        return (
-          <Text key={index}>
-            {item.id}
-          </Text>
-        );
-      })}
-      <InputItem
-        title={'Post'}
-        autoFocus={true}
-        inputContainerStyle={themedStyle.viewInput}
-        onInputTextChange={setPost} />
-      <TouchableOpacity
-        activeOpacity={0.75}
-        style={themedStyle.viewButton}
-        onPress={onAddPost}>
-        <Text style={themedStyle.txtSignUp}>
-          {'Add post'}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    <React.Fragment>
+      <FlatList
+        data={props.session.columns}
+        extraData={props.session.columns}
+        renderItem={item => {
+          return renderColumn(item.index);
+        }}>
+      </FlatList>
+      {renderEditCard()}
+    </React.Fragment>
   );
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
+  iconSend: {
+    width: pxPhone(30),
+    height: pxPhone(30),
+  },
+  txtAction: {
+    marginLeft: pxPhone(10),
+    ...textStyle.proTextBold,
+  },
   txtSignUp: {
     lineHeight: pxToPercentage(25),
     ...textStyle.proTextBold,
-    color: theme['color-basic-light-100'],
   },
   viewButton: {
     borderRadius: pxToPercentage(9),
     marginTop: pxToPercentage(20),
-    backgroundColor: theme['color-app'],
     height: pxToPercentage(40),
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: theme['color-green-1'],
   },
   txtPlaceholder: {
     color: theme['color-basic-dark-100'],
@@ -76,9 +203,8 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     ...textStyle.proDisplayRegular,
   },
   viewInput: {
-    marginTop: pxPhone(50),
+    marginTop: pxPhone(15),
     height: pxToPercentage(40),
-    paddingHorizontal: pxPhone(25),
   },
   viewAddButton: {
     width: pxPhone(50),
@@ -127,6 +253,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     width: pxToPercentage(20),
   },
   container: {
+    padding: pxPhone(12),
     alignItems: 'center',
     flex: 1,
   },
@@ -135,6 +262,26 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     marginLeft: pxToPercentage(5),
     marginTop: pxToPercentage(5),
     paddingLeft: pxToPercentage(15),
+    paddingVertical: pxToPercentage(15),
+    borderRadius: pxToPercentage(3),
+    backgroundColor: theme['color-basic-light-100'],
+    // shadow ios
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 3,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    // shadow android
+    elevation: 8,
+    borderWidth: 0,
+  },
+  card2: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: pxToPercentage(5),
+    paddingHorizontal: pxToPercentage(15),
     paddingVertical: pxToPercentage(15),
     borderRadius: pxToPercentage(3),
     backgroundColor: theme['color-basic-light-100'],
