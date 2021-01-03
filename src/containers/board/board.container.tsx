@@ -1,4 +1,4 @@
-import { Post, Session } from '@src/core/models/type';
+import { Post, PostGroup, Session } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
 import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onUpdatePost } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
@@ -141,6 +141,29 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
     [send]
   );
 
+  const onMovePost = useCallback(
+    (
+        post: Post,
+        destinationGroup: PostGroup | null,
+        destinationColumn: number,
+        newRank: string
+    ) => {
+        if (send) {
+            const updatedPost: Post = {
+                ...post,
+                column: destinationColumn,
+                group: destinationGroup,
+                rank: newRank,
+            };
+            dispatch(onUpdatePost(updatedPost));
+            send(Actions.EDIT_POST, {
+                post: updatedPost,
+            });
+        }
+    },
+    [send]
+);
+
   const onBackPress = (): void => {
     props.navigation.goBack();
   };
@@ -169,6 +192,7 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       onAddPost={onAddPost}
       onEditPost={onEditPost}
       onDeletePostPress={onDeletePostPress}
+      onMovePost={onMovePost}
       session={session} />
   );
 };

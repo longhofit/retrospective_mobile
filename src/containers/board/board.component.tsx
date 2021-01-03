@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList } from 'react-native';
-import { EvaArrowIcon, AddIcon, SendIcon } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -9,7 +9,7 @@ import Modal from 'react-native-modal';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
 import { User } from '@src/core/models/user/user.model';
-import { Post, Session } from '@src/core/models/type';
+import { ColumnDefinition, Post, PostGroup, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
 import { InputItem } from '@src/components/input/inputItem.component';
@@ -20,6 +20,10 @@ interface ComponentProps {
   onAddPost: (columnIndex: number, content: string, rank: string) => void;
   onEditPost: (post: Post) => void;
   onDeletePostPress: (post: Post) => void;
+  onMovePost: (post: Post,
+    destinationGroup: PostGroup | null,
+    destinationColumn: number,
+    newRank: string) => void;
 }
 
 export type BoardProps = ComponentProps & ThemedComponentProps;
@@ -28,8 +32,11 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const { themedStyle } = props;
   const [post, setPost] = useState<string>('');
   const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
+  const [isShowMove, setIsShowMove] = useState<boolean>(false);
   const [postSelected, setPostSelected] = useState<Post>(undefined);
   const [postSelectedContent, setPostSelectedContent] = useState<string>('');
+  const [desColumnSelected, setDesColumnSelected] = useState<ColumnDefinition>(undefined);
+
 
   const onAddPost = (columnIndex: number): void => {
     props.onAddPost(columnIndex, post, `ranh ${post}`);
@@ -76,9 +83,12 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const renderEditCard = (): React.ReactElement => {
     return (
       <Modal
-        animationIn={'fadeIn'}
-        animationOut={'fadeOut'}
-        animationInTiming={500}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
         isVisible={isShowAdd}
         style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
         <View style={themedStyle.sectionAddNotifications}>
@@ -110,19 +120,51 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     );
   };
 
-  const renderColumn = (columnIndex: number): React.ReactElement => {
+  const onDesColumnSelected = (column: ColumnDefinition): void => {
+    props.onMovePost(postSelected, null, column.index, postSelected.rank);
+    setIsShowMove(false);
+  };
+
+  const renderSelectComlumnModal = (): React.ReactElement => {
     return (
-      <View style={{ padding: pxPhone(12) }}>
-        <TouchableOpacity
-          activeOpacity={0.75}
-          style={themedStyle.viewButton}
-          onPress={() => onAddPost(columnIndex)}>
-          <Text style={themedStyle.txtSignUp}>
-            {columnIndex === 0 ? 'TO DO' : columnIndex === 1 ? 'IN PROGRESS' : 'DONE'}
+      <Modal
+        isVisible={isShowMove}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
+        style={{ alignItems: 'center' }}>
+        <View style={themedStyle.box}>
+          <Text style={themedStyle.txtNote}>
+            {'Move to column: '}
           </Text>
-        </TouchableOpacity>
+          {onRenderColumnName()}
+          <TouchableOpacity
+            style={themedStyle.btnCancel}
+            activeOpacity={0.75}
+            onPress={() => setIsShowMove(false)}>
+            <Text style={themedStyle.txtCancel}>
+              {'Cancel'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )
+  };
+
+  const renderColumn = (column: ColumnDefinition): React.ReactElement => {
+    return (
+      <View style={{ paddingVertical: pxPhone(12), paddingHorizontal: pxPhone(25) }}>
+        <View style={themedStyle.viewButton}>
+          <Text style={themedStyle.txtSignUp}>
+            {column.type}
+          </Text>
+        </View>
         <InputItem
-          onIconPress={() => onAddPost(columnIndex)}
+          iconStyle={themedStyle.iconSend}
+          onIconPress={() => onAddPost(column.index)}
           icon={SendIcon}
           placeholder={'Add new post'}
           value={post}
@@ -130,29 +172,29 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
           inputContainerStyle={themedStyle.viewInput}
           onInputTextChange={setPost} />
         {props.session.posts.map((item, index) => {
-          if (item.column === columnIndex) {
+          if (item.column === column.index) {
             return (
               <View style={themedStyle.card2}>
                 <Text key={index}>
                   {item.content}
                 </Text>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={themedStyle.viewActions}>
                   <TouchableOpacity
                     onPress={() => onDeletePress(item)}
                     activeOpacity={0.75}>
-                    <Text style={[themedStyle.txtAction, { color: 'red' }]}>
-                      {'Delete'}
-                    </Text>
+                    {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onMoveIconPress(item)}
+                    activeOpacity={0.75}>
+                    {MoveIcon(themedStyle.actionIcon)}
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => onEditPress(item)}
                     activeOpacity={0.75}>
-                    <Text style={themedStyle.txtAction}>
-                      {'Edit'}
-                    </Text>
+                    {EditIcon(themedStyle.actionIcon)}
                   </TouchableOpacity>
                 </View>
-
               </View>
             );
           }
@@ -161,24 +203,98 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     );
   };
 
+  const onMoveIconPress = (post: Post): void => {
+    setIsShowMove(true);
+    setPostSelected(post);
+  };
+
+  const onRenderColumnName = (): React.ReactElement => {
+    return <FlatList
+      data={props.session.columns.filter(item => { if (postSelected) { return item.index !== postSelected.column } else return false })}
+      extraData={props.session.columns.filter(item => { if (postSelected) { return item.index !== postSelected.column } else return false })}
+      showsVerticalScrollIndicator={false}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => (
+        <React.Fragment>
+          <View style={themedStyle.hr} />
+          <TouchableOpacity
+            style={{ marginTop: pxPhone(5) }}
+            activeOpacity={0.75}
+            onPress={() => onDesColumnSelected(item)}>
+            <Text style={{ textAlign: 'center' }}>
+              {item.type}
+            </Text>
+          </TouchableOpacity>
+        </React.Fragment>
+      )}
+    />;
+  };
+
   return (
     <React.Fragment>
       <FlatList
         data={props.session.columns}
         extraData={props.session.columns}
         renderItem={item => {
-          return renderColumn(item.index);
+          return renderColumn(item.item);
         }}>
       </FlatList>
       {renderEditCard()}
+      {renderSelectComlumnModal()}
     </React.Fragment>
   );
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
   iconSend: {
-    width: pxPhone(30),
-    height: pxPhone(30),
+    tintColor: theme['color-app'],
+    width:pxPhone(22),
+    height:pxPhone(22),
+  },
+  txtCancel: {
+    color: '#FF708D',
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(15),
+  },
+  btnCancel: {
+    width: pxPhone(285),
+    height: pxPhone(50),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  txtNote: {
+    fontSize: pxPhone(15),
+    ...textStyle.proTextBold,
+    textAlign: 'center',
+  },
+  box: {
+    borderRadius: pxPhone(10),
+    alignItems: 'center',
+    width: pxPhone(285),
+    height: pxPhone(170),
+    paddingTop: pxPhone(15),
+    backgroundColor: theme['color-basic-light-100'],
+  },
+  sectionSite: {
+    marginTop: pxPhone(10),
+  },
+  hr: {
+    marginTop: pxPhone(10),
+    height: pxPhone(1),
+    width: pxPhone(285),
+    backgroundColor: '#BDBDBD',
+  },
+  viewActions: {
+    flexDirection: 'row',
+    width: pxPhone(80),
+    justifyContent: 'space-between',
+  },
+  actionIcon: {
+    width: pxPhone(18),
+    height: pxPhone(18),
+  },
+  iconTrash: {
+    tintColor: 'red',
   },
   txtAction: {
     marginLeft: pxPhone(10),

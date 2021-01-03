@@ -69,3 +69,27 @@ export const SendIcon = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const EditIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/edit.png'),
+  };
+
+  return Icon(source, style);
+};
+
+export const MoveIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/move.png'),
+  };
+
+  return Icon(source, style);
+};
+
+export const TrashIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/trash.png'),
+  };
+
+  return Icon(source, style);
+};
+
