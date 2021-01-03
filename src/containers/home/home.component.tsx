@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl } from 'react-native';
 import { EvaArrowIcon, AddIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
@@ -13,8 +13,11 @@ import { User } from '@src/core/models/user/user.model';
 import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
-import { ddMMyyyyFormatterV3, ddMMyyyyhhMMssFormatter } from '@src/core/formatters';
-
+import { UserState } from '@src/core/store/reducer/user';
+import { useDispatch, useSelector } from 'react-redux';
+import { onThunkDeleteBoardReq } from './store/thunk';
+import { Dispatch } from 'redux';
+import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
   onCreateBoard: () => void;
@@ -98,8 +101,8 @@ const fakeData = [
 const boardRepositoryFake = new BoardRepository(fakeData);
 
 const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
+  const dispatch: Dispatch<any> = useDispatch();
   const { themedStyle, boards } = props;
-
   const [isShowPicker, setIsShowPicker] = useState<boolean>(false);
   const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
   const [idColumnAddSelected, setColumnAddSelected] = useState<number>(0);
@@ -109,8 +112,10 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [cardID, setCardID] = useState<string>('');
   const [socket, setSocket] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-
+  const { user }: UserState = useSelector((state: AppState) => state.user);
+  
   const onCancle = (): void => {
     setIsShowPicker(false);
   };
@@ -303,6 +308,42 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     props.onBoardPress(sessionId);
   };
 
+  const convertDate = (boardCreated : String): String => {
+    const arrayDateTime = boardCreated.split("T");
+    const arrayDay = arrayDateTime[0].split("-");
+    const arrayTime = arrayDateTime[1].split(".");
+    return arrayDay[2] + "/" + arrayDay[1] + "/" + arrayDay[0] + "  " + arrayTime[0];
+  }
+  const onSuccess = (): void => {
+  };
+  const onError = (): void => {
+  };
+  const onPressDeleteBoard = (idBoard: String): void => {
+    console.log("id board:",idBoard);
+    Alert.alert(
+      'Deleting "My Retrospective" ?',
+      'Deleting a session is irreversible. It will delete all posts, votes, groups, and the session itself. The data cannot be restored.Are you sure you want to delete this session and all its content?',
+      [
+        {
+          text: "YES, I'M SURE",
+          onPress: () => {
+            dispatch(onThunkDeleteBoardReq(idBoard, onSuccess, onError));
+            onRefresh();
+          },
+          style:"destructive"
+        },
+        {
+          text: "NO, I'M SORRY, I MADE A MISTAKE",
+          onPress: () => {
+
+          },
+          style:"cancel"
+        },
+        
+      ],
+      {cancelable: true},
+    );
+  }
   const renderBoard = (board: BoardMetaData): React.ReactElement => {
     return (
       <TouchableOpacity
@@ -310,44 +351,76 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         activeOpacity={0.75}
         style={themedStyle.viewBoard}>
         <View style={themedStyle.sectionText}>
-          <Text style={themedStyle.txtDate}>{ddMMyyyyhhMMssFormatter(new Date(board.created))}</Text>
-          <Text style={themedStyle.txtBoardTitle}>{'My Retrospective'}</Text>
+          <View style={themedStyle.viewBoardDelete}>
+            <Text style={themedStyle.txtBoardTitle}>{convertDate(String(board.created))}</Text>
+            <TouchableOpacity onPress={() => onPressDeleteBoard(board.id)}>
+              <Image source={require('@src/assets/icons/other/delete.png')} style={themedStyle.buttonDelete}/>
+            </TouchableOpacity>
+          </View>
+          <Text style={themedStyle.txtRetrospective}>{'My Retrospective'}</Text>
           <Text style={themedStyle.txtBoardTitle}>
             {`Create by ${board.createdBy.name}`}
           </Text>
         </View>
         <View style={themedStyle.viewBoardInfomation}>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>{board.numberOfPosts}</Text>
+            <Text style={{color:"green", fontSize:pxToPercentage(18)}}>{board.numberOfPosts}</Text>
             <Text>{'Post'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>{board.participants.length}</Text>
+            <Text style={{color:"blue", fontSize:pxToPercentage(18)}}>{board.participants.length}</Text>
             <Text>{'Participants'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>
+            <Text style={{color:"red", fontSize:pxToPercentage(18)}}>
               {board.numberOfPositiveVotes + board.numberOfNegativeVotes}
             </Text>
             <Text>{'Votes'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text>{board.numberOfActions}</Text>
+            <Text style={{color:"orange", fontSize:pxToPercentage(18)}}>{board.numberOfActions}</Text>
             <Text>{'Actions'}</Text>
           </View>
         </View>
-        {/* <View style={themedStyle.viewParticipants}>
+        <View style={themedStyle.viewParticipants}>
           {board.participants.map((item) => {
-            return <View style={themedStyle.viewviewParticipantPhoto} />;
+            return (<View style={themedStyle.viewviewParticipantPhoto}>
+              <Image
+                source={{uri:`https://www.gravatar.com/avatar/$%7Bmd5(${user.id})%7D?d=retro`}}
+                style={themedStyle.image}
+              />
+            </View>);
           })}
-        </View> */}
+        </View>
       </TouchableOpacity>
     );
   };
 
+  const onGetBoardSuccess = (): void => {
+  };
+
+  const onGetBoardError = (): void => {
+  };
+  const wait = (timeout) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+  };
+  const onRefresh = () : void => {
+    setRefreshing(true);
+    dispatch(onThunkGetPrePublicBoardsReq(
+      onGetBoardSuccess,
+      onGetBoardError,
+    ));
+    wait(500).then(() => setRefreshing(false));
+  };
   return (
     <View style={themedStyle.container}>
+      <Text style={themedStyle.txtHeader}>Public board</Text>
       <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: pxPhone(20) }}>
         {boards.map((item) => {
@@ -412,8 +485,26 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
   },
   viewParticipants: {
     marginLeft: pxPhone(15),
+    marginTop: pxPhone(15),
+    marginBottom: pxPhone(40),
     flexDirection: 'row',
     width: '100%',
+  },
+  viewBoardDelete:{
+    flexDirection:'row', 
+    justifyContent:"space-between", 
+    marginTop:pxToPercentage(10),
+  },
+  image:{
+    marginRight: pxPhone(5),
+    width: pxPhone(35),
+    height: pxPhone(35),
+    borderRadius: pxPhone(25),
+    backgroundColor: theme['color-purple'],
+    ...viewStyle.shadow2,
+  },
+  buttonDelete:{
+    marginRight: pxPhone(5),
   },
   viewviewParticipantPhoto: {
     marginRight: pxPhone(5),
@@ -430,16 +521,20 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-around',
+    marginTop: pxPhone(15),
+    backgroundColor: "#d6d4d1",
+    paddingTop: 10,
+    paddingBottom: 5,
+    paddingHorizontal: 10,
   },
   sectionText: {
     marginLeft: pxPhone(15),
   },
   viewBoard: {
     marginTop: pxPhone(15),
-    justifyContent: 'center',
+    alignSelf: 'center',
     backgroundColor: theme['color-basic-light-100'],
     width: pxToPercentage(300),
-    height: pxToPercentage(150),
     borderRadius: pxToPercentage(10),
     ...viewStyle.shadow2,
   },
@@ -448,7 +543,6 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     width: pxToPercentage(20),
   },
   container: {
-    alignItems: 'center',
     flex: 1,
   },
   card: {
@@ -488,9 +582,10 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     ...textStyle.proDisplayBold,
   },
   txtHeader: {
-    fontSize: pxToPercentage(18),
-    color: theme['color-basic-light-100'],
+    fontSize: pxToPercentage(20),
     ...textStyle.proDisplayRegular,
+    marginLeft: 20,
+    marginTop: 20,
   },
   txtSignIn: {
     color: theme['color-basic-dark-100'],
@@ -559,4 +654,13 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     borderRadius: pxToPercentage(5),
     color: theme['color-basic-dark-100'],
   },
+  txtBoardTitle:{
+    fontSize: pxToPercentage(15),
+    color: 'gray'
+  },
+  txtRetrospective:{
+    fontSize: pxToPercentage(16),
+    color: 'black'
+  },
+  
 }));

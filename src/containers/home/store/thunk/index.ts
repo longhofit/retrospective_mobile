@@ -46,3 +46,24 @@ export const onThunkCreateBoardReq = (
     onError();
   }
 };
+
+export const onThunkDeleteBoardReq = (
+  data: String,
+  onSuccess: () => void,
+  onError: () => void,
+): ThunkActionTypes => async () => {
+  const homeService = new HomeService();
+
+  try {
+    const res = await homeService.deleteBoard(data);
+
+    if (res) {
+      onSuccess();
+    } else {
+      onError();
+    }
+  } catch (e) {
+    alerts.alert({message: 'Delete board not successfully'});
+    onError();
+  }
+};

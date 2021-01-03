@@ -9,4 +9,8 @@ export default class HomeService extends ApiService {
   public createBoard() {
     return this.apiPost('/create');
   }
+
+  public deleteBoard(sessionId : String) {
+    return this.apiDelete(`/session/${sessionId}`);
+  }
 }
