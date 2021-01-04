@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl } from 'react-native';
-import { EvaArrowIcon, AddIcon } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon, TrashIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -114,8 +114,8 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [socket, setSocket] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { user }: UserState = useSelector((state: AppState) => state.user);
-  
+  const user = props.user;
+
   const onCancle = (): void => {
     setIsShowPicker(false);
   };
@@ -308,7 +308,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     props.onBoardPress(sessionId);
   };
 
-  const convertDate = (boardCreated : String): String => {
+  const convertDate = (boardCreated: String): String => {
     const arrayDateTime = boardCreated.split("T");
     const arrayDay = arrayDateTime[0].split("-");
     const arrayTime = arrayDateTime[1].split(".");
@@ -319,7 +319,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const onError = (): void => {
   };
   const onPressDeleteBoard = (idBoard: String): void => {
-    console.log("id board:",idBoard);
+    console.log("id board:", idBoard);
     Alert.alert(
       'Deleting "My Retrospective" ?',
       'Deleting a session is irreversible. It will delete all posts, votes, groups, and the session itself. The data cannot be restored.Are you sure you want to delete this session and all its content?',
@@ -330,18 +330,18 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             dispatch(onThunkDeleteBoardReq(idBoard, onSuccess, onError));
             onRefresh();
           },
-          style:"destructive"
+          style: "destructive"
         },
         {
           text: "NO, I'M SORRY, I MADE A MISTAKE",
           onPress: () => {
 
           },
-          style:"cancel"
+          style: "cancel"
         },
-        
+
       ],
-      {cancelable: true},
+      { cancelable: true },
     );
   }
   const renderBoard = (board: BoardMetaData): React.ReactElement => {
@@ -354,7 +354,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
           <View style={themedStyle.viewBoardDelete}>
             <Text style={themedStyle.txtBoardTitle}>{convertDate(String(board.created))}</Text>
             <TouchableOpacity onPress={() => onPressDeleteBoard(board.id)}>
-              <Image source={require('@src/assets/icons/other/delete.png')} style={themedStyle.buttonDelete}/>
+             {TrashIcon(themedStyle.buttonDelete)}
             </TouchableOpacity>
           </View>
           <Text style={themedStyle.txtRetrospective}>{'My Retrospective'}</Text>
@@ -364,21 +364,21 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         </View>
         <View style={themedStyle.viewBoardInfomation}>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text style={{color:"green", fontSize:pxToPercentage(18)}}>{board.numberOfPosts}</Text>
+            <Text style={{ color: "green", fontSize: pxToPercentage(18) }}>{board.numberOfPosts}</Text>
             <Text>{'Post'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text style={{color:"blue", fontSize:pxToPercentage(18)}}>{board.participants.length}</Text>
+            <Text style={{ color: "blue", fontSize: pxToPercentage(18) }}>{board.participants.length}</Text>
             <Text>{'Participants'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text style={{color:"red", fontSize:pxToPercentage(18)}}>
+            <Text style={{ color: "red", fontSize: pxToPercentage(18) }}>
               {board.numberOfPositiveVotes + board.numberOfNegativeVotes}
             </Text>
             <Text>{'Votes'}</Text>
           </View>
           <View style={themedStyle.viewBoardInfoItem}>
-            <Text style={{color:"orange", fontSize:pxToPercentage(18)}}>{board.numberOfActions}</Text>
+            <Text style={{ color: "orange", fontSize: pxToPercentage(18) }}>{board.numberOfActions}</Text>
             <Text>{'Actions'}</Text>
           </View>
         </View>
@@ -386,7 +386,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
           {board.participants.map((item) => {
             return (<View style={themedStyle.viewviewParticipantPhoto}>
               <Image
-                source={{uri:`https://www.gravatar.com/avatar/$%7Bmd5(${user.id})%7D?d=retro`}}
+                source={{ uri: `https://www.gravatar.com/avatar/$%7Bmd5(${user.id})%7D?d=retro` }}
                 style={themedStyle.image}
               />
             </View>);
@@ -406,7 +406,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       setTimeout(resolve, timeout);
     });
   };
-  const onRefresh = () : void => {
+  const onRefresh = (): void => {
     setRefreshing(true);
     dispatch(onThunkGetPrePublicBoardsReq(
       onGetBoardSuccess,
@@ -418,9 +418,9 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     <View style={themedStyle.container}>
       <Text style={themedStyle.txtHeader}>Public board</Text>
       <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: pxPhone(20) }}>
         {boards.map((item) => {
@@ -490,12 +490,12 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     flexDirection: 'row',
     width: '100%',
   },
-  viewBoardDelete:{
-    flexDirection:'row', 
-    justifyContent:"space-between", 
-    marginTop:pxToPercentage(10),
+  viewBoardDelete: {
+    flexDirection: 'row',
+    justifyContent: "space-between",
+    marginTop: pxToPercentage(10),
   },
-  image:{
+  image: {
     marginRight: pxPhone(5),
     width: pxPhone(35),
     height: pxPhone(35),
@@ -503,8 +503,10 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     backgroundColor: theme['color-purple'],
     ...viewStyle.shadow2,
   },
-  buttonDelete:{
+  buttonDelete: {
     marginRight: pxPhone(5),
+    width: pxPhone(20),
+    height: pxPhone(20),
   },
   viewviewParticipantPhoto: {
     marginRight: pxPhone(5),
@@ -534,7 +536,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     marginTop: pxPhone(15),
     alignSelf: 'center',
     backgroundColor: theme['color-basic-light-100'],
-    width: pxToPercentage(300),
+    width: pxToPercentage(340),
     borderRadius: pxToPercentage(10),
     ...viewStyle.shadow2,
   },
@@ -654,13 +656,13 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     borderRadius: pxToPercentage(5),
     color: theme['color-basic-dark-100'],
   },
-  txtBoardTitle:{
+  txtBoardTitle: {
     fontSize: pxToPercentage(15),
     color: 'gray'
   },
-  txtRetrospective:{
+  txtRetrospective: {
     fontSize: pxToPercentage(16),
     color: 'black'
   },
-  
+
 }));

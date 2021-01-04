@@ -87,7 +87,7 @@ export const MoveIcon = (style: StyleProp<ImageStyle>): IconElement => {
 
 export const TrashIcon = (style: StyleProp<ImageStyle>): IconElement => {
   const source: IconSource = {
-    imageSource: require('./other/trash.png'),
+    imageSource: require('./other/delete.png'),
   };
 
   return Icon(source, style);
