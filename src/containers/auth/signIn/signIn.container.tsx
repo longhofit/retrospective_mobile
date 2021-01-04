@@ -26,16 +26,16 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [signInFormData, setSignInFormData] = useState<SignInFormData>({
-    username: 'longhoimt3',
+    username: 'minhhien21',
     password: '123456',
   });
   const dispatch: Dispatch<any> = useDispatch();
 
   const hasErrorEmail = () => {
-    return username.trim() == '';
+    return signInFormData.username.trim() == '';
   };
   const hasErrorPassword = () => {
-    return password.trim() == '';
+    return signInFormData.password.trim() == '';
   };
   const hasName = () => {
     return name.trim() == '';
@@ -81,18 +81,16 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
       <ScrollView style={styles.container1}>
         <Text style={styles.text}>Username</Text>
         <TextInput
-          value={username}
+          value={signInFormData.username}
           onChangeText={(username) => {
-            setUsername(username);
             setSignInFormData({ ...signInFormData, username });
           }}
           style={styles.textinput}
         />
         <Text style={styles.text}>Password</Text>
         <TextInput
-          value={password}
+          value={signInFormData.password}
           onChangeText={(password) => {
-            setPassword(password);
             setSignInFormData({ ...signInFormData, password });
           }}
           style={styles.textinput}
