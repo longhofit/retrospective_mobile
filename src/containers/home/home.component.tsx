@@ -308,11 +308,63 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     props.onBoardPress(sessionId);
   };
 
-  const convertDate = (boardCreated: String): String => {
+  const convertDateTime = (boardCreated: String): String => {
+    var date = new Date().getDate();
+    var month = new Date().getMonth() + 1;
+    var year = new Date().getFullYear();
+    var hours = new Date().getHours(); 
+    var min = new Date().getMinutes();
+    var sec = new Date().getSeconds();
     const arrayDateTime = boardCreated.split("T");
     const arrayDay = arrayDateTime[0].split("-");
-    const arrayTime = arrayDateTime[1].split(".");
-    return arrayDay[2] + "/" + arrayDay[1] + "/" + arrayDay[0] + "  " + arrayTime[0];
+    const arrayTimeConvert = arrayDateTime[1].split(".");
+    const arrayTime = arrayTimeConvert[0].split(":");
+
+    // console.log("datetime:", date + " " + month + " " + year + " " + hours + " " + min + " " + sec);
+    // console.log("datetime2:", arrayDay[2] + "/" + arrayDay[1] + "/" + arrayDay[0] + "  " + arrayTime[0] + ":" + arrayTime[1] + ":" + arrayTime[2]);
+
+    const convertYear = year - parseInt(arrayDay[0]);
+    if(convertYear > 1){
+      return convertYear + " years ago";
+    }
+    if(convertYear > 0){
+      return convertYear + " year ago";
+    }
+    
+    const convertMonth = month - parseInt(arrayDay[1]);
+    if(convertMonth > 1){
+      return convertMonth + " months ago";
+    }
+    if(convertMonth > 0){
+      return convertMonth + " month ago";
+    }
+    
+    const convertDate = date - parseInt(arrayDay[2]);
+    if(convertDate > 1){
+      return convertDate + " days ago";
+    }
+    if(convertDate > 0){
+      return convertDate + " day ago";
+    }
+    
+    const convertHour = hours - parseInt(arrayTime[0]);
+    if(convertHour > 1){
+      return convertHour + " hours ago";
+    }
+    if(convertHour > 0){
+      return convertHour + " hour ago";
+    }
+    
+    const convertMin = min - parseInt(arrayTime[1]);
+    if(convertMin > 1){
+      return convertMin + " minutes ago";
+    }
+    if(convertMin > 0){
+      return convertMin + " minute ago";
+    }
+    return "less than a minute ago";
+
+    //return arrayDay[2] + "/" + arrayDay[1] + "/" + arrayDay[0] + "  " + arrayTime[0] + ":" + arrayTime[1] + ":" + arrayTime[2];
   }
   const onSuccess = (): void => {
   };
@@ -352,7 +404,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         style={themedStyle.viewBoard}>
         <View style={themedStyle.sectionText}>
           <View style={themedStyle.viewBoardDelete}>
-            <Text style={themedStyle.txtBoardTitle}>{convertDate(String(board.created))}</Text>
+            <Text style={themedStyle.txtBoardTitle}>{convertDateTime(String(board.created))}</Text>
             <TouchableOpacity onPress={() => onPressDeleteBoard(board.id)}>
              {TrashIcon(themedStyle.buttonDelete)}
             </TouchableOpacity>
