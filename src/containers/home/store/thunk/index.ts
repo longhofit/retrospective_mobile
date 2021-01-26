@@ -47,6 +47,28 @@ export const onThunkCreateBoardReq = (
   }
 };
 
+export const onThunkCreateCustomBoardReq = (
+  data,
+  onSuccess: () => void,
+  onError: () => void,
+): ThunkActionTypes => async () => {
+  const homeService = new HomeService();
+
+  try {
+    const res = await homeService.createCustomBoard(data);
+
+    if (res) {
+      onSuccess();
+    } else {
+      alerts.alert({message: 'Create board successfully'});
+      onError();
+    }
+  } catch (e) {
+    alerts.alert({message: 'Create board not successfully'});
+    onError();
+  }
+};
+
 export const onThunkDeleteBoardReq = (
   data: String,
   onSuccess: () => void,

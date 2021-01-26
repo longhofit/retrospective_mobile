@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Home } from './home.component';
 import { HomeState } from './store/reducer/types';
-import { onThunkCreateBoardReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
+import { onThunkCreateBoardReq, onThunkCreateCustomBoardReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
 
 export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const { user }: UserState = useSelector((state: AppState) => state.user);
@@ -58,12 +58,14 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
     ));
   };
 
-  const onCreateBoard = (): void => {
-    dispatch(onThunkCreateBoardReq(
+  const onCreateBoard = (data): void => {
+    dispatch(onThunkCreateCustomBoardReq(
+      data,
       onCreateBoardSuccess,
       () => { },
     ));
   };
+
 
   return (
     <Home

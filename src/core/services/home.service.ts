@@ -1,5 +1,5 @@
 import ApiService from './api.service';
-import { BoardMetaData } from '../models/board/board.model';
+import {BoardMetaData} from '../models/board/board.model';
 
 export default class HomeService extends ApiService {
   public getPrevPublicBoards() {
@@ -10,7 +10,11 @@ export default class HomeService extends ApiService {
     return this.apiPost('/create');
   }
 
-  public deleteBoard(sessionId : String) {
+  public createCustomBoard(data) {
+    return this.apiPost('/create-custom', data);
+  }
+
+  public deleteBoard(sessionId: String) {
     return this.apiDelete(`/session/${sessionId}`);
   }
 }

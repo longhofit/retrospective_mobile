@@ -159,7 +159,7 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
       <View style={{ paddingVertical: pxPhone(12), paddingHorizontal: pxPhone(25) }}>
         <View style={themedStyle.viewButton}>
           <Text style={themedStyle.txtSignUp}>
-            {column.type}
+            {column.label}
           </Text>
         </View>
         <InputItem
@@ -167,7 +167,7 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
           onIconPress={() => onAddPost(column.index)}
           icon={SendIcon}
           placeholder={'Add new post'}
-          value={post}
+          // value={post}
           title={'Post'}
           inputContainerStyle={themedStyle.viewInput}
           onInputTextChange={setPost} />
@@ -248,8 +248,8 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
   iconSend: {
     tintColor: theme['color-app'],
-    width:pxPhone(22),
-    height:pxPhone(22),
+    width: pxPhone(22),
+    height: pxPhone(22),
   },
   txtCancel: {
     color: '#FF708D',
@@ -272,6 +272,14 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     alignItems: 'center',
     width: pxPhone(285),
     height: pxPhone(170),
+    paddingTop: pxPhone(15),
+    backgroundColor: theme['color-basic-light-100'],
+  },
+  boxCreateBoard: {
+    borderRadius: pxPhone(10),
+    alignItems: 'center',
+    width: '80%',
+    height: '80%',
     paddingTop: pxPhone(15),
     backgroundColor: theme['color-basic-light-100'],
   },

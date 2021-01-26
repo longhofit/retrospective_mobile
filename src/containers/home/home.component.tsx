@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList } from 'react-native';
 import { EvaArrowIcon, AddIcon, TrashIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
@@ -18,9 +18,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { onThunkDeleteBoardReq } from './store/thunk';
 import { Dispatch } from 'redux';
 import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
+import uuid from 'react-native-uuid';
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
-  onCreateBoard: () => void;
+  onCreateBoard: (data) => void;
   boards: BoardMetaData[];
   session: Session;
   onReceivePost: (post: Post) => void;
@@ -98,6 +99,70 @@ const fakeData = [
   },
 ];
 
+const templateColumn = [
+  {
+    type: 'Default',
+    columns: [
+      {
+        "color": "#E8F5E9",
+        "icon": "satisfied",
+        "label": "What went well?",
+        "id": uuid.v4(),
+        "index": 0,
+        "type": "well"
+      },
+      {
+        "color": "#FFEBEE",
+        "icon": "disatisfied",
+        "label": "What could be improved?",
+        "id": uuid.v4(),
+        "index": 1,
+        "type": "notWell"
+      },
+      {
+        "color": "#FFFDE7",
+        "icon": "sunny",
+        "label": "A brilliant idea to share?",
+        "id": uuid.v4(),
+        "index": 2,
+        "type": "ideas"
+      }
+    ]
+  },
+  { type: 'Well / Not Well', columns: [] },
+  {
+    type: 'Start / Stop / Continue',
+    columns: [
+      {
+        "color": "#E8F5E9",
+        "icon": "play",
+        "label": "Start",
+        "id": uuid.v4(),
+        "index": 0,
+        "type": "start"
+      },
+      {
+        "color": "#FFEBEE",
+        "icon": "pause",
+        "label": "Stop",
+        "id": uuid.v4(),
+        "index": 1,
+        "type": "stop"
+      },
+      {
+        "color": "#BBDEFB",
+        "icon": "fast-forward",
+        "label": "Continue",
+        "id": uuid.v4(),
+        "index": 2,
+        "type": "continue"
+      }
+    ]
+  },
+  { type: 'Four Ls', columns: [] },
+  { type: 'Sailboat', columns: [] },
+]
+
 const boardRepositoryFake = new BoardRepository(fakeData);
 
 const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
@@ -113,6 +178,9 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [cardID, setCardID] = useState<string>('');
   const [socket, setSocket] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isCreateBoard, setIsShowCreateBoard] = useState<boolean>(false);
+  const [templateSelected, setTemplateSelected] = useState(templateColumn[0]);
+  const [isShowBoardTemplate, setIsShowBoardTemplate] = useState<boolean>(false);
 
   const user = props.user;
 
@@ -196,7 +264,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
   const onIconAddPress = (): void => {
     // setIsShowPicker(true);
-    props.onCreateBoard();
+    setIsShowCreateBoard(true);
   };
 
   const onColumnPress = (id: number): void => {
@@ -352,9 +420,9 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         style={themedStyle.viewBoard}>
         <View style={themedStyle.sectionText}>
           <View style={themedStyle.viewBoardDelete}>
-            <Text style={themedStyle.txtBoardTitle}>{convertDate(String(board.created))}</Text>
+            <Text style={themedStyle.txtBoardTitle}>{new Date(board.created).toTimeString().split(' ')[0]}</Text>
             <TouchableOpacity onPress={() => onPressDeleteBoard(board.id)}>
-             {TrashIcon(themedStyle.buttonDelete)}
+              {TrashIcon(themedStyle.buttonDelete)}
             </TouchableOpacity>
           </View>
           <Text style={themedStyle.txtRetrospective}>{'My Retrospective'}</Text>
@@ -395,6 +463,137 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       </TouchableOpacity>
     );
   };
+
+  const onTemplatePress = (index: number): void => {
+    setTemplateSelected(templateColumn[index]);
+    setIsShowCreateBoard(false);
+    setIsShowBoardTemplate(true);
+  };
+
+  const onColumnNameChange = (text: string, columnIndex: number): void => {
+    // setSignInFormData({ ...signInFormData, password });
+    let newColumns = templateSelected.columns;
+    newColumns[columnIndex].label = text;
+
+    console.log(newColumns)
+
+    setTemplateSelected({ ...templateSelected, columns: newColumns })
+
+  }
+
+  const onRenderColumnName = (): React.ReactElement => {
+    return <FlatList
+      data={templateColumn}
+      extraData={templateColumn}
+      showsVerticalScrollIndicator={false}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item, index }) => (
+        <React.Fragment>
+          <View style={themedStyle.hr} />
+          <TouchableOpacity
+            style={{ marginTop: pxPhone(5) }}
+            activeOpacity={0.75}
+            onPress={() => onTemplatePress(index)}>
+            <Text style={{ textAlign: 'center' }}>
+              {item.type}
+            </Text>
+          </TouchableOpacity>
+        </React.Fragment>
+      )}
+    />;
+  };
+
+  const onRenderColumnTemplate = (): React.ReactElement => {
+    return <FlatList
+      data={templateSelected.columns}
+      extraData={templateSelected.columns}
+      showsVerticalScrollIndicator={false}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item, index }) => (
+        <React.Fragment>
+          <View style={themedStyle.hr} />
+          <TextInput
+            onChangeText={text => onColumnNameChange(text, item.index)}
+            value={item.label}
+            style={{ marginTop: pxPhone(5) }}>
+          </TextInput>
+        </React.Fragment>
+      )}
+    />;
+  };
+
+  const renderCreateCustomBoard = (): React.ReactElement => {
+    return (
+      <Modal
+        isVisible={isCreateBoard}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
+        style={{ alignItems: 'center' }}>
+        <View style={themedStyle.box}>
+          <Text style={themedStyle.txtNote}>
+            {'Create custom board'}
+          </Text>
+          {onRenderColumnName()}
+          <TouchableOpacity
+            style={themedStyle.btnCancel}
+            activeOpacity={0.75}
+            onPress={() => setIsShowCreateBoard(false)}>
+            <Text style={themedStyle.txtCancel}>
+              {'Cancel'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )
+  }
+
+  const onDoneCreateBoard = (): void => {
+    setIsShowBoardTemplate(false);
+    props.onCreateBoard(templateSelected);
+  }
+
+  const renderBoardTemplate = (): React.ReactElement => {
+    return (
+      <Modal
+        isVisible={isShowBoardTemplate}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
+        style={{ alignItems: 'center' }}>
+        <View style={themedStyle.box2}>
+          <Text style={themedStyle.txtNote}>
+            {templateSelected.type}
+          </Text>
+          {onRenderColumnTemplate()}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around', left: pxPhone(-15), }}>
+            <TouchableOpacity
+              style={themedStyle.btnCancel}
+              activeOpacity={0.75}
+              onPress={() => onDoneCreateBoard()}>
+              <Text style={themedStyle.txtCancel}>
+                {'OK'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={themedStyle.btnCancel}
+              activeOpacity={0.75}
+              onPress={() => setIsShowBoardTemplate(false)}>
+              <Text style={themedStyle.txtCancel}>
+                {'Cancel'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
 
   const onGetBoardSuccess = (): void => {
   };
@@ -469,11 +668,56 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       </TouchableOpacity>
       {renderPicker()}
       {renderAddCard()}  */}
+      {renderCreateCustomBoard()}
+      {renderBoardTemplate()}
     </View>
   );
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  txtCancel: {
+    color: '#FF708D',
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(15),
+  },
+  hr: {
+    marginTop: pxPhone(10),
+    height: pxPhone(1),
+    width: pxPhone(285),
+    backgroundColor: '#BDBDBD',
+  },
+  btnCancel: {
+    width: pxPhone(285),
+    height: pxPhone(50),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  btnCancel2: {
+    width: pxPhone(285),
+    height: pxPhone(50),
+  },
+  txtNote: {
+    fontSize: pxPhone(15),
+    ...textStyle.proTextBold,
+    textAlign: 'center',
+  },
+  box: {
+    borderRadius: pxPhone(10),
+    alignItems: 'center',
+    width: pxPhone(285),
+    height: pxPhone(230),
+    paddingTop: pxPhone(15),
+    backgroundColor: theme['color-basic-light-100'],
+  },
+  box2: {
+    borderRadius: pxPhone(10),
+    alignItems: 'center',
+    width: '95%',
+    height: '80%',
+    paddingTop: pxPhone(15),
+    backgroundColor: theme['color-basic-light-100'],
+  },
   viewAddButton: {
     width: pxPhone(50),
     height: pxPhone(50),
