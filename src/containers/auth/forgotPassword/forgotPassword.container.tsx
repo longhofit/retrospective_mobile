@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
 import { SendOTPData, ForgotPwFormData } from '@src/core/models/signUp/forgotpwReq.model';
 import { onThunkSendOTPReq, onThunkForgotPasswordReq } from './store/thunk';
@@ -10,12 +10,17 @@ import ForgotPassword from './forgotPassword.component';
 export const ForgotPasswordContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const navigationKey: string = 'ForgotPassword';
   const dispatch: Dispatch<any> = useDispatch();
+  const [valueReturnSendOTP, setValueReturnSendOTP] = useState(false);
 
   const onSuccess = (): void => {
+    setValueReturnSendOTP(true);
+    console.log("valueReturnSendOTPSuccess:",valueReturnSendOTP);
   };
 
   const onError = (): void => {
     Alert.alert("Email does not exist");
+    setValueReturnSendOTP(false);
+    console.log("valueReturnSendOTPError:",valueReturnSendOTP);
   };
 
   const onSuccessFPW = (): void => {
@@ -31,8 +36,9 @@ export const ForgotPasswordContainer: React.FunctionComponent<NavigationInjected
     Alert.alert("OTP code incorrect");
   };
 
-  const onSendOTPPress = (data: SendOTPData): void => {
+  const onSendOTPPress = (data: SendOTPData): boolean => {
     dispatch(onThunkSendOTPReq(data, () => onSuccess(), onError));
+    return valueReturnSendOTP;
   };
   const onNewPasswordPress = (data: ForgotPwFormData): void => {
     dispatch(onThunkForgotPasswordReq(data, () => onSuccessFPW(), onErrorFPW));

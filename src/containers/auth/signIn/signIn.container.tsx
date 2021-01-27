@@ -70,6 +70,16 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
       onSignInPress();
     }
   };
+  const onSingUpPress = () : void => {
+      props.navigation.navigate({
+        routeName: 'SignUp',
+      })
+  }
+  const onForgotPasswordPress = () : void => {
+    props.navigation.navigate({
+      routeName: 'ForgotPassword',
+    })
+}
 
   return (
     <ScrollView style={styles.container}>
@@ -101,10 +111,10 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
             SIGN IN
           </Text>
         </TouchableOpacity>
-        <Text style={styles.text1} onPress={() => console.log('1st')}>
+        <Text style={styles.text1} onPress={onForgotPasswordPress}>
           FORGOT PASSWORD?
         </Text>
-        <Text style={styles.text1} onPress={() => console.log('1st')}>
+        <Text style={styles.text1} onPress={onSingUpPress}>
           SIGN UP FREE
         </Text>
         <Text style={styles.header}>Or</Text>

@@ -12,11 +12,7 @@ export const SignUpContainer: React.FunctionComponent<NavigationInjectedProps> =
 
   const onSuccess = (name: string): void => {
     props.navigation.navigate({
-      routeName: 'Home',
-      key: navigationKey,
-      params: {
-        name
-      },
+      routeName: 'SignIn',
     })
   };
 

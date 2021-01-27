@@ -21,7 +21,7 @@ import { EmailValidator } from '@src/core/validators';
 import { SendOTPData, ForgotPwFormData } from '@src/core/models/signUp/forgotpwReq.model';
 import OtpInputs from 'react-native-otp-inputs';
 interface ComponentProps {
-  onSendOTPPress: (formData: SendOTPData) => void;
+  onSendOTPPress: (formData: SendOTPData) => boolean;
   onNewPasswordPress: (formData: ForgotPwFormData) => void;
   onBackPress: () => void;
 }
@@ -38,12 +38,14 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
     email: '',
   });
   const [displayButton, setDisplayButton] = useState('flex');
-
+  const [checkSendOTP, setCheckSendOTP] = useState(false);
   const onSendOTPButton = (): void => {
     if (!EmailValidator(sendOTPData.email)) {
       Alert.alert('Invalid email!');
     } else {
-      props.onSendOTPPress(sendOTPData);
+      let getValueReturnSendOTP = props.onSendOTPPress(sendOTPData);
+      console.log("getValueReturnSendOTP:",getValueReturnSendOTP);
+      setCheckSendOTP(getValueReturnSendOTP);
       setDisplayButton('none');
     }
   };
@@ -51,11 +53,8 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
   const onNewPasswordButton = (): void => {
     if (!EmailValidator(sendOTPData.email)) {
       Alert.alert('Invalid email!');
-    } else {
-      props.onSendOTPPress(sendOTPData);
-      setDisplayButton('none');
     }
-    if (!EmailValidator(sendOTPData.email)) {
+    else if (!EmailValidator(sendOTPData.email)) {
       Alert.alert('Invalid email!');
     } else if (forgotPwFormData.otp.length < 6) {
       Alert.alert('OTP has 6 characters.')
@@ -83,7 +82,31 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
     setForgotPwFormData({ ...forgotPwFormData, newPassword });
   };
 
-
+  const viewChangePassword = () : JSX.Element => {
+    if(checkSendOTP == true){
+      return(
+        <View>
+          <Text style={styles.text}>OTP</Text>
+          <View style={styles.inputOTP}>
+            <OtpInputs
+            handleChange={onOtpInputTextChange}
+            numberOfInputs={6}
+            />
+          </View>
+          <Text style={styles.text}>New Password</Text>
+          <TextInput
+            onChangeText={onPasswordInputTextChange}
+            style={styles.textinput}
+            secureTextEntry={true}/>
+          <TouchableOpacity style={styles.buttonSignIn}>
+            <Text style={styles.buttontext} onPress={onNewPasswordButton}>
+              NEW PASSWORD
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+  }
   
   return (
     <View style={styles.container}>
@@ -93,33 +116,16 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
         </Text>
       </View>
       <View style={styles.container1}>
-          <Text style={styles.text}>Email</Text>
-          <TextInput
+        <Text style={styles.text}>Email</Text>
+        <TextInput
           onChangeText={onEmailInputTextChange}
           style={styles.textinput}/>
-          <TouchableOpacity style={[styles.buttonSignIn, {display:'flex'}]}>
-            <Text style={styles.buttontext} onPress={onSendOTPButton}>
-                SEND OTP
-            </Text>
-          </TouchableOpacity>
-          <Text style={styles.text}>OTP</Text>
-          <View style={styles.inputOTP}>
-              <OtpInputs
-              handleChange={onOtpInputTextChange}
-              numberOfInputs={6}
-              />
-            </View>
-          <Text style={styles.text}>New Password</Text>
-          <TextInput
-          onChangeText={onPasswordInputTextChange}
-          style={styles.textinput}
-          secureTextEntry={true}
-          />
-          <TouchableOpacity style={styles.buttonSignIn}>
-            <Text style={styles.buttontext} onPress={onNewPasswordButton}>
-              NEW PASSWORD
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={[styles.buttonSignIn, {display:'flex'}]}>
+          <Text style={styles.buttontext} onPress={onSendOTPButton}>
+            SEND OTP
+          </Text>
+        </TouchableOpacity>
+        {viewChangePassword()}
       </View>
     </View>
 
