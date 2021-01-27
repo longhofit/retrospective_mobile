@@ -93,3 +93,11 @@ export const TrashIcon = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const InformationIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/information.png'),
+  };
+
+  return Icon(source, style);
+};
+
