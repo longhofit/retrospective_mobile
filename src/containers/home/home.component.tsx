@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList } from 'react-native';
-import { EvaArrowIcon, AddIcon, TrashIcon } from '@src/assets/icons';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList, Switch } from 'react-native';
+import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -30,6 +30,24 @@ interface ComponentProps {
   name: string;
   onBackPress: () => void;
   sessionId: string;
+}
+interface FormSettingState{
+  isPrivateBoard: boolean,
+  isBlurCards: boolean,
+  isAllowActions: boolean,
+  isShowAuthor: boolean,
+  isAllowReordering:boolean,
+  isAllowGrouping: boolean,
+  isAllowGiphy: boolean,
+}
+const initSettingState: FormSettingState = {
+  isPrivateBoard: false,
+  isBlurCards: false,
+  isAllowActions: false,
+  isShowAuthor: false,
+  isAllowReordering:false,
+  isAllowGrouping: false,
+  isAllowGiphy: false,
 }
 
 export type HomeProps = ComponentProps & ThemedComponentProps;
@@ -163,6 +181,7 @@ const templateColumn = [
   { type: 'Sailboat', columns: [] },
 ]
 
+
 const boardRepositoryFake = new BoardRepository(fakeData);
 
 const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
@@ -181,6 +200,45 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [isCreateBoard, setIsShowCreateBoard] = useState<boolean>(false);
   const [templateSelected, setTemplateSelected] = useState(templateColumn[0]);
   const [isShowBoardTemplate, setIsShowBoardTemplate] = useState<boolean>(false);
+  const [settingState, setSettingState] = useState<FormSettingState>(initSettingState);
+  const templateColumnSetting = [
+    {
+      header: 'Private Board',
+      description: 'Only author and team member can modify this board',
+      state: settingState.isPrivateBoard,
+    },
+    {
+      header: 'Blur Cards',
+      description: 'Cards content is blurred until the moderator reveals the content',
+      state: settingState.isBlurCards,
+    },
+    {
+      header: 'Allow Actions',
+      description: `Whether to allow the 'Action' (follow-up) field on each post`,
+      state: settingState.isAllowActions,
+    },
+    {
+      header: 'Show Author',
+      description: 'Display the author of the post, on the post itself.',
+      state: settingState.isShowAuthor,
+    },
+    {
+      header: 'Allow Re-ordering',
+      description: 'Allow re-ordering posts by drag-and-drop',
+      state: settingState.isAllowReordering,
+    },
+    {
+      header: 'Allow Grouping',
+      description: 'Allow the creation of groups to group posts together',
+      state: settingState.isAllowGrouping,
+    },
+    {
+      header: 'Allow Giphy',
+      description: 'Allow users to set a Giphy image against a post',
+      state: settingState.isAllowGiphy,
+    },
+  ]
+  
 
   const user = props.user;
 
@@ -599,6 +657,93 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     )
   }
 
+
+  // render setting
+  const onTemplateSettingPress = (index: number): void => {
+    //setSettingState({...settingState, isBlurCards:!settingState.isBlurCards});
+    console.log("index:",index);
+    switch (index) {
+      case 0:
+        setSettingState({...settingState, isPrivateBoard:!settingState.isPrivateBoard});
+        break;
+      case 1:
+        setSettingState({...settingState, isBlurCards:!settingState.isBlurCards});
+        break;
+      case 2:
+        setSettingState({...settingState, isAllowActions:!settingState.isAllowActions});
+        break;
+      case 3:
+        setSettingState({...settingState, isShowAuthor:!settingState.isShowAuthor});
+        break;
+      case 4:
+        setSettingState({...settingState, isAllowReordering:!settingState.isAllowReordering});
+        break;
+      case 5:
+        setSettingState({...settingState, isAllowGrouping:!settingState.isAllowGrouping});
+        break;
+      case 6:
+        setSettingState({...settingState, isAllowGiphy:true});
+        break;
+    }
+  };
+  const onRenderSettingColumnName = (): React.ReactElement => {
+    return <FlatList
+      data={templateColumnSetting}
+      extraData={templateColumnSetting}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item, index }) => (
+        <React.Fragment>
+          <View style={themedStyle.containerSetting}>
+            <View style={themedStyle.containerHeaderSetting}>
+              <Text>{item.header}</Text>
+              <Switch
+                trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
+                thumbColor={item.state ? "#05386b" : "#fafafa"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={() => onTemplateSettingPress(index)}
+                value={item.state}
+              />
+            </View>
+            <View style={themedStyle.containerInfoSetting}>
+              {InformationIcon(themedStyle.iconInformation)}
+              <Text style={{width:'90%', height: '100%'}}>{item.description}</Text>
+            </View>
+          </View>
+        </React.Fragment>
+      )}
+    />;
+  };
+
+  const renderCreateSettingCustomBoard = (): React.ReactElement => {
+    return (
+      <Modal
+        isVisible={isCreateBoard}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
+        style={{ alignItems: 'center' }}>
+        <View style={themedStyle.boxSetting}>
+          <Text style={themedStyle.txtNote}>
+            {'Post setting'}
+          </Text>
+          {onRenderSettingColumnName()}
+          <TouchableOpacity
+            style={themedStyle.btnCancel}
+            activeOpacity={0.75}
+            onPress={() => setIsShowCreateBoard(false)}>
+            <Text style={themedStyle.txtCancel}>
+              {'Cancel'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )
+  }
+  // render setting
+
   const onDoneCreateBoard = (): void => {
     setIsShowBoardTemplate(false);
     props.onCreateBoard(templateSelected);
@@ -716,13 +861,43 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       </TouchableOpacity>
       {renderPicker()}
       {renderAddCard()}  */}
-      {renderCreateCustomBoard()}
+      {renderCreateSettingCustomBoard()}
       {renderBoardTemplate()}
     </View>
   );
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  containerSetting:{
+    marginTop: pxPhone(5),
+    borderColor: "#b5bdb6", 
+    borderWidth: 1,
+    borderRadius: pxPhone(10),
+    marginHorizontal: pxPhone(10),
+    height: pxPhone(120)
+  },
+  containerHeaderSetting:{
+    marginHorizontal: pxPhone(10),
+    flexDirection:"row",
+    justifyContent:"space-between",
+    alignItems:"center",
+    padding: pxPhone(10),
+    height: '50%'
+  },
+  containerInfoSetting:{
+    flexDirection:"row", 
+    backgroundColor: "#e8f4fd",
+    borderBottomEndRadius: pxPhone(10),
+    alignItems:"center",
+    padding: pxPhone(10),
+    height: '50%'
+  },
+  iconInformation: {
+    marginRight: pxPhone(5),
+    width: pxPhone(20),
+    height: pxPhone(20),
+    tintColor:"#35a0f4",
+  },
   txtCancel: {
     color: '#FF708D',
     ...textStyle.proTextBold,
@@ -749,6 +924,14 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     fontSize: pxPhone(15),
     ...textStyle.proTextBold,
     textAlign: 'center',
+  },
+  boxSetting: {
+    borderRadius: pxPhone(10),
+    width: '90%',
+    height: '60%',
+    paddingTop: pxPhone(15),
+    backgroundColor: theme['color-basic-light-100'],
+    alignItems: 'center',
   },
   box: {
     borderRadius: pxPhone(10),
