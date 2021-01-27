@@ -17,7 +17,7 @@ export const onThunkSignUpReq = (data: SignUpFormData,
   try {
     const res = await authService.signUp(signUpReq);
     if (res) {
-      alerts.alert({ message: 'Login successful!', onResult: onSuccess });
+      alerts.alert({ message: 'SignUp successful!', onResult: onSuccess });
     } else {
       alerts.alert({ message: res.message || res.error_message });
       onError();

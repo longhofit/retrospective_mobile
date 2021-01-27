@@ -19,6 +19,7 @@ import { onThunkDeleteBoardReq } from './store/thunk';
 import { Dispatch } from 'redux';
 import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 import uuid from 'react-native-uuid';
+import Slider from '@react-native-community/slider'
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
   onCreateBoard: (data) => void;
@@ -40,14 +41,26 @@ interface FormSettingState{
   isAllowGrouping: boolean,
   isAllowGiphy: boolean,
 }
+interface FormVotingState{
+  MaxUpVotes: number,
+  MaxDownVotes: number,
+  isAllowSelfVoting: boolean,
+  isAllowMultiple: boolean,
+}
 const initSettingState: FormSettingState = {
   isPrivateBoard: false,
   isBlurCards: false,
-  isAllowActions: false,
+  isAllowActions: true,
   isShowAuthor: false,
-  isAllowReordering:false,
-  isAllowGrouping: false,
-  isAllowGiphy: false,
+  isAllowReordering: true,
+  isAllowGrouping: true,
+  isAllowGiphy: true,
+}
+const initVotingState: FormVotingState = {
+  MaxUpVotes: 6,
+  MaxDownVotes: 6,
+  isAllowSelfVoting: false,
+  isAllowMultiple: false,
 }
 
 export type HomeProps = ComponentProps & ThemedComponentProps;
@@ -201,6 +214,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [templateSelected, setTemplateSelected] = useState(templateColumn[0]);
   const [isShowBoardTemplate, setIsShowBoardTemplate] = useState<boolean>(false);
   const [settingState, setSettingState] = useState<FormSettingState>(initSettingState);
+  const [votingState, setVotingState] = useState<FormVotingState>(initVotingState);
   const templateColumnSetting = [
     {
       header: 'Private Board',
@@ -660,7 +674,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
   // render setting
   const onTemplateSettingPress = (index: number): void => {
-    //setSettingState({...settingState, isBlurCards:!settingState.isBlurCards});
     console.log("index:",index);
     switch (index) {
       case 0:
@@ -713,7 +726,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       )}
     />;
   };
-
   const renderCreateSettingCustomBoard = (): React.ReactElement => {
     return (
       <Modal
@@ -743,6 +755,142 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     )
   }
   // render setting
+
+  // render voting
+  const toggleSwitchAllowSelfVoting = () => setVotingState({...votingState, isAllowSelfVoting :!votingState.isAllowSelfVoting});
+  const toggleSwitchAllowMultiple = () => setVotingState({...votingState, isAllowMultiple :!votingState.isAllowMultiple});
+  const sliderMaxUpVotes = (value) => setVotingState({...votingState, MaxUpVotes: value});
+  const sliderMaxDownVotes = (value) => setVotingState({...votingState, MaxDownVotes: value});
+  const onRenderVotingColumnName = (): React.ReactElement => {
+    return <ScrollView>
+            <View style={themedStyle.containerSetting}>
+              <View style={themedStyle.containerHeaderVoting}>
+                <Text style={{width: '35%'}}>Max Up-Votes</Text>
+                <View style={{width: '65%'}}>
+                  <Slider
+                    style={{width: '77%', height: 40}}
+                    minimumValue={0}
+                    maximumValue={6}
+                    value={votingState.MaxUpVotes}
+                    step={1}
+                    onValueChange={(value)=> sliderMaxUpVotes(value)}
+                    minimumTrackTintColor="#5cdb95"
+                    maximumTrackTintColor="#5cdb95"
+                    thumbTintColor="#5cdb95"
+                  />
+                  <View style={{flexDirection:'row', justifyContent:'space-around', width: '96%', alignSelf:'flex-end'}}>
+                    <Text>0</Text>
+                    <Text>1</Text>
+                    <Text>2</Text>
+                    <Text>3</Text>
+                    <Text>4</Text>
+                    <Text>5</Text>
+                    <Text>Unlimited</Text>
+                  </View>
+                </View>
+              </View>
+              <View style={themedStyle.containerInfoSetting}>
+                {InformationIcon(themedStyle.iconInformation)}
+                <Text style={{width:'90%', height: '100%'}}>Maximum number of 'likes' votes a user is allowed to cast</Text>
+              </View>
+            </View>
+
+            <View style={themedStyle.containerSetting}>
+              <View style={themedStyle.containerHeaderVoting}>
+                <Text style={{width: '35%'}}>Max Down-Votes</Text>
+                <View style={{width: '65%'}}>
+                  <Slider
+                    style={{width: '77%', height: 40}}
+                    minimumValue={0}
+                    maximumValue={6}
+                    value={votingState.MaxDownVotes}
+                    step={1}
+                    onValueChange={(value)=> sliderMaxDownVotes(value)}
+                    minimumTrackTintColor="#5cdb95"
+                    maximumTrackTintColor="#5cdb95"
+                    thumbTintColor="#5cdb95"
+                  />
+                  <View style={{flexDirection:'row', justifyContent:'space-around', width: '96%', alignSelf:'flex-end'}}>
+                    <Text>0</Text>
+                    <Text>1</Text>
+                    <Text>2</Text>
+                    <Text>3</Text>
+                    <Text>4</Text>
+                    <Text>5</Text>
+                    <Text>Unlimited</Text>
+                  </View>
+                </View>
+              </View>
+              <View style={themedStyle.containerInfoSetting}>
+                {InformationIcon(themedStyle.iconInformation)}
+                <Text style={{width:'90%', height: '100%'}}>Maximum number of 'dislikes' votes a user is allowed to cast</Text>
+              </View>
+            </View>
+
+            <View style={themedStyle.containerSetting}>
+              <View style={themedStyle.containerHeaderSetting}>
+                <Text>Allow Self Voting</Text>
+                <Switch
+                  trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
+                  thumbColor={votingState.isAllowSelfVoting ? "#05386b" : "#fafafa"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={toggleSwitchAllowSelfVoting}
+                  value={votingState.isAllowSelfVoting}
+                />
+              </View>
+              <View style={themedStyle.containerInfoSetting}>
+                {InformationIcon(themedStyle.iconInformation)}
+                <Text style={{width:'90%', height: '100%'}}>Whether to allow a user to vote on their own post</Text>
+              </View>
+            </View>
+
+            <View style={themedStyle.containerSetting}>
+              <View style={themedStyle.containerHeaderSetting}>
+                <Text>Allow Multiple Votes</Text>
+                <Switch
+                  trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
+                  thumbColor={votingState.isAllowMultiple ? "#05386b" : "#fafafa"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={toggleSwitchAllowMultiple}
+                  value={votingState.isAllowMultiple}
+                />
+              </View>
+              <View style={themedStyle.containerInfoSetting}>
+                {InformationIcon(themedStyle.iconInformation)}
+                <Text style={{width:'90%', height: '100%'}}>Whether to allow a user to vote multiple times on the same post</Text>
+              </View>
+            </View>
+          </ScrollView>;
+  };
+  const renderCreateVotingCustomBoard = (): React.ReactElement => {
+    return (
+      <Modal
+        isVisible={isCreateBoard}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
+        style={{ alignItems: 'center'}}>
+        <View style={themedStyle.boxSetting}>
+          <Text style={themedStyle.txtNote}>
+            {'Voting'}
+          </Text>
+          {onRenderVotingColumnName()}
+          <TouchableOpacity
+            style={themedStyle.btnCancel}
+            activeOpacity={0.75}
+            onPress={() => setIsShowCreateBoard(false)}>
+            <Text style={themedStyle.txtCancel}>
+              {'Cancel'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )
+  }
+  // render voting
 
   const onDoneCreateBoard = (): void => {
     setIsShowBoardTemplate(false);
@@ -861,7 +1009,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       </TouchableOpacity>
       {renderPicker()}
       {renderAddCard()}  */}
-      {renderCreateSettingCustomBoard()}
+      {renderCreateVotingCustomBoard()}
       {renderBoardTemplate()}
     </View>
   );
@@ -898,6 +1046,13 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     height: pxPhone(20),
     tintColor:"#35a0f4",
   },
+  containerHeaderVoting:{
+    marginLeft: pxPhone(10),
+    padding: pxPhone(10),
+    flexDirection:"row",
+    alignItems:"center",
+    height: '50%'
+  },
   txtCancel: {
     color: '#FF708D',
     ...textStyle.proTextBold,
@@ -927,8 +1082,8 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
   },
   boxSetting: {
     borderRadius: pxPhone(10),
-    width: '90%',
-    height: '60%',
+    width: '100%',
+    height: '70%',
     paddingTop: pxPhone(15),
     backgroundColor: theme['color-basic-light-100'],
     alignItems: 'center',

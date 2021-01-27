@@ -16,6 +16,7 @@
     "@react-native-community/async-storage": "^1.7.1",
     "@react-native-community/clipboard": "^1.5.1",
     "@react-native-community/netinfo": "^5.0.1",
+    "@react-native-community/slider": "^3.0.3",
     "@react-navigation/drawer": "^5.10.7",
     "@react-navigation/native": "^5.8.7",
     "@types/react-native-i18n": "^2.0.0",
