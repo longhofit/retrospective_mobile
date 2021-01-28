@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList, Switch } from 'react-native';
-import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon, CheckedIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -20,6 +20,7 @@ import { Dispatch } from 'redux';
 import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 import uuid from 'react-native-uuid';
 import Slider from '@react-native-community/slider'
+import { TabView, SceneMap } from 'react-native-tab-view';
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
   onCreateBoard: (data) => void;
@@ -726,21 +727,44 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       )}
     />;
   };
+  // const renderCreateSettingCustomBoard = (): React.ReactElement => {
+  //   return (
+  //     <Modal
+  //       isVisible={isCreateBoard}
+  //       animationIn='slideInUp'
+  //       animationOut='slideOutDown'
+  //       animationInTiming={1}
+  //       animationOutTiming={1}
+  //       backdropTransitionInTiming={1}
+  //       backdropTransitionOutTiming={1}
+  //       style={{ alignItems: 'center' }}>
+  //       <View style={themedStyle.boxSetting}>
+  //         <Text style={themedStyle.txtNote}>
+  //           {'Post setting'}
+  //         </Text>
+  //         {onRenderSettingColumnName()}
+  //         <TouchableOpacity
+  //           style={themedStyle.btnCancel}
+  //           activeOpacity={0.75}
+  //           onPress={() => setIsShowCreateBoard(false)}>
+  //           <Text style={themedStyle.txtCancel}>
+  //             {'Cancel'}
+  //           </Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </Modal>
+  //   )
+  // }
   const renderCreateSettingCustomBoard = (): React.ReactElement => {
     return (
-      <Modal
-        isVisible={isCreateBoard}
-        animationIn='slideInUp'
-        animationOut='slideOutDown'
-        animationInTiming={1}
-        animationOutTiming={1}
-        backdropTransitionInTiming={1}
-        backdropTransitionOutTiming={1}
-        style={{ alignItems: 'center' }}>
         <View style={themedStyle.boxSetting}>
-          <Text style={themedStyle.txtNote}>
-            {'Post setting'}
-          </Text>
+          <View style={themedStyle.HeaderSetting}> 
+            {CheckedIcon(themedStyle.iconCheckedIcon)}
+            <Text style={{fontSize: pxPhone(15),
+    ...textStyle.proTextBold,}}>
+              Set the rules about what a user can do when creating or viewing a post
+            </Text>
+          </View>
           {onRenderSettingColumnName()}
           <TouchableOpacity
             style={themedStyle.btnCancel}
@@ -751,7 +775,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             </Text>
           </TouchableOpacity>
         </View>
-      </Modal>
     )
   }
   // render setting
@@ -862,21 +885,44 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             </View>
           </ScrollView>;
   };
+  // const renderCreateVotingCustomBoard = (): React.ReactElement => {
+  //   return (
+  //     <Modal
+  //       isVisible={isCreateBoard}
+  //       animationIn='slideInUp'
+  //       animationOut='slideOutDown'
+  //       animationInTiming={1}
+  //       animationOutTiming={1}
+  //       backdropTransitionInTiming={1}
+  //       backdropTransitionOutTiming={1}
+  //       style={{ alignItems: 'center'}}>
+  //       <View style={themedStyle.boxSetting}>
+  //         <Text style={themedStyle.txtNote}>
+  //           {'Voting'}
+  //         </Text>
+  //         {onRenderVotingColumnName()}
+  //         <TouchableOpacity
+  //           style={themedStyle.btnCancel}
+  //           activeOpacity={0.75}
+  //           onPress={() => setIsShowCreateBoard(false)}>
+  //           <Text style={themedStyle.txtCancel}>
+  //             {'Cancel'}
+  //           </Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </Modal>
+  //   )
+  // }
   const renderCreateVotingCustomBoard = (): React.ReactElement => {
     return (
-      <Modal
-        isVisible={isCreateBoard}
-        animationIn='slideInUp'
-        animationOut='slideOutDown'
-        animationInTiming={1}
-        animationOutTiming={1}
-        backdropTransitionInTiming={1}
-        backdropTransitionOutTiming={1}
-        style={{ alignItems: 'center'}}>
         <View style={themedStyle.boxSetting}>
-          <Text style={themedStyle.txtNote}>
-            {'Voting'}
-          </Text>
+          <View style={themedStyle.HeaderSetting}> 
+            {CheckedIcon(themedStyle.iconCheckedIcon)}
+            <Text style={{fontSize: pxPhone(15),
+    ...textStyle.proTextBold,}}>
+              Set the rules about likes and dislikes
+            </Text>
+          </View>
           {onRenderVotingColumnName()}
           <TouchableOpacity
             style={themedStyle.btnCancel}
@@ -887,11 +933,43 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             </Text>
           </TouchableOpacity>
         </View>
-      </Modal>
     )
   }
   // render voting
-
+  const [index, setIndex] = React.useState(0);
+  const [routes] = React.useState([
+    { key: 'first', title: 'Setting' },
+    { key: 'second', title: 'Voting' },
+  ]);
+  
+  const renderScene = SceneMap({
+    first: renderCreateSettingCustomBoard,
+    second: renderCreateVotingCustomBoard,
+  });
+  // tab create custom board
+  const renderTabCreateCustomBoard = (): React.ReactElement => {
+    return (
+      <Modal
+        isVisible={isCreateBoard}
+        animationIn='slideInUp'
+        animationOut='slideOutDown'
+        animationInTiming={1}
+        animationOutTiming={1}
+        backdropTransitionInTiming={1}
+        backdropTransitionOutTiming={1}
+        style={{ alignItems: 'center', justifyContent:'center',height: '70%'}}>
+          <TabView
+            style={{width: '100%', height:'70%'}}
+            navigationState={{ index, routes}}
+            renderScene={renderScene}
+            onIndexChange={(value) => setIndex(value)}
+            lazy={true}
+            swipeEnabled={false}
+          />  
+      </Modal>
+    )
+  }
+  // tab create custom board
   const onDoneCreateBoard = (): void => {
     setIsShowBoardTemplate(false);
     props.onCreateBoard(templateSelected);
@@ -1009,13 +1087,19 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       </TouchableOpacity>
       {renderPicker()}
       {renderAddCard()}  */}
-      {renderCreateVotingCustomBoard()}
+      {renderTabCreateCustomBoard()}
       {renderBoardTemplate()}
     </View>
   );
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  HeaderSetting:{
+    flexDirection:'row',
+    width: '95%',
+    backgroundColor: '#bbf4c9', borderRadius: pxPhone(10),
+    marginHorizontal: pxPhone(15), padding:pxPhone(10)
+  },
   containerSetting:{
     marginTop: pxPhone(5),
     borderColor: "#b5bdb6", 
@@ -1039,6 +1123,13 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     alignItems:"center",
     padding: pxPhone(10),
     height: '50%'
+  },
+  iconCheckedIcon:{
+    marginRight: pxPhone(5),
+    width: pxPhone(20),
+    height: pxPhone(20),
+    tintColor:"#66b066",
+    alignSelf: 'center'
   },
   iconInformation: {
     marginRight: pxPhone(5),
