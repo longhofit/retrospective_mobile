@@ -13,9 +13,11 @@ import { SignUpContainer } from '@src/containers/auth/signUp/signUp.container';
 import SignIn from '@src/containers/auth/signIn/signIn.container';
 import { BoardContainer } from '@src/containers/board/board.container';
 import { ForgotPasswordContainer } from '@src/containers/auth/forgotPassword/forgotPassword.container';
+import { PaymentContainer } from '@src/containers/payment/payment.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
+    ['Payment']: PaymentContainer,
     ['SignIn']: SignIn,
     ['Home']: HomeContainer,
     ['SignUp']:SignUpContainer,
