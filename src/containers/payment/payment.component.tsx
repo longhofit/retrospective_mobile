@@ -8,6 +8,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  AppState,
 } from 'react-native';
 import {
   textStyle,
@@ -18,15 +19,16 @@ import {
   pxToPercentage,
 } from '@src/core/utils/utils';
 import { ScrollView } from 'react-native-gesture-handler';
+import { User } from '@src/core/models/user/user.model';
 interface ComponentProps {
   onPlusAccountPress: () => void;
   onProAccountPress: () => void;
+  user: User;
 }
 
 export type PaymentProps = ThemedComponentProps & ComponentProps;
 
 const SignUpComponent: React.FunctionComponent<PaymentProps> = (props) => {
-
   const onBackPress = (): void => {
     //props.onBackPress();
   };
