@@ -2,7 +2,7 @@ import {ThunkActionTypes} from '@src/core/store/thunk/types';
 import {alerts} from '@src/core/utils/alerts';
 import HomeService from '@src/core/services/home.service';
 import {BoardMetaData} from '@src/core/models/board/board.model';
-import {onGetPrevPublicBoard} from '../reducer/actions';
+import {onGetPrevPublicBoard, onGetPrevPrivateBoard} from '../reducer/actions';
 
 export const onThunkGetPrePublicBoardsReq = (
   onSuccess: () => void,
@@ -22,6 +22,29 @@ export const onThunkGetPrePublicBoardsReq = (
     }
   } catch (e) {
     alerts.alert({message: 'Get public boards not successfully'});
+    onError();
+  }
+};
+
+export const onThunkGetPrePrivateBoardsReq = (
+  onSuccess: () => void,
+  onError: () => void,
+): ThunkActionTypes => async (dispatch) => {
+  const homeService = new HomeService();
+
+  try {
+    const res: BoardMetaData[] = await homeService.getPrevPrivateBoards();
+
+    if (res) {
+      dispatch(onGetPrevPrivateBoard(res));
+      onSuccess();
+    } else {
+      alerts.alert({message: 'Get private boards not 2 successfully'});
+      onError();
+    }
+  } catch (e) {
+    console.log(e);
+    alerts.alert({message: 'Get private boards not successfully'});
     onError();
   }
 };

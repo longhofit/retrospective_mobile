@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList } from 'react-native';
-import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon } from '@src/assets/icons';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard } from 'react-native';
+import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -232,6 +232,16 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 
   return (
     <React.Fragment>
+      <View style={themedStyle.viewHeader}>
+        <Text style={themedStyle.txtHeader2}>
+          {'My retrospective'}
+        </Text>
+        <TouchableOpacity
+          onPress={() => Clipboard.setString(`http://localhost:3000/game/${props.session.id}`)}
+          activeOpacity={0.75}>
+          {ShareIcon(themedStyle.iconShare)}
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={props.session.columns}
         extraData={props.session.columns}
@@ -239,13 +249,43 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
           return renderColumn(item.item);
         }}>
       </FlatList>
-      {renderEditCard()}
-      {renderSelectComlumnModal()}
-    </React.Fragment>
+      { renderEditCard()}
+      { renderSelectComlumnModal()}
+    </React.Fragment >
   );
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
+  txtHeader2: {
+    color: theme['color-basic-dark-100'],
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(20),
+  },
+  viewHeader: {
+    flexDirection: 'row',
+    width: '100%',
+    height: pxPhone(50),
+    backgroundColor: theme['color-green-1'],
+    // shadow ios
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 3,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    // shadow android
+    elevation: 8,
+    borderWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: pxPhone(12),
+  },
+  iconShare: {
+    width: pxToPercentage(20),
+    height: pxToPercentage(20),
+    tintColor: theme['color-basic-light-100'],
+  },
   iconSend: {
     tintColor: theme['color-app'],
     width: pxPhone(22),
@@ -309,6 +349,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     ...textStyle.proTextBold,
   },
   txtSignUp: {
+    color: theme['color-basic-light-100'],
     lineHeight: pxToPercentage(25),
     ...textStyle.proTextBold,
   },
@@ -447,11 +488,6 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     fontSize: 20,
     ...textStyle.proTextSemibold,
   },
-  viewHeader: {
-    backgroundColor: theme['color-app'],
-    height: pxToPercentage(70),
-    width: '100%',
-  },
   viewAdd: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -462,12 +498,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     width: pxToPercentage(50),
     height: pxToPercentage(50),
     borderRadius: pxToPercentage(25),
-    backgroundColor: theme['color-green-1'],
-  },
-  iconAdd: {
-    width: pxToPercentage(30),
-    height: pxToPercentage(30),
-    tintColor: theme['color-basic-light-100'],
+    backgroundColor: theme['color-app'],
   },
   sectionAddNotifications: {
     width: '100%',
@@ -508,5 +539,17 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     paddingVertical: 0,
     borderRadius: pxToPercentage(5),
     color: theme['color-basic-dark-100'],
+  },
+  viewShare: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    position: 'absolute',
+    bottom: pxPhone(30),
+    right: pxPhone(30),
+    width: pxToPercentage(50),
+    height: pxToPercentage(50),
+    borderRadius: pxToPercentage(25),
+    backgroundColor: theme['color-green-1'],
   },
 }));

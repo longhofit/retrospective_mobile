@@ -6,6 +6,10 @@ export default class HomeService extends ApiService {
     return this.apiGet<BoardMetaData[]>('/previous/public');
   }
 
+  public getPrevPrivateBoards() {
+    return this.apiGet<BoardMetaData[]>('/previous/private');
+  }
+
   public createBoard() {
     return this.apiPost('/create');
   }

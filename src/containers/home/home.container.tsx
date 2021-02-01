@@ -1,3 +1,4 @@
+import { BoardMetaData } from '@src/core/models/board/board.model';
 import { Post, Session } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
 import { onReceiveBoard, onReceivePost } from '@src/core/store/reducer/session/actions';
@@ -9,16 +10,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Home } from './home.component';
 import { HomeState } from './store/reducer/types';
-import { onThunkCreateBoardReq, onThunkCreateCustomBoardReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
+import { onThunkCreateBoardReq, onThunkCreateCustomBoardReq, onThunkGetPrePrivateBoardsReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
 
 export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const { user }: UserState = useSelector((state: AppState) => state.user);
   const { session }: SessionState = useSelector((state: AppState) => state.session);
-  const { boards }: HomeState = useSelector((state: AppState) => state.home);
+  const { boards, privateBoards }: HomeState = useSelector((state: AppState) => state.home);
   const dispatch: Dispatch<any> = useDispatch();
 
   useEffect(() => {
     onGetPrePublicBoards();
+    onGetPrePrivateBoards();
   }, []);
 
   const onBoardPress = (sessionId: string): void => {
@@ -41,6 +43,7 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
   };
 
   const onGetBoardSuccess = (): void => {
+    console.log(boards)
   };
 
   const onGetBoardError = (): void => {
@@ -48,11 +51,19 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
 
   const onCreateBoardSuccess = (): void => {
     onGetPrePublicBoards();
+    onGetPrePrivateBoards();
   };
 
 
   const onGetPrePublicBoards = (): void => {
     dispatch(onThunkGetPrePublicBoardsReq(
+      onGetBoardSuccess,
+      onGetBoardError,
+    ));
+  };
+
+  const onGetPrePrivateBoards = (): void => {
+    dispatch(onThunkGetPrePrivateBoardsReq(
       onGetBoardSuccess,
       onGetBoardError,
     ));
@@ -71,7 +82,7 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
     <Home
       onBoardPress={onBoardPress}
       onCreateBoard={onCreateBoard}
-      boards={boards}
+      boards={boards.concat(privateBoards)}
       onReceiveBoard={receiveBoard}
       session={session}
       onReceivePost={receivePost}

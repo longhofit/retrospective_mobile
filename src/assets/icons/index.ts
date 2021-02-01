@@ -109,3 +109,11 @@ export const CheckedIcon = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const ShareIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/share.png'),
+  };
+
+  return Icon(source, style);
+};
+

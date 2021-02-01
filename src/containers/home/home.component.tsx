@@ -21,6 +21,7 @@ import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 import uuid from 'react-native-uuid';
 import Slider from '@react-native-community/slider'
 import { TabView, SceneMap } from 'react-native-tab-view';
+import { color } from 'react-native-reanimated';
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
   onCreateBoard: (data) => void;
@@ -33,16 +34,16 @@ interface ComponentProps {
   onBackPress: () => void;
   sessionId: string;
 }
-interface FormSettingState{
+interface FormSettingState {
   isPrivateBoard: boolean,
   isBlurCards: boolean,
   isAllowActions: boolean,
   isShowAuthor: boolean,
-  isAllowReordering:boolean,
+  isAllowReordering: boolean,
   isAllowGrouping: boolean,
   isAllowGiphy: boolean,
 }
-interface FormVotingState{
+interface FormVotingState {
   MaxUpVotes: number,
   MaxDownVotes: number,
   isAllowSelfVoting: boolean,
@@ -66,73 +67,21 @@ const initVotingState: FormVotingState = {
 
 export type HomeProps = ComponentProps & ThemedComponentProps;
 
-const fakeData = [
-  {
-    id: 1,
-    name: 'TO DO',
-    rows: [
-      {
-        id: '1',
-        name: 'Analyze your audience',
-        description:
-          'Learn more about the audience to whom you will be speaking',
-      },
-      {
-        id: '2',
-        name: 'Select a topic',
-        description:
-          'Select a topic that is of interest to the audience and to you',
-      },
-      {
-        id: '3',
-        name: 'Define the objective',
-        description:
-          'Write the objective of the presentation in a single concise statement',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'IN PROGRESS',
-    rows: [
-      {
-        id: '4',
-        name: 'Look at drawings',
-        description: 'How did they use line and shape? How did they shade?',
-      },
-      {
-        id: '5',
-        name: 'Draw from drawings',
-        description: 'Learn from the masters by copying them',
-      },
-      {
-        id: '6',
-        name: 'Draw from photographs',
-        description:
-          'For most people, it’s easier to reproduce an image that’s already two-dimensional',
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'DONE',
-    rows: [
-      {
-        id: '7',
-        name: 'Draw from life',
-        description: 'Do you enjoy coffee? Draw your coffee cup',
-      },
-      {
-        id: '8',
-        name: 'Take a class',
-        description: 'Check your local university extension',
-      },
-    ],
-  },
-];
-
 const templateColumn = [
   {
+    options: {
+      "allowActions": true,
+      "allowMultipleVotes": false,
+      "allowSelfVoting": false,
+      "allowAuthorVisible": false,
+      "maxDownVotes": null,
+      "maxUpVotes": null,
+      "allowGiphy": true,
+      "allowGrouping": true,
+      "allowReordering": true,
+      "blurCards": false,
+      "isPublic": true
+    },
     type: 'Default',
     columns: [
       {
@@ -161,8 +110,37 @@ const templateColumn = [
       }
     ]
   },
-  { type: 'Well / Not Well', columns: [] },
   {
+    options: {
+      "allowActions": true,
+      "allowMultipleVotes": false,
+      "allowSelfVoting": false,
+      "allowAuthorVisible": false,
+      "maxDownVotes": null,
+      "maxUpVotes": null,
+      "allowGiphy": true,
+      "allowGrouping": true,
+      "allowReordering": true,
+      "blurCards": false,
+      "isPublic": true
+    },
+    type: 'Well / Not Well',
+    columns: []
+  },
+  {
+    options: {
+      "allowActions": true,
+      "allowMultipleVotes": false,
+      "allowSelfVoting": false,
+      "allowAuthorVisible": false,
+      "maxDownVotes": null,
+      "maxUpVotes": null,
+      "allowGiphy": true,
+      "allowGrouping": true,
+      "allowReordering": true,
+      "blurCards": false,
+      "isPublic": false
+    },
     type: 'Start / Stop / Continue',
     columns: [
       {
@@ -195,9 +173,6 @@ const templateColumn = [
   { type: 'Sailboat', columns: [] },
 ]
 
-
-const boardRepositoryFake = new BoardRepository(fakeData);
-
 const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const dispatch: Dispatch<any> = useDispatch();
   const { themedStyle, boards } = props;
@@ -205,7 +180,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
   const [idColumnAddSelected, setColumnAddSelected] = useState<number>(0);
   const [cardName, setCardName] = useState<string>('');
-  const [boardRepository, setBoardRepository] = useState(fakeData);
   const [lastId, setLastId] = useState<number>(8);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [cardID, setCardID] = useState<string>('');
@@ -253,81 +227,12 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       state: settingState.isAllowGiphy,
     },
   ]
-  
+
 
   const user = props.user;
 
   const onCancle = (): void => {
     setIsShowPicker(false);
-  };
-
-  const onOkPress = (): void => {
-    if (!isEdit) {
-      onAddCard(idColumnAddSelected);
-      setIsShowAdd(false);
-    } else {
-      const newData = boardRepository;
-
-      boardRepository.forEach((item, itemIndex) => {
-        item.rows.forEach((row, rowIndex) => {
-          if (row.id === cardID) {
-            newData[itemIndex].rows[rowIndex].name = cardName;
-          }
-        });
-      });
-
-      boardRepositoryFake.updateData(newData);
-      setBoardRepository(newData);
-      setIsShowAdd(false);
-      setIsEdit(false);
-    }
-  };
-
-  const onRemoveCard = (idCard: string): void => {
-    const newData = boardRepository;
-
-    boardRepository.forEach((item, index) => {
-      item.rows.forEach((card) => {
-        if (card.id === cardID) {
-          newData[index].rows = newData[index].rows.filter((row) => {
-            return row.id !== idCard;
-          });
-        }
-      });
-    });
-
-    boardRepositoryFake.updateData(newData);
-    setBoardRepository(newData);
-  };
-
-  const onAddCard = (idColumn: number, card?: any): void => {
-    const newData = boardRepository;
-
-    boardRepository.forEach((item, index) => {
-      if (item.id === idColumn) {
-        let newItem: any;
-        if (card) {
-          newItem = card;
-        } else {
-          newItem = {
-            id: `${lastId + 1}`,
-            name: cardName,
-            description: '',
-          };
-        }
-        newData[index].rows.push(newItem);
-        setLastId(lastId + 1);
-      }
-    });
-
-    boardRepositoryFake.updateData(newData);
-    setBoardRepository(newData);
-  };
-
-  const onDeletePress = (): void => {
-    onRemoveCard(cardID);
-    setIsShowAdd(false);
-    setIsEdit(false);
   };
 
   const onDragEnd = (): void => { };
@@ -347,87 +252,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     setTimeout(() => {
       setIsShowAdd(true);
     }, 500);
-  };
-
-  const renderAddCard = (): React.ReactElement => {
-    return (
-      <Modal
-        animationIn={'fadeIn'}
-        animationOut={'fadeOut'}
-        animationInTiming={500}
-        isVisible={isShowAdd}
-        style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
-        <View style={themedStyle.sectionAddNotifications}>
-          <Text style={themedStyle.txtAddNotificationsModal}>
-            {'Enter card'}
-          </Text>
-          <TextInput
-            textAlignVertical="top"
-            style={themedStyle.inputNote}
-            autoFocus
-            multiline
-            value={cardName}
-            onChangeText={(text) => setCardName(text)}
-          />
-          <View style={themedStyle.viewAddNotificationsBottom2}>
-            {isEdit && (
-              <TouchableOpacity activeOpacity={0.75} onPress={onDeletePress}>
-                <Text style={themedStyle.txtCloseAddNotificationsModal}>
-                  {'DELETE'}
-                </Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity activeOpacity={0.75} onPress={onCancelAddPress}>
-              <Text style={themedStyle.txtCloseAddNotificationsModal}>
-                {'CANCEL'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.75} onPress={onOkPress}>
-              <Text style={themedStyle.txtCloseAddNotificationsModal}>
-                {'OK'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
-  const renderPicker = (): React.ReactElement => {
-    return (
-      <Modal
-        animationIn={'fadeIn'}
-        animationOut={'fadeOut'}
-        animationInTiming={500}
-        isVisible={isShowPicker}
-        style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
-        <View style={themedStyle.sectionAddNotifications}>
-          <Text style={themedStyle.txtAddNotificationsModal}>
-            {'Select column'}
-          </Text>
-          {fakeData.map((item, index) => {
-            return (
-              <React.Fragment key={index}>
-                <View style={themedStyle.card}>
-                  <TouchableOpacity
-                    activeOpacity={0.75}
-                    onPress={() => onColumnPress(item.id)}>
-                    <Text>{item.name}</Text>
-                  </TouchableOpacity>
-                </View>
-              </React.Fragment>
-            );
-          })}
-          <View style={themedStyle.viewAddNotificationsBottom}>
-            <TouchableOpacity activeOpacity={0.75} onPress={onCancle}>
-              <Text style={themedStyle.txtCloseAddNotificationsModal}>
-                {'CANCEL'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
   };
 
   const renderCard = (item): React.ReactElement => {
@@ -453,7 +277,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     var date = new Date().getDate();
     var month = new Date().getMonth() + 1;
     var year = new Date().getFullYear();
-    var hours = new Date().getHours(); 
+    var hours = new Date().getHours();
     var min = new Date().getMinutes();
     var sec = new Date().getSeconds();
 
@@ -464,41 +288,41 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     // console.log("datetime:", date + " " + month + " " + year + " " + hours + " " + min + " " + sec);
 
     const convertYear = year - boardCreatedDateTime.getFullYear();
-    if(convertYear > 1){
+    if (convertYear > 1) {
       return convertYear + " years ago";
     }
-    if(convertYear > 0){
+    if (convertYear > 0) {
       return convertYear + " year ago";
     }
-    
+
     const convertMonth = month - (boardCreatedDateTime.getMonth() + 1);
-    if(convertMonth > 1){
+    if (convertMonth > 1) {
       return convertMonth + " months ago";
     }
-    if(convertMonth > 0){
+    if (convertMonth > 0) {
       return convertMonth + " month ago";
     }
-    
+
     const convertDate = date - boardCreatedDateTime.getDate();
-    if(convertDate > 1){
+    if (convertDate > 1) {
       return convertDate + " days ago";
     }
-    if(convertDate > 0){
+    if (convertDate > 0) {
       return convertDate + " day ago";
     }
     const convertHour = hours - boardCreatedDateTime.getHours();
-    if(convertHour > 1){
+    if (convertHour > 1) {
       return convertHour + " hours ago";
     }
-    if(convertHour > 0){
+    if (convertHour > 0) {
       return convertHour + " hour ago";
     }
-    
+
     const convertMin = min - boardCreatedDateTime.getMinutes();
-    if(convertMin > 1){
+    if (convertMin > 1) {
       return convertMin + " minutes ago";
     }
-    if(convertMin > 0){
+    if (convertMin > 0) {
       return convertMin + " minute ago";
     }
     return "less than a minute ago";
@@ -645,58 +469,49 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
   const renderCreateCustomBoard = (): React.ReactElement => {
     return (
-      <Modal
-        isVisible={isCreateBoard}
-        animationIn='slideInUp'
-        animationOut='slideOutDown'
-        animationInTiming={1}
-        animationOutTiming={1}
-        backdropTransitionInTiming={1}
-        backdropTransitionOutTiming={1}
-        style={{ alignItems: 'center' }}>
-        <View style={themedStyle.box}>
-          <Text style={themedStyle.txtNote}>
-            {'Create custom board'}
+      <View style={themedStyle.boxSetting}>
+        <Text style={themedStyle.txtNote}>
+          {'Create custom board'}
+        </Text>
+        {onRenderColumnName()}
+        <TouchableOpacity
+          style={themedStyle.btnCancel}
+          activeOpacity={0.75}
+          onPress={onDoneCreateBoard}>
+          <Text style={themedStyle.txtCancel}>
+            {'OK'}
           </Text>
-          {onRenderColumnName()}
-          <TouchableOpacity
-            style={themedStyle.btnCancel}
-            activeOpacity={0.75}
-            onPress={() => setIsShowCreateBoard(false)}>
-            <Text style={themedStyle.txtCancel}>
-              {'Cancel'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+        </TouchableOpacity>
+      </View>
     )
   }
 
 
   // render setting
   const onTemplateSettingPress = (index: number): void => {
-    console.log("index:",index);
+    console.log("index:", index);
     switch (index) {
       case 0:
-        setSettingState({...settingState, isPrivateBoard:!settingState.isPrivateBoard});
+        setSettingState({ ...settingState, isPrivateBoard: !settingState.isPrivateBoard });
+        setTemplateSelected({ ...templateSelected, options: { ...templateSelected.options, isPublic: !settingState.isPrivateBoard } });
         break;
       case 1:
-        setSettingState({...settingState, isBlurCards:!settingState.isBlurCards});
+        setSettingState({ ...settingState, isBlurCards: !settingState.isBlurCards });
         break;
       case 2:
-        setSettingState({...settingState, isAllowActions:!settingState.isAllowActions});
+        setSettingState({ ...settingState, isAllowActions: !settingState.isAllowActions });
         break;
       case 3:
-        setSettingState({...settingState, isShowAuthor:!settingState.isShowAuthor});
+        setSettingState({ ...settingState, isShowAuthor: !settingState.isShowAuthor });
         break;
       case 4:
-        setSettingState({...settingState, isAllowReordering:!settingState.isAllowReordering});
+        setSettingState({ ...settingState, isAllowReordering: !settingState.isAllowReordering });
         break;
       case 5:
-        setSettingState({...settingState, isAllowGrouping:!settingState.isAllowGrouping});
+        setSettingState({ ...settingState, isAllowGrouping: !settingState.isAllowGrouping });
         break;
       case 6:
-        setSettingState({...settingState, isAllowGiphy:true});
+        setSettingState({ ...settingState, isAllowGiphy: true });
         break;
     }
   };
@@ -720,7 +535,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             </View>
             <View style={themedStyle.containerInfoSetting}>
               {InformationIcon(themedStyle.iconInformation)}
-              <Text style={{width:'90%', height: '100%'}}>{item.description}</Text>
+              <Text style={{ width: '90%', height: '100%' }}>{item.description}</Text>
             </View>
           </View>
         </React.Fragment>
@@ -757,133 +572,135 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   // }
   const renderCreateSettingCustomBoard = (): React.ReactElement => {
     return (
-        <View style={themedStyle.boxSetting}>
-          <View style={themedStyle.HeaderSetting}> 
-            {CheckedIcon(themedStyle.iconCheckedIcon)}
-            <Text style={{fontSize: pxPhone(15),
-    ...textStyle.proTextBold,}}>
-              Set the rules about what a user can do when creating or viewing a post
+      <View style={themedStyle.boxSetting}>
+        <View style={themedStyle.HeaderSetting}>
+          {CheckedIcon(themedStyle.iconCheckedIcon)}
+          <Text style={{
+            fontSize: pxPhone(15),
+            ...textStyle.proTextBold,
+          }}>
+            Set the rules about what a user can do when creating or viewing a post
             </Text>
-          </View>
-          {onRenderSettingColumnName()}
-          <TouchableOpacity
-            style={themedStyle.btnCancel}
-            activeOpacity={0.75}
-            onPress={() => setIsShowCreateBoard(false)}>
-            <Text style={themedStyle.txtCancel}>
-              {'Cancel'}
-            </Text>
-          </TouchableOpacity>
         </View>
+        {onRenderSettingColumnName()}
+        <TouchableOpacity
+          style={themedStyle.btnCancel}
+          activeOpacity={0.75}
+          onPress={onDoneCreateBoard}>
+          <Text style={themedStyle.txtCancel}>
+            {'OK'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     )
   }
   // render setting
 
   // render voting
-  const toggleSwitchAllowSelfVoting = () => setVotingState({...votingState, isAllowSelfVoting :!votingState.isAllowSelfVoting});
-  const toggleSwitchAllowMultiple = () => setVotingState({...votingState, isAllowMultiple :!votingState.isAllowMultiple});
-  const sliderMaxUpVotes = (value) => setVotingState({...votingState, MaxUpVotes: value});
-  const sliderMaxDownVotes = (value) => setVotingState({...votingState, MaxDownVotes: value});
+  const toggleSwitchAllowSelfVoting = () => setVotingState({ ...votingState, isAllowSelfVoting: !votingState.isAllowSelfVoting });
+  const toggleSwitchAllowMultiple = () => setVotingState({ ...votingState, isAllowMultiple: !votingState.isAllowMultiple });
+  const sliderMaxUpVotes = (value) => setVotingState({ ...votingState, MaxUpVotes: value });
+  const sliderMaxDownVotes = (value) => setVotingState({ ...votingState, MaxDownVotes: value });
   const onRenderVotingColumnName = (): React.ReactElement => {
     return <ScrollView>
-            <View style={themedStyle.containerSetting}>
-              <View style={themedStyle.containerHeaderVoting}>
-                <Text style={{width: '35%'}}>Max Up-Votes</Text>
-                <View style={{width: '65%'}}>
-                  <Slider
-                    style={{width: '77%', height: 40}}
-                    minimumValue={0}
-                    maximumValue={6}
-                    value={votingState.MaxUpVotes}
-                    step={1}
-                    onValueChange={(value)=> sliderMaxUpVotes(value)}
-                    minimumTrackTintColor="#5cdb95"
-                    maximumTrackTintColor="#5cdb95"
-                    thumbTintColor="#5cdb95"
-                  />
-                  <View style={{flexDirection:'row', justifyContent:'space-around', width: '96%', alignSelf:'flex-end'}}>
-                    <Text>0</Text>
-                    <Text>1</Text>
-                    <Text>2</Text>
-                    <Text>3</Text>
-                    <Text>4</Text>
-                    <Text>5</Text>
-                    <Text>Unlimited</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={themedStyle.containerInfoSetting}>
-                {InformationIcon(themedStyle.iconInformation)}
-                <Text style={{width:'90%', height: '100%'}}>Maximum number of 'likes' votes a user is allowed to cast</Text>
-              </View>
+      <View style={themedStyle.containerSetting}>
+        <View style={themedStyle.containerHeaderVoting}>
+          <Text style={{ width: '35%' }}>Max Up-Votes</Text>
+          <View style={{ width: '65%' }}>
+            <Slider
+              style={{ width: '77%', height: 40 }}
+              minimumValue={0}
+              maximumValue={6}
+              value={votingState.MaxUpVotes}
+              step={1}
+              onValueChange={(value) => sliderMaxUpVotes(value)}
+              minimumTrackTintColor="#5cdb95"
+              maximumTrackTintColor="#5cdb95"
+              thumbTintColor="#5cdb95"
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '96%', alignSelf: 'flex-end' }}>
+              <Text>0</Text>
+              <Text>1</Text>
+              <Text>2</Text>
+              <Text>3</Text>
+              <Text>4</Text>
+              <Text>5</Text>
+              <Text>Unlimited</Text>
             </View>
+          </View>
+        </View>
+        <View style={themedStyle.containerInfoSetting}>
+          {InformationIcon(themedStyle.iconInformation)}
+          <Text style={{ width: '90%', height: '100%' }}>Maximum number of 'likes' votes a user is allowed to cast</Text>
+        </View>
+      </View>
 
-            <View style={themedStyle.containerSetting}>
-              <View style={themedStyle.containerHeaderVoting}>
-                <Text style={{width: '35%'}}>Max Down-Votes</Text>
-                <View style={{width: '65%'}}>
-                  <Slider
-                    style={{width: '77%', height: 40}}
-                    minimumValue={0}
-                    maximumValue={6}
-                    value={votingState.MaxDownVotes}
-                    step={1}
-                    onValueChange={(value)=> sliderMaxDownVotes(value)}
-                    minimumTrackTintColor="#5cdb95"
-                    maximumTrackTintColor="#5cdb95"
-                    thumbTintColor="#5cdb95"
-                  />
-                  <View style={{flexDirection:'row', justifyContent:'space-around', width: '96%', alignSelf:'flex-end'}}>
-                    <Text>0</Text>
-                    <Text>1</Text>
-                    <Text>2</Text>
-                    <Text>3</Text>
-                    <Text>4</Text>
-                    <Text>5</Text>
-                    <Text>Unlimited</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={themedStyle.containerInfoSetting}>
-                {InformationIcon(themedStyle.iconInformation)}
-                <Text style={{width:'90%', height: '100%'}}>Maximum number of 'dislikes' votes a user is allowed to cast</Text>
-              </View>
+      <View style={themedStyle.containerSetting}>
+        <View style={themedStyle.containerHeaderVoting}>
+          <Text style={{ width: '35%' }}>Max Down-Votes</Text>
+          <View style={{ width: '65%' }}>
+            <Slider
+              style={{ width: '77%', height: 40 }}
+              minimumValue={0}
+              maximumValue={6}
+              value={votingState.MaxDownVotes}
+              step={1}
+              onValueChange={(value) => sliderMaxDownVotes(value)}
+              minimumTrackTintColor="#5cdb95"
+              maximumTrackTintColor="#5cdb95"
+              thumbTintColor="#5cdb95"
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '96%', alignSelf: 'flex-end' }}>
+              <Text>0</Text>
+              <Text>1</Text>
+              <Text>2</Text>
+              <Text>3</Text>
+              <Text>4</Text>
+              <Text>5</Text>
+              <Text>Unlimited</Text>
             </View>
+          </View>
+        </View>
+        <View style={themedStyle.containerInfoSetting}>
+          {InformationIcon(themedStyle.iconInformation)}
+          <Text style={{ width: '90%', height: '100%' }}>Maximum number of 'dislikes' votes a user is allowed to cast</Text>
+        </View>
+      </View>
 
-            <View style={themedStyle.containerSetting}>
-              <View style={themedStyle.containerHeaderSetting}>
-                <Text>Allow Self Voting</Text>
-                <Switch
-                  trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
-                  thumbColor={votingState.isAllowSelfVoting ? "#05386b" : "#fafafa"}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={toggleSwitchAllowSelfVoting}
-                  value={votingState.isAllowSelfVoting}
-                />
-              </View>
-              <View style={themedStyle.containerInfoSetting}>
-                {InformationIcon(themedStyle.iconInformation)}
-                <Text style={{width:'90%', height: '100%'}}>Whether to allow a user to vote on their own post</Text>
-              </View>
-            </View>
+      <View style={themedStyle.containerSetting}>
+        <View style={themedStyle.containerHeaderSetting}>
+          <Text>Allow Self Voting</Text>
+          <Switch
+            trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
+            thumbColor={votingState.isAllowSelfVoting ? "#05386b" : "#fafafa"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitchAllowSelfVoting}
+            value={votingState.isAllowSelfVoting}
+          />
+        </View>
+        <View style={themedStyle.containerInfoSetting}>
+          {InformationIcon(themedStyle.iconInformation)}
+          <Text style={{ width: '90%', height: '100%' }}>Whether to allow a user to vote on their own post</Text>
+        </View>
+      </View>
 
-            <View style={themedStyle.containerSetting}>
-              <View style={themedStyle.containerHeaderSetting}>
-                <Text>Allow Multiple Votes</Text>
-                <Switch
-                  trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
-                  thumbColor={votingState.isAllowMultiple ? "#05386b" : "#fafafa"}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={toggleSwitchAllowMultiple}
-                  value={votingState.isAllowMultiple}
-                />
-              </View>
-              <View style={themedStyle.containerInfoSetting}>
-                {InformationIcon(themedStyle.iconInformation)}
-                <Text style={{width:'90%', height: '100%'}}>Whether to allow a user to vote multiple times on the same post</Text>
-              </View>
-            </View>
-          </ScrollView>;
+      <View style={themedStyle.containerSetting}>
+        <View style={themedStyle.containerHeaderSetting}>
+          <Text>Allow Multiple Votes</Text>
+          <Switch
+            trackColor={{ false: "#9c9c9c", true: "#7f99b2" }}
+            thumbColor={votingState.isAllowMultiple ? "#05386b" : "#fafafa"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitchAllowMultiple}
+            value={votingState.isAllowMultiple}
+          />
+        </View>
+        <View style={themedStyle.containerInfoSetting}>
+          {InformationIcon(themedStyle.iconInformation)}
+          <Text style={{ width: '90%', height: '100%' }}>Whether to allow a user to vote multiple times on the same post</Text>
+        </View>
+      </View>
+    </ScrollView>;
   };
   // const renderCreateVotingCustomBoard = (): React.ReactElement => {
   //   return (
@@ -915,41 +732,46 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   // }
   const renderCreateVotingCustomBoard = (): React.ReactElement => {
     return (
-        <View style={themedStyle.boxSetting}>
-          <View style={themedStyle.HeaderSetting}> 
-            {CheckedIcon(themedStyle.iconCheckedIcon)}
-            <Text style={{fontSize: pxPhone(15),
-    ...textStyle.proTextBold,}}>
-              Set the rules about likes and dislikes
+      <View style={themedStyle.boxSetting}>
+        <View style={themedStyle.HeaderSetting}>
+          {CheckedIcon(themedStyle.iconCheckedIcon)}
+          <Text style={{
+            fontSize: pxPhone(15),
+            ...textStyle.proTextBold,
+          }}>
+            Set the rules about likes and dislikes
             </Text>
-          </View>
-          {onRenderVotingColumnName()}
-          <TouchableOpacity
-            style={themedStyle.btnCancel}
-            activeOpacity={0.75}
-            onPress={() => setIsShowCreateBoard(false)}>
-            <Text style={themedStyle.txtCancel}>
-              {'Cancel'}
-            </Text>
-          </TouchableOpacity>
         </View>
+        {onRenderVotingColumnName()}
+        <TouchableOpacity
+          style={themedStyle.btnCancel}
+          activeOpacity={0.75}
+          onPress={onDoneCreateBoard}>
+          <Text style={themedStyle.txtCancel}>
+            {'OK'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     )
   }
   // render voting
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    { key: 'first', title: 'Setting' },
-    { key: 'second', title: 'Voting' },
+    { key: 'first', title: 'Template' },
+    { key: 'second', title: 'Setting' },
+    { key: 'three', title: 'Voting' },
   ]);
-  
+
   const renderScene = SceneMap({
-    first: renderCreateSettingCustomBoard,
-    second: renderCreateVotingCustomBoard,
+    first: renderCreateCustomBoard,
+    second: renderCreateSettingCustomBoard,
+    three: renderCreateVotingCustomBoard,
   });
   // tab create custom board
   const renderTabCreateCustomBoard = (): React.ReactElement => {
     return (
       <Modal
+        onBackdropPress={() => setIsShowCreateBoard(false)}
         isVisible={isCreateBoard}
         animationIn='slideInUp'
         animationOut='slideOutDown'
@@ -957,20 +779,21 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         animationOutTiming={1}
         backdropTransitionInTiming={1}
         backdropTransitionOutTiming={1}
-        style={{ alignItems: 'center', justifyContent:'center',height: '70%'}}>
-          <TabView
-            style={{width: '100%', height:'70%'}}
-            navigationState={{ index, routes}}
-            renderScene={renderScene}
-            onIndexChange={(value) => setIndex(value)}
-            lazy={true}
-            swipeEnabled={false}
-          />  
+        style={{ alignItems: 'center', justifyContent: 'center', height: '70%' }}>
+        <TabView
+          style={{ width: '100%', height: '70%' }}
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={(value) => setIndex(value)}
+          lazy={true}
+          swipeEnabled={false}
+        />
       </Modal>
     )
   }
   // tab create custom board
   const onDoneCreateBoard = (): void => {
+    setIsShowCreateBoard(false);
     setIsShowBoardTemplate(false);
     props.onCreateBoard(templateSelected);
   }
@@ -1034,15 +857,28 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   };
   return (
     <View style={themedStyle.container}>
-      <Text style={themedStyle.txtHeader}>Public board</Text>
+      <View style={themedStyle.viewHeader2}>
+        <Text style={themedStyle.txtHeader2}>
+          {'My boards'}
+        </Text>
+      </View>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: pxPhone(20) }}>
+        <Text style={[themedStyle.txtHeader2, { fontSize: pxPhone(18) }]}>
+          {'Public Boards'}
+        </Text>
         {boards.map((item) => {
-          return renderBoard(item);
+          return item.isPublic && renderBoard(item);
+        })}
+        <Text style={[themedStyle.txtHeader2, { fontSize: pxPhone(18), marginTop: pxPhone(40) }]}>
+          {'Team Boards'}
+        </Text>
+        {boards.map((item) => {
+          return !item.isPublic && renderBoard(item);
         })}
       </ScrollView>
       <TouchableOpacity
@@ -1094,54 +930,80 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
-  HeaderSetting:{
-    flexDirection:'row',
+  txtHeader2: {
+    color: theme['color-basic-dark-100'],
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(20),
+    marginLeft: pxPhone(12),
+  },
+  viewHeader2: {
+    flexDirection: 'row',
+    width: '100%',
+    height: pxPhone(50),
+    backgroundColor: theme['color-green-1'],
+    // shadow ios
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 3,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    // shadow android
+    elevation: 8,
+    borderWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: pxPhone(12),
+  },
+  HeaderSetting: {
+    flexDirection: 'row',
     width: '95%',
     backgroundColor: '#bbf4c9', borderRadius: pxPhone(10),
-    marginHorizontal: pxPhone(15), padding:pxPhone(10)
+    marginHorizontal: pxPhone(15), padding: pxPhone(10)
   },
-  containerSetting:{
+  containerSetting: {
     marginTop: pxPhone(5),
-    borderColor: "#b5bdb6", 
+    borderColor: "#b5bdb6",
     borderWidth: 1,
     borderRadius: pxPhone(10),
     marginHorizontal: pxPhone(10),
     height: pxPhone(120)
   },
-  containerHeaderSetting:{
+  containerHeaderSetting: {
     marginHorizontal: pxPhone(10),
-    flexDirection:"row",
-    justifyContent:"space-between",
-    alignItems:"center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: pxPhone(10),
     height: '50%'
   },
-  containerInfoSetting:{
-    flexDirection:"row", 
+  containerInfoSetting: {
+    flexDirection: "row",
     backgroundColor: "#e8f4fd",
     borderBottomEndRadius: pxPhone(10),
-    alignItems:"center",
+    alignItems: "center",
     padding: pxPhone(10),
     height: '50%'
   },
-  iconCheckedIcon:{
+  iconCheckedIcon: {
     marginRight: pxPhone(5),
     width: pxPhone(20),
     height: pxPhone(20),
-    tintColor:"#66b066",
+    tintColor: "#66b066",
     alignSelf: 'center'
   },
   iconInformation: {
     marginRight: pxPhone(5),
     width: pxPhone(20),
     height: pxPhone(20),
-    tintColor:"#35a0f4",
+    tintColor: "#35a0f4",
   },
-  containerHeaderVoting:{
+  containerHeaderVoting: {
     marginLeft: pxPhone(10),
     padding: pxPhone(10),
-    flexDirection:"row",
-    alignItems:"center",
+    flexDirection: "row",
+    alignItems: "center",
     height: '50%'
   },
   txtCancel: {
@@ -1152,7 +1014,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
   hr: {
     marginTop: pxPhone(10),
     height: pxPhone(1),
-    width: pxPhone(285),
+    width: pxPhone(300),
     backgroundColor: '#BDBDBD',
   },
   btnCancel: {
