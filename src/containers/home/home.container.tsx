@@ -25,7 +25,7 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
 
   const onBoardPress = (sessionId: string): void => {
     props.navigation.navigate({
-      routeName: 'Board',
+      routeName: 'DetailBoard',
       params: {
         sessionId,
       }

@@ -15,7 +15,8 @@ import { Actions } from '@src/core/utils/constants';
 import uuid from 'react-native-uuid';
 
 export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
-  const sessionId: string = props.navigation.getParam('sessionId');
+  //const sessionId: string = props.navigation.getParam('sessionId');
+  const sessionId: string = props.route.params.sessionId;
   const { user }: UserState = useSelector((state: AppState) => state.user);
   const { session }: SessionState = useSelector((state: AppState) => state.session);
   const { boards }: HomeState = useSelector((state: AppState) => state.home);

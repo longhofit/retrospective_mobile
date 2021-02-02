@@ -13,6 +13,7 @@ import { SignUpContainer } from '@src/containers/auth/signUp/signUp.container';
 import SignIn from '@src/containers/auth/signIn/signIn.container';
 import { BoardContainer } from '@src/containers/board/board.container';
 import { ForgotPasswordContainer } from '@src/containers/auth/forgotPassword/forgotPassword.container';
+import { DetailBoardContainer } from '@src/containers/DetailBoard/detail-board.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
@@ -21,6 +22,7 @@ const HomeNavigator: NavigationContainer = createStackNavigator(
     ['SignUp']:SignUpContainer,
     ['ForgotPassword']: ForgotPasswordContainer,
     ['Board']:BoardContainer,
+    ['DetailBoard']: DetailBoardContainer,
     
   },
   {
