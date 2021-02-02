@@ -274,56 +274,53 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   };
 
   const convertDateTime = (boardCreated: String): String => {
-    var date = new Date().getDate();
-    var month = new Date().getMonth() + 1;
-    var year = new Date().getFullYear();
-    var hours = new Date().getHours();
-    var min = new Date().getMinutes();
-    var sec = new Date().getSeconds();
-
-
+    var currentDate = new Date();
     var boardCreatedDateTime = new Date(String(boardCreated));
-    var timeZone = boardCreatedDateTime.getTimezoneOffset();
-    // console.log("boardCreatedDateTime:", boardCreatedDateTime);
-    // console.log("datetime:", date + " " + month + " " + year + " " + hours + " " + min + " " + sec);
 
-    const convertYear = year - boardCreatedDateTime.getFullYear();
+    var timeDiff = Math.abs(currentDate.getTime() - boardCreatedDateTime.getTime());
+    var diffDays = Math.ceil(timeDiff/(1000*3600*24));
+    var convertYear : number = (diffDays - 1) / 365;
+    var monthRemainder : number = (diffDays - 1) % 365;
+    var convertMonth : number = monthRemainder / 30;
+    var convertDate : number = monthRemainder % 30;
+
+
+    if (convertYear == 1) {
+      return convertYear + " year ago";
+    }
     if (convertYear > 1) {
       return convertYear + " years ago";
     }
-    if (convertYear > 0) {
-      return convertYear + " year ago";
-    }
 
-    const convertMonth = month - (boardCreatedDateTime.getMonth() + 1);
+    
+    if (convertMonth == 1) {
+      return convertMonth + " month ago";
+    }
     if (convertMonth > 1) {
       return convertMonth + " months ago";
     }
-    if (convertMonth > 0) {
-      return convertMonth + " month ago";
-    }
 
-    const convertDate = date - boardCreatedDateTime.getDate();
+    if (convertDate == 1) {
+      return convertDate + " day ago";
+    }
     if (convertDate > 1) {
       return convertDate + " days ago";
     }
-    if (convertDate > 0) {
-      return convertDate + " day ago";
+
+    const convertHour : number = timeDiff/(1000*3600*24) * 24;
+    if(convertHour >= 2){
+      return parseInt(String(convertHour)) + " hours ago";
     }
-    const convertHour = hours - boardCreatedDateTime.getHours();
-    if (convertHour > 1) {
-      return convertHour + " hours ago";
-    }
-    if (convertHour > 0) {
-      return convertHour + " hour ago";
+    if(convertHour >= 1){
+      return parseInt(String(convertHour)) + " hour ago";
     }
 
-    const convertMin = min - boardCreatedDateTime.getMinutes();
-    if (convertMin > 1) {
-      return convertMin + " minutes ago";
+    const convertMin : number = convertHour * 60;
+    if(convertMin >= 2){
+      return parseInt(String(convertMin)) + " minutes ago";
     }
-    if (convertMin > 0) {
-      return convertMin + " minute ago";
+    if(convertMin >= 1){
+      return parseInt(String(convertMin)) + " minute ago";
     }
     return "less than a minute ago";
   }
