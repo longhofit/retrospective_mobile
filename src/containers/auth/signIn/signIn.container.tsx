@@ -26,7 +26,7 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [signInFormData, setSignInFormData] = useState<SignInFormData>({
-    username: 'minhhien21',
+    username: 'minhhien21hcmus@gmail.com',
     password: '123456',
   });
   const dispatch: Dispatch<any> = useDispatch();

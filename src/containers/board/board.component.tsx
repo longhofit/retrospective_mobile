@@ -232,16 +232,6 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 
   return (
     <React.Fragment>
-      <View style={themedStyle.viewHeader}>
-        <Text style={themedStyle.txtHeader2}>
-          {'My retrospective'}
-        </Text>
-        <TouchableOpacity
-          onPress={() => Clipboard.setString(`http://localhost:3000/game/${props.session.id}`)}
-          activeOpacity={0.75}>
-          {ShareIcon(themedStyle.iconShare)}
-        </TouchableOpacity>
-      </View>
       <FlatList
         data={props.session.columns}
         extraData={props.session.columns}
@@ -256,36 +246,6 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
-  txtHeader2: {
-    color: theme['color-basic-dark-100'],
-    ...textStyle.proTextBold,
-    fontSize: pxPhone(20),
-  },
-  viewHeader: {
-    flexDirection: 'row',
-    width: '100%',
-    height: pxPhone(50),
-    backgroundColor: theme['color-green-1'],
-    // shadow ios
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 3,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 7,
-    // shadow android
-    elevation: 8,
-    borderWidth: 0,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: pxPhone(12),
-  },
-  iconShare: {
-    width: pxToPercentage(20),
-    height: pxToPercentage(20),
-    tintColor: theme['color-basic-light-100'],
-  },
   iconSend: {
     tintColor: theme['color-app'],
     width: pxPhone(22),

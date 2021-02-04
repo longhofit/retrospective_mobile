@@ -1,179 +1,113 @@
 import React, { useState } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, FlatList, Clipboard } from 'react-native';
-import { ShareIcon } from '@src/assets/icons';
+import { View, Text, TouchableOpacity, FlatList, Clipboard , Image} from 'react-native';
+import { ShareIcon, DeleteParticipantsIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
-import { ColumnDefinition, Session } from '@src/core/models/type';
+import { Session, User } from '@src/core/models/type';
 
 interface ComponentProps {
-  session: Session;
+  session: Session,
+  user: User
 }
 
 export type ParticipantsProps = ComponentProps & ThemedComponentProps;
 
 const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props) => {
   const { themedStyle } = props;
-  const [checkEmpty, setCheckEmpty] = useState(true);
-  const renderViewItemCard = (): React.ReactElement => {
+  const [number, setNumber] = useState(1);
+  const renderColumn = (): React.ReactElement => {
     console.log("props.session:",props.session);
+    if(props.session.members != undefined){
     console.log("props.session.members:",props.session.members);
-    console.log("props.session.posts:",props.session.options.isPublic);
-      if(checkEmpty === true){
-          return <View>
-            <Text style={themedStyle.contentCard}>
-                There are no posts to display
-            </Text>
-          </View>
-      }
-  }
-  const renderColumn = (column: ColumnDefinition): React.ReactElement => {
-    setCheckEmpty(true);
     return (
-      <View style={themedStyle.viewCard}>
-        <View style={themedStyle.viewHeaderCard}>
-          <Text style={themedStyle.txtHeader2}>
-            {column.label}
-          </Text>
-        </View>
-        <View style={themedStyle.viewItemCard}>
-        {props.session.posts.map((item, index) => {
-          if (item.column === column.index) {
-            setCheckEmpty(false);
-            return (
-                <Text key={index} style={themedStyle.contentCard}>
-                  {item.content}
-                </Text>
-            );
-          }
+      <View>
+        {props.session.members.map((item, index) => {
+          <View style={themedStyle.viewItemParticipants}>
+            <Text style={{width: '15%', textAlign:'center', alignSelf: 'center'}}>{number}</Text>
+            <View style={{flexDirection: 'row',width:'45%', alignItems:'center', justifyContent:'space-evenly'}}>
+              <Image
+                source={{ uri: `https://www.gravatar.com/avatar/$%7Bmd5(${item.id})%7D?d=retro` }}
+                style={themedStyle.image}
+              />
+              <Text style={{marginHorizontal:pxPhone(5)}}>{item.name}</Text>
+            </View>
+            <Text style={{width: '30%', textAlign:'center', alignSelf: 'center'}}>{item.accountType}</Text>
+            <TouchableOpacity style={{width: '10%', alignItems:'center', alignSelf: 'center'}}>
+              {DeleteParticipantsIcon(themedStyle.iconDelete)}
+            </TouchableOpacity>
+          </View>
         })}
-        {renderViewItemCard()}
-        </View>
       </View>
     );
+    }
   };
 
   const renderOwnerBoard = () : React.ReactElement => {
-      if(props.session.options.isPublic === false){
-          return <View style={{flexDirection: 'row', justifyContent:'space-around'}}>
-              <Text>Number</Text>
-              <Text>Participants</Text>
-              <Text>Account Type</Text>
-              <Text></Text>
+    //console.log("props.session.posts:",props.session.options);
+    console.log("props.user:",props.user);
+    if(props.session.options != undefined)
+    {
+      //setNumber(number + 1);
+      if(props.session.options.isPublic === true){
+        
+          return <View style={themedStyle.viewItemParticipants}>
+              <Text style={{width: '15%', textAlign:'center', alignSelf: 'center'}}>{number}</Text>
+              <View style={{flexDirection: 'row',width:'45%', alignItems:'center', justifyContent:'space-evenly'}}>
+                <Image
+                  source={{ uri: `https://www.gravatar.com/avatar/$%7Bmd5(${props.user.id})%7D?d=retro` }}
+                  style={themedStyle.image}
+                />
+                <Text style={{marginHorizontal:pxPhone(5)}}>{props.user.name}</Text>
+              </View>
+              <Text style={{width: '30%', textAlign:'center', alignSelf: 'center'}}>{props.user.accountType}</Text>
+              
+              <TouchableOpacity style={{width: '10%', alignItems:'center', alignSelf: 'center'}}>
+                {DeleteParticipantsIcon(themedStyle.iconDelete)}
+              </TouchableOpacity>
           </View>
       }
+    }
+    return <View></View>
   }
   return (
     <React.Fragment>
-      <View style={themedStyle.viewHeader}>
-        <Text style={themedStyle.txtHeader}>
-          {'My retrospective'}
-        </Text>
-        <TouchableOpacity
-          onPress={() => Clipboard.setString(`http://localhost:3000/game/${props.session.id}`)}
-          activeOpacity={0.75}>
-          {ShareIcon(themedStyle.iconShare)}
-        </TouchableOpacity>
-      </View>
       <View style={{marginHorizontal: pxPhone(10), marginTop: pxPhone(20)}}>
-          <View style={{flexDirection:'row', justifyContent: 'space-around', borderWidth: 1}}>
-              <Text>Number</Text>
-              <Text>Participants</Text>
-              <Text>Account Type</Text>
-              <Text></Text>
+          <View style={themedStyle.viewHeaderItemParticipants}>
+              <Text style={{width: '15%', textAlign:'center'}}>Number</Text>
+              <Text style={{width: '45%', textAlign:'center'}}>Participants</Text>
+              <Text style={{width: '30%', textAlign:'center'}}>Account Type</Text>
+              <Text style={{width: '10%', textAlign:'center'}}></Text>
           </View>
-          {renderOwnerBoard()};
+          {renderOwnerBoard()}
+          {renderColumn()}
       </View>
-      <FlatList
-        data={props.session.columns}
-        extraData={props.session.columns}
-        renderItem={item => {
-          return renderColumn(item.item);
-        }}>
-      </FlatList>
     </React.Fragment >
   );
 };
 
 export const Participants = withStyles(ParticipantsComponent, (theme: ThemeType) => ({
-    
-    txtHeader: {
-        color: theme['color-basic-dark-100'],
-        ...textStyle.proTextBold,
-        fontSize: pxPhone(20),
+    iconDelete:{
+      width: pxToPercentage(20),
+      height: pxToPercentage(20),
     },
-    txtHeader2: {
-        color: theme['color-basic-light-100'],
-        lineHeight: pxToPercentage(25),
-        ...textStyle.proTextBold,
-    },
-    iconShare: {
-        width: pxToPercentage(20),
-        height: pxToPercentage(20),
-        tintColor: theme['color-basic-light-100'],
-    },
-    viewCard:{
-        marginVertical: pxPhone(10), 
-        marginHorizontal: pxPhone(15),
-        borderRadius: pxToPercentage(9),
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 3,
-          height: 4,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 7,
-        // shadow android
-        elevation: 8,
-        borderWidth: 0,
-    },
-    viewHeaderCard: {
-        borderTopLeftRadius:pxToPercentage(9),
-        borderTopRightRadius:pxToPercentage(9),
-        height: pxToPercentage(40),
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: theme['color-green-1'],
-    },
-    viewItemCard:{
-        borderBottomRightRadius:pxToPercentage(9),
-        borderBottomLeftRadius:pxToPercentage(9),
-        paddingVertical: pxPhone(5),
-        backgroundColor: theme['color-basic-light-100'],
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 3,
-          height: 4,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 7,
-        // shadow android
-        elevation: 8,
-        borderWidth: 0,
-    },
-    contentCard: {
-        paddingLeft:pxPhone(15)
-    },
-    
-    viewHeader: {
+    viewItemParticipants:{
         flexDirection: 'row',
-        width: '100%',
-        height: pxPhone(50),
-        backgroundColor: theme['color-green-1'],
-        // shadow ios
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 3,
-          height: 4,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 7,
-        // shadow android
-        elevation: 8,
-        borderWidth: 0,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: pxPhone(12),
+        borderWidth: 1, 
+        borderTopColor:'white',
     },
+    viewHeaderItemParticipants:{
+        flexDirection:'row', 
+        borderWidth: 1, 
+        paddingHorizontal: pxPhone(5), 
+        justifyContent:'center'
+    },
+    image: {
+      marginRight: pxPhone(5),
+      width: pxPhone(35),
+      height: pxPhone(35),
+      borderRadius: pxPhone(25),
+      backgroundColor: theme['color-purple'],
+    },
+    
 }));

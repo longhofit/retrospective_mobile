@@ -100,6 +100,7 @@ export const ParticipantsContainer: React.FunctionComponent<NavigationInjectedPr
 
   return (
     <Participants
-      session={session} />
+      session={session}
+      user={user} />
   );
 };

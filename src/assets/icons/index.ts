@@ -117,3 +117,11 @@ export const ShareIcon = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const DeleteParticipantsIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/delete-participants.png'),
+  };
+
+  return Icon(source, style);
+};
+
