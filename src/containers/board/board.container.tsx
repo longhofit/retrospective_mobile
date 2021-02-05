@@ -1,6 +1,6 @@
 import { Post, PostGroup, Session } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onUpdatePost } from '@src/core/store/reducer/session/actions';
+import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onSetPlayers, onUpdatePost } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,11 +19,11 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
   const sessionId: string = props.route.params.sessionId;
   const { user }: UserState = useSelector((state: AppState) => state.user);
   const { session }: SessionState = useSelector((state: AppState) => state.session);
+  const { players }: SessionState = useSelector((state: AppState) => state.session);
   const { boards }: HomeState = useSelector((state: AppState) => state.home);
   const dispatch: Dispatch<any> = useDispatch();
   const [socket, setSocket] = useState(null);
   console.log(sessionId);
-
   // socket connection
 
   function sendFactory(socket, sessionId) {
@@ -85,6 +85,10 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       console.log('Delete post: ', post);
       dispatch(onDeletePost(post));
     });
+
+    newSocket.on(Actions.RECEIVE_CLIENT_LIST, (clients: string[]) => {
+      dispatch(onSetPlayers(clients));
+  });
 
     return () => {
       console.log('Attempting disconnection');
@@ -194,6 +198,7 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       onEditPost={onEditPost}
       onDeletePostPress={onDeletePostPress}
       onMovePost={onMovePost}
-      session={session} />
+      session={session} 
+      />
   );
 };

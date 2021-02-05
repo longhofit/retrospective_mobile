@@ -6,6 +6,7 @@ import {
   CLEAR_BOARD,
   EDIT_POST,
   DELETE_POST,
+  SET_PLAYERS,
 } from './types';
 
 const initialState: SessionState = {
@@ -91,6 +92,8 @@ export const sessionReducer = (
           posts: state.session.posts.filter((p) => p.id !== action.payload.id),
         },
       };
+    case SET_PLAYERS:
+      return { ...state, players: action.payload };
     default: {
       return state;
     }

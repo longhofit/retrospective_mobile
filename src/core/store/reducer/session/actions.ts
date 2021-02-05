@@ -9,6 +9,8 @@ import {
   RECEIVE_BOARD,
   RECEIVE_POST,
   UpdatePostAction,
+  SET_PLAYERS,
+  SetPlayersAction,
 } from './types';
 import {Post, Session} from '@src/core/models/type';
 
@@ -33,5 +35,10 @@ export const onUpdatePost = (payload: Post): UpdatePostAction => ({
 
 export const onDeletePost = (payload: Post): DeletePostAction => ({
   type: DELETE_POST,
+  payload,
+});
+
+export const onSetPlayers = (payload: string[]): SetPlayersAction => ({
+  type: SET_PLAYERS,
   payload,
 });

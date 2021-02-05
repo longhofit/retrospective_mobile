@@ -48,9 +48,15 @@ export interface DeletePostAction {
   payload: Post;
 }
 
+export interface SetPlayersAction {
+  type: typeof SET_PLAYERS;
+  payload: string[];
+}
+
 export type SessionActionTypes =
   | ReceivePostAction
   | ReceiveBoardAction
   | ClearBoardAction
   | UpdatePostAction
-  | DeletePostAction;
+  | DeletePostAction
+  | SetPlayersAction;
