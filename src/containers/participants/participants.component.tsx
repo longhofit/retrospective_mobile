@@ -35,6 +35,31 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
       </View>
     );
   };
+  const renderPublicPrivateColumn = (): React.ReactElement => {
+    if(props.session.options != undefined)
+    {
+      //setNumber(number + 1);
+      if(props.session.options.isPublic === true){
+        return <FlatList
+          data={props.players}
+          extraData={props.players}
+          renderItem={item => {
+          return renderColumn(item.item, item.index);
+          }}>
+        </FlatList>
+      }
+      else{
+        return <FlatList
+          data={props.session.members}
+          extraData={props.players}
+          renderItem={item => {
+          return renderColumn(item.item, item.index);
+          }}>
+        </FlatList>
+      }
+    }
+    return <View></View>
+  }
 
   return (
     <React.Fragment>
@@ -45,13 +70,8 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
               <Text style={{width: '30%', textAlign:'center'}}>Account Type</Text>
               <Text style={{width: '10%', textAlign:'center'}}></Text>
           </View>
-          <FlatList
-            data={props.players}
-            extraData={props.players}
-            renderItem={item => {
-            return renderColumn(item.item, item.index);
-          }}>
-      </FlatList>
+
+          {renderPublicPrivateColumn()}
       </View>
     </React.Fragment >
   );
