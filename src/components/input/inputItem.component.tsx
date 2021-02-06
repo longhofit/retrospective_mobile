@@ -125,7 +125,7 @@ export const InputItem = withStyles(InputItemComponent, (theme: ThemeType) => ({
     width: '100%',
   },
   viewTop: {
-    backgroundColor: theme['color-basic-light-100'],
+    backgroundColor: '#F4F4F7',
     position: 'absolute',
     top: -pxToPercentage(12),
     left: pxToPercentage(14),

@@ -8,6 +8,9 @@ import {
   DELETE_POST,
   SET_PLAYERS,
   RECEIVE_VOTE,
+  RECEIVE_POSTGROUP,
+  UPDATE_POST_GROUP,
+  DELETE_POST_GROUP,
 } from './types';
 
 const initialState: SessionState = {
@@ -98,7 +101,7 @@ export const sessionReducer = (
       return {...state, players: action.payload};
 
     case RECEIVE_VOTE:
-      console.log(action.payload)
+      console.log(action.payload);
       if (!state.session) {
         return state;
       }
@@ -124,6 +127,64 @@ export const sessionReducer = (
             },
             ...state.session.posts.slice(postIndex + 1),
           ],
+        },
+      };
+
+    case RECEIVE_POSTGROUP:
+      if (!state.session) {
+        return state;
+      }
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          groups: [...state.session.groups, action.payload],
+        },
+      };
+
+    case UPDATE_POST_GROUP:
+      if (!state.session) {
+        return state;
+      }
+
+      const groupIndex = state.session.groups.findIndex(
+        (g) => g.id === action.payload.id,
+      );
+
+      if (groupIndex === -1) {
+        return state;
+      }
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          groups: [
+            ...state.session.groups.slice(0, groupIndex),
+            action.payload,
+            ...state.session.groups.slice(groupIndex + 1),
+          ],
+        },
+      };
+
+    case DELETE_POST_GROUP:
+      if (!state.session) {
+        return state;
+      }
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          groups: state.session.groups.filter(
+            (g) => g.id !== action.payload.id,
+          ),
+          posts: state.session.posts.map((p) =>
+            p.group && p.group.id === action.payload.id
+              ? {
+                  ...p,
+                  group: null,
+                }
+              : p,
+          ),
         },
       };
 

@@ -1,6 +1,6 @@
-import { Post, PostGroup, Session, Vote, VoteType } from '@src/core/models/type';
+import { ColumnContent, Post, PostGroup, Session, Vote, VoteType } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onReceiveVote, onSetPlayers, onUpdatePost } from '@src/core/store/reducer/session/actions';
+import { onClearBoard, onDeletePost, onDeletePostGroupSuccess, onReceiveBoard, onReceivePost, onReceivePostGroup, onReceiveVote, onSetPlayers, onUpdatePost, onUpdatePostGroup } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -13,12 +13,15 @@ import { onThunkGetPrePublicBoardsReq } from './store/thunk';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
 import uuid from 'react-native-uuid';
+import { getMiddle, getNext } from '@src/core/utils/utils';
+import useColumns from './useColumns';
 
 export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   // const sessionId: string = props.navigation.getParam('sessionId');
   const sessionId: string = props.route.params.sessionId;
   const { user }: UserState = useSelector((state: AppState) => state.user);
   const { session }: SessionState = useSelector((state: AppState) => state.session);
+  const columns = useColumns();
   const { players }: SessionState = useSelector((state: AppState) => state.session);
   const { boards }: HomeState = useSelector((state: AppState) => state.home);
   const dispatch: Dispatch<any> = useDispatch();
@@ -60,6 +63,16 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       dispatch(onReceivePost(post));
     });
 
+    newSocket.on(Actions.RECEIVE_POST_GROUP, (group: PostGroup) => {
+      console.log('Receive new post group: ', group);
+      dispatch(onReceivePostGroup(group));
+    });
+
+    newSocket.on(Actions.RECEIVE_EDIT_POST_GROUP, (group: PostGroup) => {
+      console.log('Receive edit group: ', group);
+      dispatch(onUpdatePostGroup(group));
+    });
+
     newSocket.on('disconnect', () => {
       console.log('Server disconnected');
     });
@@ -84,6 +97,11 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
     newSocket.on(Actions.RECEIVE_DELETE_POST, (post: Post) => {
       console.log('Delete post: ', post);
       dispatch(onDeletePost(post));
+    });
+
+    newSocket.on(Actions.RECEIVE_DELETE_POST_GROUP, (group: PostGroup) => {
+      console.log('Delete post group: ', group);
+      dispatch(onDeletePostGroupSuccess(group));
     });
 
     newSocket.on(Actions.RECEIVE_CLIENT_LIST, (clients: string[]) => {
@@ -144,6 +162,16 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
     [send]
   );
 
+  const onEditPostGroup = useCallback(
+    (group: PostGroup) => {
+      if (send) {
+        dispatch(onUpdatePostGroup(group))
+        send(Actions.EDIT_POST_GROUP, group);
+      }
+    },
+    [onUpdatePostGroup, send]
+  );
+
   const onDeletePostPress = useCallback(
     (post: Post) => {
       if (send) {
@@ -152,6 +180,16 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       }
     },
     [send]
+  );
+
+  const onDeletePostGroup = useCallback(
+    (group: PostGroup) => {
+      if (send) {
+        dispatch(onDeletePostGroupSuccess(group));
+        send(Actions.DELETE_POST_GROUP, group);
+      }
+    },
+    [onDeletePostGroupSuccess, send]
   );
 
   const onMovePost = useCallback(
@@ -233,11 +271,14 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
 
   return (
     <Board
+      columns={columns}
       onAddPost={onAddPost}
       onEditPost={onEditPost}
       onDeletePostPress={onDeletePostPress}
       onMovePost={onMovePost}
       onLike={onLike}
+      onDeletePostGroup={onDeletePostGroup}
+      onEditPostGroup={onEditPostGroup}
       session={session}
     />
   );

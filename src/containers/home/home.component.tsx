@@ -139,7 +139,7 @@ const templateColumn = [
       "allowGrouping": true,
       "allowReordering": true,
       "blurCards": false,
-      "isPublic": false
+      "isPublic": true
     },
     type: 'Start / Stop / Continue',
     columns: [

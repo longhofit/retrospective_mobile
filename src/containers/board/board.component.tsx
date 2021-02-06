@@ -1,26 +1,30 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, createRef } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard } from 'react-native';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard, Group } from 'react-native';
 import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
-import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
+import { getBetween, getMiddle, getNext, getPrevious, pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
 import Modal from 'react-native-modal';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
 import { User } from '@src/core/models/user/user.model';
-import { ColumnDefinition, Post, PostGroup, Session } from '@src/core/models/type';
+import { ColumnContent, ColumnDefinition, Post, PostGroup, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
 import { InputItem } from '@src/components/input/inputItem.component';
 import { alerts } from '@src/core/utils/alerts';
+import { calculateRank, getMovingEntities } from './moving-logic';
 
 interface ComponentProps {
+  columns: ColumnContent[];
   session: Session;
   onAddPost: (columnIndex: number, content: string, rank: string) => void;
   onEditPost: (post: Post) => void;
   onDeletePostPress: (post: Post) => void;
   onLike: (post: Post, like: boolean) => void;
+  onDeletePostGroup: (group: PostGroup) => void;
+  onEditPostGroup: (group: PostGroup) => void;
   onMovePost: (post: Post,
     destinationGroup: PostGroup | null,
     destinationColumn: number,
@@ -35,13 +39,23 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
   const [isShowMove, setIsShowMove] = useState<boolean>(false);
   const [postSelected, setPostSelected] = useState<Post>(undefined);
+  const [groupSelected, setGroupSelected] = useState<PostGroup>(undefined);
+  const [postGroupSelectedContent, setPostGroupSelectedContent] = useState<string>('');
   const [actionIndex, setActionIndex] = useState<string>(undefined);
   const [postSelectedContent, setPostSelectedContent] = useState<string>('');
   const [postActionSelectedContent, setPostActionSelectedContent] = useState<string>('');
   const [desColumnSelected, setDesColumnSelected] = useState<ColumnDefinition>(undefined);
 
-  const onAddPost = (columnIndex: number): void => {
-    props.onAddPost(columnIndex, post, `rank ${post}`);
+
+  const calculateRankForNewPost = (column: ColumnContent): string => {
+    if (column.posts.length) {
+      return getNext(column.posts[column.posts.length - 1].rank);
+    }
+    return getMiddle();
+  };
+
+  const onAddPost = (column: ColumnContent): void => {
+    props.onAddPost(column.index, post, calculateRankForNewPost(column));
     setPost('');
     inputEl2.current.clear();
   };
@@ -128,8 +142,9 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     );
   };
 
-  const onDesColumnSelected = (column: ColumnDefinition): void => {
-    props.onMovePost(postSelected, null, column.index, postSelected.rank);
+  const onDesColumnSelected = (column: ColumnContent): void => {
+    const newRank = calculateRankForNewPost(column);
+    props.onMovePost(postSelected, null, column.index, newRank);
     setIsShowMove(false);
   };
 
@@ -172,7 +187,12 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     setPostActionSelectedContent(post.action);
   };
 
-  const onEditIconPress = (post: Post, index: number): void => {
+  const onGroupFocus = (group: PostGroup): void => {
+    setGroupSelected(group);
+    setPostSelectedContent(group.label);
+  };
+
+  const onEditIconPress = (post: Post): void => {
     setPostSelected(post);
     setPostSelectedContent(post.content);
   };
@@ -188,112 +208,238 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     props.onEditPost(newPost);
   }
 
+  const onPostGroupUnFocus = (): void => {
+    const newPostGroup: PostGroup = {
+      ...groupSelected,
+      label: postGroupSelectedContent,
+    }
+
+
+    props.onEditPostGroup(newPostGroup);
+  }
+
   const inputEl2 = useRef(null);
 
-  const renderColumn = (column: ColumnDefinition): React.ReactElement => {
+  // const renderPost = (group: PostGroup): React.ReactElement => {
+  //   // console.log(group.posts, 'postttt', props.columns[group.column].color)
+  //   group.posts.map((post) => {
+  //     return (
+  //       <React.Fragment>
+
+  //       </React.Fragment>
+  //     );
+  //   })
+  // };
+
+  const renderColumn = (column: ColumnContent): React.ReactElement => {
     return (
       <View style={themedStyle.sectionColumn}>
-        {/* <View style={themedStyle.viewButton}>
-          <Text style={themedStyle.txtSignUp}>
-            {column.label}
-          </Text>
-        </View> */}
         <InputItem
           customRef={inputEl2}
           iconStyle={themedStyle.iconSend}
-          onIconPress={() => onAddPost(column.index)}
+          onIconPress={() => onAddPost(column)}
           icon={SendIcon}
           placeholder={column.label}
           // value={post}
           title={'Post'}
           inputContainerStyle={themedStyle.viewInput}
           onInputTextChange={setPost} />
-        {props.session.posts.map((item, index) => {
-          if (item.column === column.index) {
+        {
+          column.groups.map(group => {
             return (
-              <View style={themedStyle.sectionCard}>
-                <View style={themedStyle.viewContent}>
+              <View style={themedStyle.viewGroup}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: pxPhone(12), marginTop: pxPhone(12), paddingHorizontal: pxPhone(12) }}>
                   <TextInput
                     multiline
-                    style={{ maxWidth: '90%' }}
-                    onChangeText={setPostSelectedContent}
-                    onEndEditing={onPostUnFocus}
-                    onFocus={() => onPostFocus(item)}>
-                    {item.content}
+                    style={{ maxWidth: '85%', fontSize: pxPhone(20), padding: 0, color: 'gray' }}
+                    onChangeText={setPostGroupSelectedContent}
+                    onEndEditing={onPostGroupUnFocus}
+                    onFocus={() => onGroupFocus(group)}>
+                    {group.label}
                   </TextInput>
                   <TouchableOpacity
-                    onPress={() => onEditIconPress(item, index)}
+                    onPress={() => { }}
                     activeOpacity={0.75}>
-                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
+                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(5) })}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flex: 1, alignItems: 'flex-end' }}
+                    onPress={() => { props.onDeletePostGroup(group) }}
+                    activeOpacity={0.75}>
+                    {TrashIcon({ height: pxPhone(20), width: pxPhone(20) })}
                   </TouchableOpacity>
                 </View>
-                {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
-                  <Text style={{ fontSize: pxPhone(13) }}>
-                    {'Action:'}
+                {group.posts.length === 0
+                  ? <View style={{ backgroundColor: '#EBF3FD', padding: pxPhone(20), margin: pxPhone(20), borderRadius: pxPhone(8) }}>
+                    <Text style={themedStyle.txtEmpty}>
+                      {'This is an empty group'}
+                    </Text>
+                    <Text style={themedStyle.txtEmpty2}>
+                      {'Move a post here to fill this group'}
+                    </Text>
+                  </View>
+                  : group.posts.map(item => {
+                    return (
+                      <View style={themedStyle.sectionCard}>
+                        <View style={themedStyle.viewContent}>
+                          <TextInput
+                            multiline
+                            style={{ maxWidth: '90%' }}
+                            onChangeText={setPostSelectedContent}
+                            onEndEditing={onPostUnFocus}
+                            onFocus={() => onPostFocus(item)}>
+                            {item.content}
+                          </TextInput>
+                          <TouchableOpacity
+                            onPress={() => onEditIconPress(item)}
+                            activeOpacity={0.75}>
+                            {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
+                          </TouchableOpacity>
+                        </View>
+                        {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
+                          <Text style={{ fontSize: pxPhone(13) }}>
+                            {'Action:'}
+                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TextInput
+                              multiline
+                              style={{ maxWidth: '90%', padding: 0 }}
+                              onChangeText={setPostActionSelectedContent}
+                              onEndEditing={onPostUnFocus}
+                              onFocus={() => onPostFocus(item)}>
+                              {item.action}
+                            </TextInput>
+                            <TouchableOpacity
+                              onPress={() => onEditIconPress(item)}
+                              activeOpacity={0.75}>
+                              {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                            </TouchableOpacity>
+                          </View>
+                        </View>}
+                        <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
+                          <View style={themedStyle.viewVotes}>
+                            <TouchableOpacity
+                              onPress={() => onVotePress(item, true)}
+                              activeOpacity={0.75}
+                              style={themedStyle.viewVote}>
+                              {LikeIcon(themedStyle.iconLike)}
+                            </TouchableOpacity>
+                            <Text style={themedStyle.txtVote}>
+                              {item.votes.filter(vote => vote.type === 'like').length}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => onVotePress(item, false)}
+                              activeOpacity={0.75}
+                              style={themedStyle.viewVote}>
+                              {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
+                            </TouchableOpacity>
+                            <Text style={themedStyle.txtVote}>
+                              {item.votes.filter(vote => vote.type === 'dislike').length}
+                            </Text>
+                          </View>
+                          <View style={[themedStyle.viewActions]}>
+                            <TouchableOpacity
+                              onPress={() => onDeletePress(item)}
+                              activeOpacity={0.75}>
+                              {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => onActionIconPress(item)}
+                              activeOpacity={0.75}>
+                              {ActionIcon([themedStyle.actionIcon])}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => onMoveIconPress(item)}
+                              activeOpacity={0.75}>
+                              {MoveIcon(themedStyle.actionIcon)}
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </View>
+                    )
+                  })}
+              </View>
+            )
+          })}
+        {column.posts.map((item) => {
+          return (
+            <View style={themedStyle.sectionCard}>
+              <View style={themedStyle.viewContent}>
+                <TextInput
+                  multiline
+                  style={{ maxWidth: '90%' }}
+                  onChangeText={setPostSelectedContent}
+                  onEndEditing={onPostUnFocus}
+                  onFocus={() => onPostFocus(item)}>
+                  {item.content}
+                </TextInput>
+                <TouchableOpacity
+                  onPress={() => onEditIconPress(item)}
+                  activeOpacity={0.75}>
+                  {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
+                </TouchableOpacity>
+              </View>
+              {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
+                <Text style={{ fontSize: pxPhone(13) }}>
+                  {'Action:'}
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TextInput
+                    multiline
+                    style={{ maxWidth: '90%', padding: 0 }}
+                    onChangeText={setPostActionSelectedContent}
+                    onEndEditing={onPostUnFocus}
+                    onFocus={() => onPostFocus(item)}>
+                    {item.action}
+                  </TextInput>
+                  <TouchableOpacity
+                    onPress={() => onEditIconPress(item)}
+                    activeOpacity={0.75}>
+                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                  </TouchableOpacity>
+                </View>
+              </View>}
+              <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
+                <View style={themedStyle.viewVotes}>
+                  <TouchableOpacity
+                    onPress={() => onVotePress(item, true)}
+                    activeOpacity={0.75}
+                    style={themedStyle.viewVote}>
+                    {LikeIcon(themedStyle.iconLike)}
+                  </TouchableOpacity>
+                  <Text style={themedStyle.txtVote}>
+                    {item.votes.filter(vote => vote.type === 'like').length}
                   </Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput
-                      multiline
-                      style={{ maxWidth: '90%', padding: 0 }}
-                      onChangeText={setPostActionSelectedContent}
-                      onEndEditing={onPostUnFocus}
-                      onFocus={() => onPostFocus(item)}>
-                      {item.action}
-                    </TextInput>
-                    <TouchableOpacity
-                      onPress={() => onEditIconPress(item, index)}
-                      activeOpacity={0.75}>
-                      {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
-                    </TouchableOpacity>
-                  </View>
-                </View>}
-                <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
-                  <View style={themedStyle.viewVotes}>
-                    <TouchableOpacity
-                      onPress={() => onVotePress(item, true)}
-                      activeOpacity={0.75}
-                      style={themedStyle.viewVote}>
-                      {LikeIcon(themedStyle.iconLike)}
-                    </TouchableOpacity>
-                    <Text style={themedStyle.txtVote}>
-                      {item.votes.filter(vote => vote.type === 'like').length}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => onVotePress(item, false)}
-                      activeOpacity={0.75}
-                      style={themedStyle.viewVote}>
-                      {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
-                    </TouchableOpacity>
-                    <Text style={themedStyle.txtVote}>
-                      {item.votes.filter(vote => vote.type === 'dislike').length}
-                    </Text>
-                  </View>
-                  <View style={[themedStyle.viewActions]}>
-                    <TouchableOpacity
-                      onPress={() => onDeletePress(item)}
-                      activeOpacity={0.75}>
-                      {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => onActionIconPress(item)}
-                      activeOpacity={0.75}>
-                      {ActionIcon([themedStyle.actionIcon])}
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => onMoveIconPress(item)}
-                      activeOpacity={0.75}>
-                      {MoveIcon(themedStyle.actionIcon)}
-                    </TouchableOpacity>
-                    {/* <TouchableOpacity
-                      onPress={() => onEditPress(item)}
-                      activeOpacity={0.75}>
-                      {EditIcon(themedStyle.actionIcon)}
-                    </TouchableOpacity> */}
-                  </View>
+                  <TouchableOpacity
+                    onPress={() => onVotePress(item, false)}
+                    activeOpacity={0.75}
+                    style={themedStyle.viewVote}>
+                    {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
+                  </TouchableOpacity>
+                  <Text style={themedStyle.txtVote}>
+                    {item.votes.filter(vote => vote.type === 'dislike').length}
+                  </Text>
+                </View>
+                <View style={[themedStyle.viewActions]}>
+                  <TouchableOpacity
+                    onPress={() => onDeletePress(item)}
+                    activeOpacity={0.75}>
+                    {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onActionIconPress(item)}
+                    activeOpacity={0.75}>
+                    {ActionIcon([themedStyle.actionIcon])}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onMoveIconPress(item)}
+                    activeOpacity={0.75}>
+                    {MoveIcon(themedStyle.actionIcon)}
+                  </TouchableOpacity>
                 </View>
               </View>
-            );
-          }
+            </View>
+          )
         })}
       </View>
     );
@@ -306,8 +452,8 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 
   const onRenderColumnName = (): React.ReactElement => {
     return <FlatList
-      data={props.session.columns.filter(item => { if (postSelected) { return item.index !== postSelected.column } else return false })}
-      extraData={props.session.columns.filter(item => { if (postSelected) { return item.index !== postSelected.column } else return false })}
+      data={props.columns}
+      extraData={props.columns}
       showsVerticalScrollIndicator={false}
       keyExtractor={(item, index) => index.toString()}
       renderItem={({ item }) => (
@@ -329,26 +475,43 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   return (
     <React.Fragment>
       <FlatList
-        data={props.session.columns}
-        extraData={props.session.columns}
-        renderItem={item => {
-          return renderColumn(item.item);
+        data={props.columns}
+        extraData={props.columns}
+        renderItem={({ item, index }) => {
+          return renderColumn(item);
         }}>
       </FlatList>
-      { renderEditCard()}
-      { renderSelectComlumnModal()}
+      {renderEditCard()}
+      {renderSelectComlumnModal()}
     </React.Fragment >
   );
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
+  txtEmpty: {
+    ...textStyle.proDisplayBold,
+  },
+  txtEmpty2: {
+    ...textStyle.proDisplayRegular,
+  },
+  txtGroupName: {
+    fontSize: pxPhone(20),
+    color: 'red',
+  },
+  viewGroup: {
+    marginTop: pxPhone(10),
+    borderColor: 'gray',
+    borderWidth: pxPhone(1),
+    borderStyle: 'dashed',
+    borderRadius: pxPhone(5),
+    padding: pxPhone(3),
+  },
   sectionColumn: {
     paddingVertical: pxPhone(12),
     paddingHorizontal: pxPhone(25),
     margin: pxPhone(12),
-    borderWidth: pxPhone(1),
     borderRadius: pxPhone(8),
-    borderColor: theme['color-gray-300'],
+    backgroundColor: '#F4F4F7',
   },
   viewContent: {
     flexDirection: 'row',

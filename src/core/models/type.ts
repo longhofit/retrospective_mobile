@@ -56,6 +56,19 @@ export interface Rankable {
   rank: string;
 }
 
+export interface ColumnSettings {
+  color: string;
+  label: string;
+  icon: IconName | null;
+  type: ColumnDefinitionType;
+}
+
+export interface ColumnContent extends ColumnSettings {
+  index: number;
+  posts: Post[];
+  groups: PostGroup[];
+}
+
 export interface PostContainer extends Entity {
   posts: Post[];
 }

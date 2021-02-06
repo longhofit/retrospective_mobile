@@ -1,4 +1,4 @@
-import {Post, Session} from '@src/core/models/type';
+import {Post, PostGroup, Session} from '@src/core/models/type';
 import {User} from '@src/core/models/user/user.model';
 
 export interface SessionState {
@@ -23,6 +23,7 @@ export const EDIT_OPTIONS = 'retrospected/game/options/edit';
 export const EDIT_COLUMNS = 'retrospected/game/columns/edit';
 export const CLEAR_BOARD = 'CLEAR_BOARD';
 export const EDIT_POST = 'EDIT_POST';
+export const RECEIVE_POSTGROUP = 'RECEIVE_POSTGROUP';
 
 export interface ReceivePostAction {
   type: typeof RECEIVE_POST;
@@ -58,6 +59,21 @@ export interface SetVoteAction {
   payload: any;
 }
 
+export interface ReceivePostGroupAction {
+  type: typeof RECEIVE_POSTGROUP;
+  payload: PostGroup;
+}
+
+export interface UpdatePostGroupAction {
+  type: typeof UPDATE_POST_GROUP;
+  payload: PostGroup;
+}
+
+export interface DeletePostGroupAction {
+  type: typeof DELETE_POST_GROUP;
+  payload: PostGroup;
+}
+
 export type SessionActionTypes =
   | ReceivePostAction
   | ReceiveBoardAction
@@ -65,4 +81,7 @@ export type SessionActionTypes =
   | UpdatePostAction
   | DeletePostAction
   | SetPlayersAction
-  | SetVoteAction;
+  | SetVoteAction
+  | ReceivePostGroupAction
+  | UpdatePostGroupAction
+  | DeletePostGroupAction;
