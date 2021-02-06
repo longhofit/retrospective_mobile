@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, createRef } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard } from 'react-native';
-import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2 } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -20,6 +20,7 @@ interface ComponentProps {
   onAddPost: (columnIndex: number, content: string, rank: string) => void;
   onEditPost: (post: Post) => void;
   onDeletePostPress: (post: Post) => void;
+  onLike: (post: Post, like: boolean) => void;
   onMovePost: (post: Post,
     destinationGroup: PostGroup | null,
     destinationColumn: number,
@@ -35,12 +36,13 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const [isShowMove, setIsShowMove] = useState<boolean>(false);
   const [postSelected, setPostSelected] = useState<Post>(undefined);
   const [postSelectedContent, setPostSelectedContent] = useState<string>('');
+  const [postActionSelectedContent, setPostActionSelectedContent] = useState<string>('');
   const [desColumnSelected, setDesColumnSelected] = useState<ColumnDefinition>(undefined);
 
-
   const onAddPost = (columnIndex: number): void => {
-    props.onAddPost(columnIndex, post, `ranh ${post}`);
+    props.onAddPost(columnIndex, post, `rank ${post}`);
     setPost('');
+    inputEl2.current.clear();
   };
 
   const onCancelAddPress = (): void => {
@@ -59,7 +61,6 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
       content: postSelectedContent,
     }
 
-    console.log(newPost);
     props.onEditPost(newPost);
     setIsShowAdd(false);
   };
@@ -154,6 +155,34 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     )
   };
 
+  const onVotePress = (post: Post, like: boolean): void => {
+    props.onLike(post, like);
+  };
+
+  const onPostFocus = (post: Post): void => {
+    setPostSelected(post);
+    setPostSelectedContent(post.content);
+    setPostActionSelectedContent(post.action);
+  };
+
+  const onEditIconPress = (post: Post, index: number): void => {
+    setPostSelected(post);
+    setPostSelectedContent(post.content);
+  };
+
+  const onPostUnFocus = (): void => {
+    const newPost: Post = {
+      ...postSelected,
+      content: postSelectedContent,
+      action: postActionSelectedContent,
+    }
+
+
+    props.onEditPost(newPost);
+  }
+
+  const inputEl2 = useRef(null);
+
   const renderColumn = (column: ColumnDefinition): React.ReactElement => {
     return (
       <View style={{ paddingVertical: pxPhone(12), paddingHorizontal: pxPhone(25) }}>
@@ -163,10 +192,11 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
           </Text>
         </View>
         <InputItem
+          customRef={inputEl2}
           iconStyle={themedStyle.iconSend}
           onIconPress={() => onAddPost(column.index)}
           icon={SendIcon}
-          placeholder={'Add new post'}
+          placeholder={column.label}
           // value={post}
           title={'Post'}
           inputContainerStyle={themedStyle.viewInput}
@@ -174,26 +204,80 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
         {props.session.posts.map((item, index) => {
           if (item.column === column.index) {
             return (
-              <View style={themedStyle.card2}>
-                <Text key={index}>
-                  {item.content}
-                </Text>
-                <View style={themedStyle.viewActions}>
+              <View style={themedStyle.sectionCard}>
+                <View style={themedStyle.viewContent}>
+                  <TextInput
+                    multiline
+                    style={{ maxWidth: '90%' }}
+                    onChangeText={setPostSelectedContent}
+                    onEndEditing={onPostUnFocus}
+                    onFocus={() => onPostFocus(item)}>
+                    {item.content}
+                  </TextInput>
                   <TouchableOpacity
-                    onPress={() => onDeletePress(item)}
+                    onPress={() => onEditIconPress(item, index)}
                     activeOpacity={0.75}>
-                    {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onMoveIconPress(item)}
-                    activeOpacity={0.75}>
-                    {MoveIcon(themedStyle.actionIcon)}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onEditPress(item)}
-                    activeOpacity={0.75}>
-                    {EditIcon(themedStyle.actionIcon)}
-                  </TouchableOpacity>
+                </View>
+                {item.action && <View style={themedStyle.viewAction}>
+                  <Text style={{ fontSize: pxPhone(13) }}>
+                    {'Action:'}
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                      multiline
+                      style={{ maxWidth: '90%', padding: 0 }}
+                      onChangeText={setPostActionSelectedContent}
+                      onEndEditing={onPostUnFocus}
+                      onFocus={() => onPostFocus(item)}>
+                      {item.action}
+                    </TextInput>
+                    <TouchableOpacity
+                      onPress={() => onEditIconPress(item, index)}
+                      activeOpacity={0.75}>
+                      {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                    </TouchableOpacity>
+                  </View>
+                </View>}
+                <View style={themedStyle.card2}>
+                  <View style={themedStyle.viewVotes}>
+                    <TouchableOpacity
+                      onPress={() => onVotePress(item, true)}
+                      activeOpacity={0.75}
+                      style={themedStyle.viewVote}>
+                      {LikeIcon(themedStyle.iconLike)}
+                    </TouchableOpacity>
+                    <Text style={themedStyle.txtVote}>
+                      {item.votes.filter(vote => vote.type === 'like').length}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => onVotePress(item, false)}
+                      activeOpacity={0.75}
+                      style={themedStyle.viewVote}>
+                      {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
+                    </TouchableOpacity>
+                    <Text style={themedStyle.txtVote}>
+                      {item.votes.filter(vote => vote.type === 'dislike').length}
+                    </Text>
+                  </View>
+                  <View style={themedStyle.viewActions}>
+                    <TouchableOpacity
+                      onPress={() => onDeletePress(item)}
+                      activeOpacity={0.75}>
+                      {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => onMoveIconPress(item)}
+                      activeOpacity={0.75}>
+                      {MoveIcon(themedStyle.actionIcon)}
+                    </TouchableOpacity>
+                    {/* <TouchableOpacity
+                      onPress={() => onEditPress(item)}
+                      activeOpacity={0.75}>
+                      {EditIcon(themedStyle.actionIcon)}
+                    </TouchableOpacity> */}
+                  </View>
                 </View>
               </View>
             );
@@ -246,6 +330,37 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
+  viewContent: {
+    flexDirection: 'row',
+    paddingLeft: pxPhone(13),
+    alignItems: 'center',
+  },
+  viewAction: {
+    padding: pxPhone(16),
+    backgroundColor: theme['color-gray-1600'],
+  },
+  txtVote: {
+    ...textStyle.proDisplayRegular,
+    left: pxPhone(-5),
+  },
+  viewVote: {
+  },
+  iconLike: {
+    width: pxPhone(22),
+    height: pxPhone(22),
+    tintColor: theme['color-green-3'],
+    top: pxPhone(-3),
+  },
+  iconDisLike: {
+    tintColor: 'red',
+  },
+  viewVotes: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: pxPhone(80),
+    height: pxPhone(25),
+    alignItems: 'center',
+  },
   iconSend: {
     tintColor: theme['color-app'],
     width: pxPhone(22),
@@ -294,7 +409,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
   },
   viewActions: {
     flexDirection: 'row',
-    width: pxPhone(80),
+    width: pxPhone(50),
     justifyContent: 'space-between',
   },
   actionIcon: {
@@ -402,12 +517,8 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     elevation: 8,
     borderWidth: 0,
   },
-  card2: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: pxToPercentage(5),
-    paddingHorizontal: pxToPercentage(15),
-    paddingVertical: pxToPercentage(15),
+  sectionCard: {
+    marginTop: pxToPercentage(15),
     borderRadius: pxToPercentage(3),
     backgroundColor: theme['color-basic-light-100'],
     // shadow ios
@@ -421,6 +532,15 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     // shadow android
     elevation: 8,
     borderWidth: 0,
+  },
+  card2: {
+    height: pxPhone(40),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderRadius: pxToPercentage(3),
+    backgroundColor: theme['color-green-2'],
+    alignItems: 'center',
+    padding: pxPhone(15),
   },
   viewIcon: {
     position: 'absolute',

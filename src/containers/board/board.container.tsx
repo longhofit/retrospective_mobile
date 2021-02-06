@@ -1,6 +1,6 @@
-import { Post, PostGroup, Session } from '@src/core/models/type';
+import { Post, PostGroup, Session, Vote, VoteType } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onSetPlayers, onUpdatePost } from '@src/core/store/reducer/session/actions';
+import { onClearBoard, onDeletePost, onReceiveBoard, onReceivePost, onReceiveVote, onSetPlayers, onUpdatePost } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,7 +15,7 @@ import { Actions } from '@src/core/utils/constants';
 import uuid from 'react-native-uuid';
 
 export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
-  //const sessionId: string = props.navigation.getParam('sessionId');
+  // const sessionId: string = props.navigation.getParam('sessionId');
   const sessionId: string = props.route.params.sessionId;
   const { user }: UserState = useSelector((state: AppState) => state.user);
   const { session }: SessionState = useSelector((state: AppState) => state.session);
@@ -88,7 +88,15 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
 
     newSocket.on(Actions.RECEIVE_CLIENT_LIST, (clients: string[]) => {
       dispatch(onSetPlayers(clients));
-  });
+    });
+
+    newSocket.on(
+      Actions.RECEIVE_LIKE,
+      ({ postId, vote }: { postId: string; vote: Vote }) => {
+        console.log('Receive vote: ', postId, vote);
+        dispatch(onReceiveVote({ postId, vote }));
+      }
+    );
 
     return () => {
       console.log('Attempting disconnection');
@@ -148,26 +156,57 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
 
   const onMovePost = useCallback(
     (
-        post: Post,
-        destinationGroup: PostGroup | null,
-        destinationColumn: number,
-        newRank: string
+      post: Post,
+      destinationGroup: PostGroup | null,
+      destinationColumn: number,
+      newRank: string
     ) => {
-        if (send) {
-            const updatedPost: Post = {
-                ...post,
-                column: destinationColumn,
-                group: destinationGroup,
-                rank: newRank,
-            };
-            dispatch(onUpdatePost(updatedPost));
-            send(Actions.EDIT_POST, {
-                post: updatedPost,
-            });
-        }
+      if (send) {
+        const updatedPost: Post = {
+          ...post,
+          column: destinationColumn,
+          group: destinationGroup,
+          rank: newRank,
+        };
+        dispatch(onUpdatePost(updatedPost));
+        send(Actions.EDIT_POST, {
+          post: updatedPost,
+        });
+      }
     },
     [send]
-);
+  );
+
+  const onLike = useCallback(
+    (post: Post, like: boolean) => {
+      if (send) {
+        const type: VoteType = like ? 'like' : 'dislike';
+        const existingVote: Vote = post.votes.find(item => item.type === type && item.user.id === user!.id)
+        // if (existingVote && !allowMultipleVotes) {
+        //   return;
+        // }
+        if (existingVote) {
+          return;
+        }
+
+        const vote: Vote = {
+          id: uuid.v4(),
+          type,
+          user: user!,
+        };
+        const modifiedPost: Post = {
+          ...post,
+          votes: [...post.votes, vote],
+        };
+        dispatch(onUpdatePost(modifiedPost));
+        send(Actions.LIKE_SUCCESS, {
+          type,
+          post,
+        });
+      }
+    },
+    [user, send, onUpdatePost]
+  );
 
   const onBackPress = (): void => {
     props.navigation.goBack();
@@ -198,7 +237,8 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       onEditPost={onEditPost}
       onDeletePostPress={onDeletePostPress}
       onMovePost={onMovePost}
-      session={session} 
-      />
+      onLike={onLike}
+      session={session}
+    />
   );
 };

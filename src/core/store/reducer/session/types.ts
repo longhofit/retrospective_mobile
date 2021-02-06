@@ -53,10 +53,16 @@ export interface SetPlayersAction {
   payload: string[];
 }
 
+export interface SetVoteAction {
+  type: typeof RECEIVE_VOTE;
+  payload: any;
+}
+
 export type SessionActionTypes =
   | ReceivePostAction
   | ReceiveBoardAction
   | ClearBoardAction
   | UpdatePostAction
   | DeletePostAction
-  | SetPlayersAction;
+  | SetPlayersAction
+  | SetVoteAction;

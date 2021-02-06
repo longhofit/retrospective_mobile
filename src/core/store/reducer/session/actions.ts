@@ -11,6 +11,8 @@ import {
   UpdatePostAction,
   SET_PLAYERS,
   SetPlayersAction,
+  SetVoteAction,
+  RECEIVE_VOTE,
 } from './types';
 import {Post, Session} from '@src/core/models/type';
 
@@ -40,5 +42,10 @@ export const onDeletePost = (payload: Post): DeletePostAction => ({
 
 export const onSetPlayers = (payload: string[]): SetPlayersAction => ({
   type: SET_PLAYERS,
+  payload,
+});
+
+export const onReceiveVote = (payload: any): SetVoteAction => ({
+  type: RECEIVE_VOTE,
   payload,
 });

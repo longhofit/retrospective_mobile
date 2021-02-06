@@ -27,6 +27,7 @@ interface ComponentProps extends TextInputProps {
   iconStyle?: StyleProp<ImageStyle>;
   onIconPress?: () => void;
   title?: string;
+  customRef?: React.LegacyRef<TextInput>;
 }
 
 export type InputItemProps = ThemedComponentProps & ComponentProps;
@@ -83,6 +84,7 @@ const InputItemComponent: React.FunctionComponent<InputItemProps> = (props) => {
       )}
       <View style={themedStyle.viewBottom}>
         <TextInput
+          ref={props.customRef}
           onFocus={onFocus}
           onEndEditing={() => setIsFocus(false)}
           autoCapitalize='none'

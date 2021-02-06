@@ -125,3 +125,27 @@ export const DeleteParticipantsIcon = (style: StyleProp<ImageStyle>): IconElemen
   return Icon(source, style);
 };
 
+export const LikeIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/like.png'),
+  };
+
+  return Icon(source, style);
+};
+
+export const DislikeIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/dislike.png'),
+  };
+
+  return Icon(source, style);
+};
+
+export const EditIcon2 = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/edit2.png'),
+  };
+
+  return Icon(source, style);
+};
+

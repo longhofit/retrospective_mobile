@@ -7,6 +7,7 @@ import {
   EDIT_POST,
   DELETE_POST,
   SET_PLAYERS,
+  RECEIVE_VOTE,
 } from './types';
 
 const initialState: SessionState = {
@@ -81,7 +82,7 @@ export const sessionReducer = (
       };
 
     case DELETE_POST:
-      console.log(action.payload)
+      console.log(action.payload);
       if (!state.session) {
         return state;
       }
@@ -92,8 +93,40 @@ export const sessionReducer = (
           posts: state.session.posts.filter((p) => p.id !== action.payload.id),
         },
       };
+
     case SET_PLAYERS:
-      return { ...state, players: action.payload };
+      return {...state, players: action.payload};
+
+    case RECEIVE_VOTE:
+      console.log(action.payload)
+      if (!state.session) {
+        return state;
+      }
+
+      const postIndex: number = state.session.posts.findIndex(
+        (item) => item.id === action.payload.postId,
+      );
+      const post = state.session.posts[postIndex];
+
+      if (!post) {
+        return state;
+      }
+
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          posts: [
+            ...state.session.posts.slice(0, postIndex),
+            {
+              ...post,
+              votes: [...post.votes, action.payload.vote],
+            },
+            ...state.session.posts.slice(postIndex + 1),
+          ],
+        },
+      };
+
     default: {
       return state;
     }

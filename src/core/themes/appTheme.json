@@ -24,6 +24,7 @@
   "color-gray-1400": "rgba(142, 142, 147, 0.12)",
   "color-gray-1500": "rgba(138, 138, 142, 1)",
   "color-gray-1600": "rgba(239, 239, 244, 0.7)",
+  "color-gray-1700": "#F4F4F4",
   "color-basic-100": "rgba(178, 0, 0, 1)",
   "color-basic-200": "rgba(255, 255, 255, 0.4)",
   "color-basic-300": "rgba(255, 255, 255, 0.6)",
@@ -93,5 +94,7 @@
   "color-basic-news-header-icon-400": "rgba(0, 122, 255, 1)",
   "color-basic-news-header-icon-500": "rgba(191, 90, 242, 1)",
   "color-grey-1":"#585858",
-  "color-green-1":"#8FDA97"
+  "color-green-1":"#8FDA97",
+  "color-green-2":"#EBF4E9",
+  "color-green-3":"#507C3A",
 }
