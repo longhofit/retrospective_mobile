@@ -109,7 +109,7 @@ const InputItemComponent: React.FunctionComponent<InputItemProps> = (props) => {
 
 export const InputItem = withStyles(InputItemComponent, (theme: ThemeType) => ({
   iconFocus: {
-    tintColor: theme['color-app'],
+    tintColor: theme['color-green-1'],
   },
   container: {
     justifyContent: 'center',
@@ -149,10 +149,10 @@ export const InputItem = withStyles(InputItemComponent, (theme: ThemeType) => ({
     tintColor: theme['color-basic-dark-800'],
   },
   focusBorder: {
-    borderColor: theme['color-app'],
+    borderColor: theme['color-green-1'],
   },
   focusTitle: {
-    color: theme['color-app'],
+    color: theme['color-green-1'],
   },
   txtTitle: {
     fontSize: pxToPercentage(13),

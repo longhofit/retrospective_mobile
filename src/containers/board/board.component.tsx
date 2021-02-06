@@ -192,12 +192,12 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 
   const renderColumn = (column: ColumnDefinition): React.ReactElement => {
     return (
-      <View style={{ paddingVertical: pxPhone(12), paddingHorizontal: pxPhone(25) }}>
-        <View style={themedStyle.viewButton}>
+      <View style={themedStyle.sectionColumn}>
+        {/* <View style={themedStyle.viewButton}>
           <Text style={themedStyle.txtSignUp}>
             {column.label}
           </Text>
-        </View>
+        </View> */}
         <InputItem
           customRef={inputEl2}
           iconStyle={themedStyle.iconSend}
@@ -247,7 +247,7 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                     </TouchableOpacity>
                   </View>
                 </View>}
-                <View style={themedStyle.card2}>
+                <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
                   <View style={themedStyle.viewVotes}>
                     <TouchableOpacity
                       onPress={() => onVotePress(item, true)}
@@ -268,7 +268,7 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                       {item.votes.filter(vote => vote.type === 'dislike').length}
                     </Text>
                   </View>
-                  <View style={themedStyle.viewActions}>
+                  <View style={[themedStyle.viewActions]}>
                     <TouchableOpacity
                       onPress={() => onDeletePress(item)}
                       activeOpacity={0.75}>
@@ -342,6 +342,14 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
+  sectionColumn: {
+    paddingVertical: pxPhone(12),
+    paddingHorizontal: pxPhone(25),
+    margin: pxPhone(12),
+    borderWidth: pxPhone(1),
+    borderRadius: pxPhone(8),
+    borderColor: theme['color-gray-300'],
+  },
   viewContent: {
     flexDirection: 'row',
     paddingLeft: pxPhone(13),
@@ -374,7 +382,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     alignItems: 'center',
   },
   iconSend: {
-    tintColor: theme['color-app'],
+    tintColor: theme['color-green-1'],
     width: pxPhone(22),
     height: pxPhone(22),
   },
