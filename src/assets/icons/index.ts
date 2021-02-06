@@ -149,3 +149,10 @@ export const EditIcon2 = (style: StyleProp<ImageStyle>): IconElement => {
   return Icon(source, style);
 };
 
+export const ActionIcon = (style: StyleProp<ImageStyle>): IconElement => {
+  const source: IconSource = {
+    imageSource: require('./other/action.png'),
+  };
+
+  return Icon(source, style);
+};

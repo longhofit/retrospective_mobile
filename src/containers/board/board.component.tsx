@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, createRef } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard } from 'react-native';
-import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2 } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { BoardRepository } from 'react-native-draganddrop-board';
@@ -35,6 +35,7 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
   const [isShowMove, setIsShowMove] = useState<boolean>(false);
   const [postSelected, setPostSelected] = useState<Post>(undefined);
+  const [actionIndex, setActionIndex] = useState<string>(undefined);
   const [postSelectedContent, setPostSelectedContent] = useState<string>('');
   const [postActionSelectedContent, setPostActionSelectedContent] = useState<string>('');
   const [desColumnSelected, setDesColumnSelected] = useState<ColumnDefinition>(undefined);
@@ -49,16 +50,11 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     setIsShowAdd(false);
   };
 
-  const onEditPress = (post: Post): void => {
-    setPostSelected(post);
-    setPostSelectedContent(post.content);
-    setIsShowAdd(true);
-  };
-
   const onOkPress = (): void => {
     const newPost: Post = {
       ...postSelected,
       content: postSelectedContent,
+      action: postActionSelectedContent,
     }
 
     props.onEditPost(newPost);
@@ -81,6 +77,17 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
     })
   };
 
+  const onActionIconPress = (post: Post): void => {
+    setPostSelected(post);
+    setPostSelectedContent(post.content);
+    if (post.action) {
+      setPostActionSelectedContent(post.action);
+    } else {
+      setPostActionSelectedContent('');
+    }
+    setIsShowAdd(true);
+  };
+
   const renderEditCard = (): React.ReactElement => {
     return (
       <Modal
@@ -94,15 +101,15 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
         style={{ margin: 0, paddingHorizontal: pxToPercentage(37) }}>
         <View style={themedStyle.sectionAddNotifications}>
           <Text style={themedStyle.txtAddNotificationsModal}>
-            {'Enter post'}
+            {'Enter action'}
           </Text>
           <TextInput
             textAlignVertical="top"
             style={themedStyle.inputNote}
             autoFocus
             multiline
-            value={postSelectedContent}
-            onChangeText={(text) => setPostSelectedContent(text)}
+            value={postActionSelectedContent}
+            onChangeText={(text) => setPostActionSelectedContent(text)}
           />
           <View style={themedStyle.viewAddNotificationsBottom2}>
             <TouchableOpacity activeOpacity={0.75} onPress={onCancelAddPress}>
@@ -220,7 +227,7 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                     {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
                   </TouchableOpacity>
                 </View>
-                {item.action && <View style={themedStyle.viewAction}>
+                {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
                   <Text style={{ fontSize: pxPhone(13) }}>
                     {'Action:'}
                   </Text>
@@ -266,6 +273,11 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                       onPress={() => onDeletePress(item)}
                       activeOpacity={0.75}>
                       {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => onActionIconPress(item)}
+                      activeOpacity={0.75}>
+                      {ActionIcon([themedStyle.actionIcon])}
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => onMoveIconPress(item)}
@@ -409,7 +421,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
   },
   viewActions: {
     flexDirection: 'row',
-    width: pxPhone(50),
+    width: pxPhone(80),
     justifyContent: 'space-between',
   },
   actionIcon: {
