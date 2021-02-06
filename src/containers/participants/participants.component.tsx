@@ -21,7 +21,7 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
     return (
       <View style={themedStyle.viewItemParticipants}>
         <Text style={{width: '15%', textAlign:'center', alignSelf: 'center'}}>{index + 1}</Text>
-        <View style={{flexDirection: 'row',width:'45%', alignItems: 'center'}}>
+        <View style={{flexDirection: 'row',width:'45%'}}>
           <Image
             source={{ uri: `https://www.gravatar.com/avatar/$%7Bmd5(${item})%7D?d=retro` }}
             style={themedStyle.image}
