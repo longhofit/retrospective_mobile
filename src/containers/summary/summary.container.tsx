@@ -11,11 +11,13 @@ import { Summary } from './summary.component';
 import { HomeState } from './store/reducer/types';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
+import useColumns from '../board/useColumns';
 
 export const SummaryContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   //const sessionId: string = props.navigation.getParam('sessionId');
   const sessionId: string = props.route.params.sessionId;
   const { session }: SessionState = useSelector((state: AppState) => state.session);
+  const columns = useColumns();
   const dispatch: Dispatch<any> = useDispatch();
 
 
@@ -25,6 +27,7 @@ export const SummaryContainer: React.FunctionComponent<NavigationInjectedProps> 
 
   return (
     <Summary
-      session={session} />
+      session={session} 
+      columns={columns}/>
   );
 };

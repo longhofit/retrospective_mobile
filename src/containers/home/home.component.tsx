@@ -435,7 +435,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         setSettingState({ ...settingState, isAllowGrouping: !settingState.isAllowGrouping });
         break;
       case 6:
-        setSettingState({ ...settingState, isAllowGiphy: true });
+        setSettingState({ ...settingState, isAllowGiphy: !settingState.isAllowGiphy });
         break;
     }
   };
