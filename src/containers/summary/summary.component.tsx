@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, FlatList, Clipboard } from 'react-native';
 import { ShareIcon } from '@src/assets/icons';
@@ -15,6 +15,7 @@ export type SummaryProps = ComponentProps & ThemedComponentProps;
 const SummaryComponent: React.FunctionComponent<SummaryProps> = (props) => {
   const { themedStyle } = props;
   const [checkEmpty, setCheckEmpty] = useState(true);
+  //console.log("props.session.posts:", props.session.posts[0].votes[0]);
   const renderViewItemCard = (): React.ReactElement => {
       if(checkEmpty === true){
           return <View>
@@ -23,6 +24,26 @@ const SummaryComponent: React.FunctionComponent<SummaryProps> = (props) => {
             </Text>
           </View>
       }
+  }
+  const renderLikeDisLike = (itemVote): React.ReactElement => {
+    var getLikes = 0;
+    var getDisLikes = 0;
+    itemVote.map(item => {
+      console.log("item:", item);
+      if(item.type === 'like'){
+        getLikes = getLikes + 1;
+      }else{
+        getDisLikes = getDisLikes + 1;
+      }
+    })
+    return <View style={{flexDirection: 'row'}}>
+      <Text style={themedStyle.likeCard}>
+        + {getLikes}
+      </Text>
+      <Text style={themedStyle.dislikeCard}>
+        - {getDisLikes}
+      </Text>
+    </View>
   }
   const renderColumn = (column: ColumnDefinition): React.ReactElement => {
     //setCheckEmpty(true);
@@ -38,9 +59,12 @@ const SummaryComponent: React.FunctionComponent<SummaryProps> = (props) => {
           if (item.column === column.index) {
             setCheckEmpty(false);
             return (
+              <View style={{flexDirection: 'row'}}>
+                {renderLikeDisLike(item.votes)}
                 <Text key={index} style={themedStyle.contentCard}>
                   {item.content}
                 </Text>
+              </View>
             );
           }
         })}
@@ -111,7 +135,15 @@ export const Summary = withStyles(SummaryComponent, (theme: ThemeType) => ({
         borderWidth: 0,
     },
     contentCard: {
-        paddingLeft:pxPhone(15)
+        paddingLeft:pxPhone(10)
+    },
+    likeCard: {
+      paddingLeft:pxPhone(10),
+      color:'green',
+    },
+    dislikeCard: {
+      paddingLeft:pxPhone(10),
+      color:'red',
     },
 
 }));

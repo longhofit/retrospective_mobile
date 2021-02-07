@@ -63,7 +63,7 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
 
   return (
     <React.Fragment>
-      <View style={{marginHorizontal: pxPhone(10), marginTop: pxPhone(20)}}>
+      <View style={themedStyle.container}>
           <View style={themedStyle.viewHeaderItemParticipants}>
               <Text style={{width: '15%', textAlign:'center'}}>Number</Text>
               <Text style={{width: '45%'}}>Participants</Text>
@@ -82,14 +82,43 @@ export const Participants = withStyles(ParticipantsComponent, (theme: ThemeType)
       width: pxToPercentage(20),
       height: pxToPercentage(20),
     },
+    container:{
+      marginHorizontal: pxPhone(10), 
+      marginTop: pxPhone(20),
+      borderBottomRightRadius:pxToPercentage(9),
+      borderBottomLeftRadius:pxToPercentage(9),
+      paddingVertical: pxPhone(5),
+      backgroundColor: theme['color-basic-light-100'],
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 3,
+        height: 4,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 7,
+      // shadow android
+      elevation: 8,
+      borderWidth: 0,
+    },
     viewItemParticipants:{
-        flexDirection: 'row',
-        borderWidth: 1, 
-        borderTopColor:'white',
+      flexDirection: 'row',
+      borderBottomRightRadius:pxToPercentage(9),
+      borderBottomLeftRadius:pxToPercentage(9),
+      paddingVertical: pxPhone(5),
+      backgroundColor: theme['color-basic-light-100'],
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 3,
+        height: 4,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 7,
+      // shadow android
+      elevation: 8,
+      borderWidth: 0,
     },
     viewHeaderItemParticipants:{
         flexDirection:'row', 
-        borderWidth: 1, 
         paddingHorizontal: pxPhone(5), 
         justifyContent:'center'
     },
