@@ -11,7 +11,7 @@ import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
 import { useDispatch, useSelector } from 'react-redux';
-import { onThunkDeleteBoardReq } from './store/thunk';
+import { onThunkDeleteBoardReq, onThunkGetPrePrivateBoardsReq } from './store/thunk';
 import { Dispatch } from 'redux';
 import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 import uuid from 'react-native-uuid';
@@ -717,7 +717,8 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         animationOutTiming={1}
         backdropTransitionInTiming={1}
         backdropTransitionOutTiming={1}
-        style={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+
+        style={{ alignItems: 'center', justifyContent: 'center', height: '100%', margin: 0 }}>
         <TabView
           style={{ width: '100%', height: '100%' }}
           navigationState={{ index, routes }}
@@ -795,6 +796,10 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       onGetBoardSuccess,
       onGetBoardError,
     ));
+    dispatch(onThunkGetPrePrivateBoardsReq(
+      onGetBoardSuccess,
+      onGetBoardError,
+    ));
     wait(500).then(() => setRefreshing(false));
   };
   return (
@@ -829,42 +834,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         style={themedStyle.viewAdd}>
         {AddIcon(themedStyle.iconAdd)}
       </TouchableOpacity>
-
-      {/* <View style={themedStyle.viewHeader}>
-        <View style={{
-          marginTop: pxToPercentage(40), justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'row',
-        }}>
-          <TouchableOpacity
-            style={themedStyle.viewIcon}
-            onPress={props.onBackPress}
-            activeOpacity={0.75}>
-            {EvaArrowIcon(themedStyle.icon)}
-          </TouchableOpacity>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={themedStyle.txtHeader}>
-              {'Home'}
-            </Text>
-          </View>
-        </View>
-      </View>
-      {/* <Text style={themedStyle.txtHome}>
-      </Text> */}
-      {/* <Board
-        boardRepository={boardRepositoryFake}
-        open={onItemPress}
-        onDragEnd={(srcColumnId, destColumnId, draggedItem) => { }}
-        cardContent={(item) => renderCard(item)}
-      />
-      <TouchableOpacity
-        onPress={onIconAddPress}
-        activeOpacity={0.75}
-        style={themedStyle.viewAdd}>
-        {AddIcon(themedStyle.iconAdd)}
-      </TouchableOpacity>
-      {renderPicker()}
-      {renderAddCard()}  */}
       {renderTabCreateCustomBoard()}
       {renderBoardTemplate()}
     </View>
@@ -989,9 +958,6 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     textAlign: 'center',
   },
   boxSetting: {
-    borderBottomLeftRadius: pxPhone(10),
-    borderBottomRightRadius: pxPhone(10),
-    borderRadius: pxPhone(10),
     width: '100%',
     height: '100%',
     paddingTop: pxPhone(15),

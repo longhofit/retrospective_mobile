@@ -1,4 +1,4 @@
-import {Post, PostGroup, Session} from '@src/core/models/type';
+import {Post, PostGroup, Session, SessionOptions} from '@src/core/models/type';
 import {User} from '@src/core/models/user/user.model';
 
 export interface SessionState {
@@ -74,6 +74,11 @@ export interface DeletePostGroupAction {
   payload: PostGroup;
 }
 
+export interface EditOptionsAction {
+  type: typeof EDIT_OPTIONS;
+  payload: SessionOptions;
+}
+
 export type SessionActionTypes =
   | ReceivePostAction
   | ReceiveBoardAction
@@ -84,4 +89,5 @@ export type SessionActionTypes =
   | SetVoteAction
   | ReceivePostGroupAction
   | UpdatePostGroupAction
-  | DeletePostGroupAction;
+  | DeletePostGroupAction
+  | EditOptionsAction;

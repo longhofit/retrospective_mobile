@@ -20,8 +20,10 @@ import {
   UPDATE_POST_GROUP,
   DeletePostGroupAction,
   DELETE_POST_GROUP,
+  EDIT_OPTIONS,
+  EditOptionsAction,
 } from './types';
-import {Post, PostGroup, Session} from '@src/core/models/type';
+import {Post, PostGroup, Session, SessionOptions} from '@src/core/models/type';
 
 export const onReceivePost = (payload: Post): ReceivePostAction => ({
   type: RECEIVE_POST,
@@ -69,5 +71,10 @@ export const onUpdatePostGroup = (payload: PostGroup): UpdatePostGroupAction => 
 
 export const onDeletePostGroupSuccess = (payload: PostGroup): DeletePostGroupAction => ({
   type: DELETE_POST_GROUP,
+  payload,
+});
+
+export const onReceiveOptions = (payload: SessionOptions): EditOptionsAction => ({
+  type: EDIT_OPTIONS,
   payload,
 });

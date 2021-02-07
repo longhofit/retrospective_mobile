@@ -11,6 +11,7 @@ import {
   RECEIVE_POSTGROUP,
   UPDATE_POST_GROUP,
   DELETE_POST_GROUP,
+  EDIT_OPTIONS,
 } from './types';
 
 const initialState: SessionState = {
@@ -185,6 +186,18 @@ export const sessionReducer = (
                 }
               : p,
           ),
+        },
+      };
+
+    case EDIT_OPTIONS:
+      if (!state.session) {
+        return state;
+      }
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          options: action.payload,
         },
       };
 

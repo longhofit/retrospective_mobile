@@ -1,6 +1,6 @@
-import { ColumnContent, Post, PostGroup, Session, Vote, VoteType } from '@src/core/models/type';
+import { ColumnContent, Post, PostGroup, Session, SessionOptions, Vote, VoteType } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onClearBoard, onDeletePost, onDeletePostGroupSuccess, onReceiveBoard, onReceivePost, onReceivePostGroup, onReceiveVote, onSetPlayers, onUpdatePost, onUpdatePostGroup } from '@src/core/store/reducer/session/actions';
+import { onClearBoard, onDeletePost, onDeletePostGroupSuccess, onReceiveBoard, onReceiveOptions, onReceivePost, onReceivePostGroup, onReceiveVote, onSetPlayers, onUpdatePost, onUpdatePostGroup } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -115,6 +115,11 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
         dispatch(onReceiveVote({ postId, vote }));
       }
     );
+
+    newSocket.on(Actions.RECEIVE_OPTIONS, (options: SessionOptions) => {
+      console.log('Receive updated options: ', options);
+      dispatch(onReceiveOptions(options))
+    });
 
     return () => {
       console.log('Attempting disconnection');
