@@ -2,9 +2,9 @@ import React from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, FlatList, ScrollView } from 'react-native';
 import { textStyle } from '@src/components/textStyle';
-import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import { ColumnContent, Session } from '@src/core/models/type';
 import { ActionIcon } from '@src/assets/icons';
+import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 
 interface ComponentProps {
   columns: ColumnContent[];
