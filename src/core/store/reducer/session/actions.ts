@@ -22,6 +22,8 @@ import {
   DELETE_POST_GROUP,
   EDIT_OPTIONS,
   EditOptionsAction,
+  RenameSessionAction,
+  RENAME_SESSION,
 } from './types';
 import {Post, PostGroup, Session, SessionOptions} from '@src/core/models/type';
 
@@ -76,5 +78,10 @@ export const onDeletePostGroupSuccess = (payload: PostGroup): DeletePostGroupAct
 
 export const onReceiveOptions = (payload: SessionOptions): EditOptionsAction => ({
   type: EDIT_OPTIONS,
+  payload,
+});
+
+export const onRenameSession = (payload: string): RenameSessionAction => ({
+  type: RENAME_SESSION,
   payload,
 });

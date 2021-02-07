@@ -7,11 +7,13 @@ import { SessionState } from '@src/core/store/reducer/session/types';
 import { useDispatch, useSelector } from 'react-redux';
 export const DetailBoardContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const sessionId: string = props.navigation.getParam('sessionId');
+  const name: string = props.navigation.getParam('name');
   const { session }: SessionState = useSelector((state: AppState) => state.session);
-  console.log(sessionId);
+  console.log(name);
   return (
-    <DetailBoard 
-    sessionId = {sessionId}
-    session = {session}/>
+    <DetailBoard
+      onBack={() => props.navigation.goBack()}
+      sessionId={sessionId}
+      session={session} />
   );
 };
