@@ -262,11 +262,8 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   };
 
   const onColumnNameChange = (text: string, columnIndex: number): void => {
-    // setSignInFormData({ ...signInFormData, password });
     let newColumns = templateSelected.columns;
     newColumns[columnIndex].label = text;
-
-    console.log(newColumns)
 
     setTemplateSelected({ ...templateSelected, columns: newColumns })
 
@@ -293,25 +290,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       )}
     />;
   };
-
-  // const onRenderColumnTemplate = (): React.ReactElement => {
-  //   return <FlatList
-  //     data={templateSelected.columns}
-  //     extraData={templateSelected.columns}
-  //     showsVerticalScrollIndicator={false}
-  //     keyExtractor={(item, index) => index.toString()}
-  //     renderItem={({ item, index }) => (
-  //       <React.Fragment>
-  //         <View style={themedStyle.hr} />
-  //         <TextInput
-  //           onChangeText={text => onColumnNameChange(text, item.index)}
-  //           value={item.label}
-  //           style={{ marginTop: pxPhone(5) }}>
-  //         </TextInput>
-  //       </React.Fragment>
-  //     )}
-  //   />;
-  // };
 
   const renderTemplatePicker = (): React.ReactElement => {
     return (
@@ -390,11 +368,16 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         {/* {onRenderColumnName()} */}
         {renderTemplatePicker()}
         {onRenderColumnTemplate()}
-        <View style={{ flexDirection: 'row', bottom: pxPhone(10) }}>
+        <View style={{ flexDirection: 'row', padding: pxPhone(12) }}>
           <TouchableOpacity
-            style={[{ borderRadius: pxPhone(8), padding: pxPhone(12) }]}
+            style={[{ borderRadius: pxPhone(8), padding: pxPhone(10) }]}
             activeOpacity={0.75}
-            onPress={() => setIsShowCreateBoard(false)}>
+            onPress={() => {
+              setIsShowCreateBoard(false);
+              setTemplateSelected(templateColumn[0]);
+              setSettingState(initSettingState);
+              setVotingState(initVotingState);
+            }}>
             <Text style={themedStyle.txtStart}>
               {'CANCEL'}
             </Text>
@@ -405,7 +388,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             style={{
               backgroundColor: themes["App Theme"]['color-green-1'],
               borderRadius: pxPhone(8),
-              padding: pxPhone(12),
+              padding: pxPhone(10),
               marginLeft: pxPhone(5),
               // shadow ios
               shadowColor: '#000',
@@ -435,7 +418,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     switch (index) {
       case 0:
         setSettingState({ ...settingState, isPrivateBoard: !settingState.isPrivateBoard });
-        setTemplateSelected({ ...templateSelected, options: { ...templateSelected.options, isPublic: !settingState.isPrivateBoard } });
         break;
       case 1:
         setSettingState({ ...settingState, isBlurCards: !settingState.isBlurCards });
@@ -484,34 +466,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       )}
     />;
   };
-  // const renderCreateSettingCustomBoard = (): React.ReactElement => {
-  //   return (
-  //     <Modal
-  //       isVisible={isCreateBoard}
-  //       animationIn='slideInUp'
-  //       animationOut='slideOutDown'
-  //       animationInTiming={1}
-  //       animationOutTiming={1}
-  //       backdropTransitionInTiming={1}
-  //       backdropTransitionOutTiming={1}
-  //       style={{ alignItems: 'center' }}>
-  //       <View style={themedStyle.boxSetting}>
-  //         <Text style={themedStyle.txtNote}>
-  //           {'Post setting'}
-  //         </Text>
-  //         {onRenderSettingColumnName()}
-  //         <TouchableOpacity
-  //           style={themedStyle.btnCancel}
-  //           activeOpacity={0.75}
-  //           onPress={() => setIsShowCreateBoard(false)}>
-  //           <Text style={themedStyle.txtCancel}>
-  //             {'Cancel'}
-  //           </Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </Modal>
-  //   )
-  // }
   const renderCreateSettingCustomBoard = (): React.ReactElement => {
     return (
       <View style={themedStyle.boxSetting}>
@@ -525,14 +479,45 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             </Text>
         </View>
         {onRenderSettingColumnName()}
-        <TouchableOpacity
-          style={themedStyle.btnCancel}
-          activeOpacity={0.75}
-          onPress={onDoneCreateBoard}>
-          <Text style={themedStyle.txtCancel}>
-            {'OK'}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', padding: pxPhone(12) }}>
+          <TouchableOpacity
+            style={[{ borderRadius: pxPhone(8), padding: pxPhone(10) }]}
+            activeOpacity={0.75}
+            onPress={() => {
+              setIsShowCreateBoard(false);
+              setTemplateSelected(templateColumn[0]);
+              setSettingState(initSettingState);
+              setVotingState(initVotingState);
+            }}>
+            <Text style={themedStyle.txtStart}>
+              {'CANCEL'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onDoneCreateBoard}
+            activeOpacity={0.75}
+            style={{
+              backgroundColor: themes["App Theme"]['color-green-1'],
+              borderRadius: pxPhone(8),
+              padding: pxPhone(10),
+              marginLeft: pxPhone(5),
+              // shadow ios
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 3,
+                height: 4,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 7,
+              // shadow android
+              elevation: 8,
+              borderWidth: 0,
+            }}>
+            <Text style={themedStyle.txtStart}>
+              {'START THE SESSION'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     )
   }
@@ -644,34 +629,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       </View>
     </ScrollView>;
   };
-  // const renderCreateVotingCustomBoard = (): React.ReactElement => {
-  //   return (
-  //     <Modal
-  //       isVisible={isCreateBoard}
-  //       animationIn='slideInUp'
-  //       animationOut='slideOutDown'
-  //       animationInTiming={1}
-  //       animationOutTiming={1}
-  //       backdropTransitionInTiming={1}
-  //       backdropTransitionOutTiming={1}
-  //       style={{ alignItems: 'center'}}>
-  //       <View style={themedStyle.boxSetting}>
-  //         <Text style={themedStyle.txtNote}>
-  //           {'Voting'}
-  //         </Text>
-  //         {onRenderVotingColumnName()}
-  //         <TouchableOpacity
-  //           style={themedStyle.btnCancel}
-  //           activeOpacity={0.75}
-  //           onPress={() => setIsShowCreateBoard(false)}>
-  //           <Text style={themedStyle.txtCancel}>
-  //             {'Cancel'}
-  //           </Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </Modal>
-  //   )
-  // }
   const renderCreateVotingCustomBoard = (): React.ReactElement => {
     return (
       <View style={themedStyle.boxSetting}>
@@ -685,14 +642,45 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
             </Text>
         </View>
         {onRenderVotingColumnName()}
-        <TouchableOpacity
-          style={themedStyle.btnCancel}
-          activeOpacity={0.75}
-          onPress={onDoneCreateBoard}>
-          <Text style={themedStyle.txtCancel}>
-            {'OK'}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', padding: pxPhone(12) }}>
+          <TouchableOpacity
+            style={[{ borderRadius: pxPhone(8), padding: pxPhone(10) }]}
+            activeOpacity={0.75}
+            onPress={() => {
+              setIsShowCreateBoard(false);
+              setTemplateSelected(templateColumn[0]);
+              setSettingState(initSettingState);
+              setVotingState(initVotingState);
+            }}>
+            <Text style={themedStyle.txtStart}>
+              {'CANCEL'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onDoneCreateBoard}
+            activeOpacity={0.75}
+            style={{
+              backgroundColor: themes["App Theme"]['color-green-1'],
+              borderRadius: pxPhone(8),
+              padding: pxPhone(10),
+              marginLeft: pxPhone(5),
+              // shadow ios
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 3,
+                height: 4,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 7,
+              // shadow android
+              elevation: 8,
+              borderWidth: 0,
+            }}>
+            <Text style={themedStyle.txtStart}>
+              {'START THE SESSION'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     )
   }
@@ -729,9 +717,9 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         animationOutTiming={1}
         backdropTransitionInTiming={1}
         backdropTransitionOutTiming={1}
-        style={{ alignItems: 'center', justifyContent: 'center', height: '70%' }}>
+        style={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <TabView
-          style={{ width: '100%', height: '70%' }}
+          style={{ width: '100%', height: '100%' }}
           navigationState={{ index, routes }}
           renderScene={renderScene}
           onIndexChange={(value) => setIndex(value)}
@@ -745,7 +733,11 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const onDoneCreateBoard = (): void => {
     setIsShowCreateBoard(false);
     setIsShowBoardTemplate(false);
-    props.onCreateBoard(templateSelected);
+    const templateData = { ...templateSelected, options: { ...templateSelected.options, isPublic: !settingState.isPrivateBoard } };
+    props.onCreateBoard(templateData);
+    setTemplateSelected(templateColumn[0]);
+    setSettingState(initSettingState);
+    setVotingState(initVotingState);
   }
 
   const renderBoardTemplate = (): React.ReactElement => {
