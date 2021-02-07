@@ -28,6 +28,7 @@ interface ComponentProps extends TextInputProps {
   onIconPress?: () => void;
   title?: string;
   customRef?: React.LegacyRef<TextInput>;
+  titleColor?: StyleProp<ImageStyle>;
 }
 
 export type InputItemProps = ThemedComponentProps & ComponentProps;
@@ -73,7 +74,7 @@ const InputItemComponent: React.FunctionComponent<InputItemProps> = (props) => {
         isFocus && themedStyle.focusBorder,
       ]}>
       {isShowTitle && (
-        <View style={themedStyle.viewTop}>
+        <View style={[themedStyle.viewTop, props.titleColor]}>
           <Text style={[
             themedStyle.txtTitle,
             isFocus && themedStyle.focusTitle,

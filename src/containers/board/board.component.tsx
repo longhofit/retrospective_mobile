@@ -3,12 +3,13 @@ import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard, Group } from 'react-native';
 import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
-import {getMiddle, getNext, pxPhone, pxToPercentage } from '@src/core/utils/utils';
+import { getMiddle, getNext, pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import Modal from 'react-native-modal';
 import { ColumnContent, ColumnDefinition, Post, PostGroup, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { InputItem } from '@src/components/input/inputItem.component';
 import { alerts } from '@src/core/utils/alerts';
+import { themes } from '@src/core/themes';
 
 interface ComponentProps {
   columns: ColumnContent[];
@@ -216,6 +217,33 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const renderColumn = (column: ColumnContent): React.ReactElement => {
     return (
       <View style={themedStyle.sectionColumn}>
+        {/* {column.index === 0 && (
+          <View style={{
+            marginTop: pxPhone(10),
+            marginLeft: pxPhone(10),
+            width: pxPhone(125),
+            height: pxPhone(40),
+            backgroundColor: '#8FDA97',
+            justifyContent: 'center',
+            alignItems: 'center',
+            // shadow ios
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 3,
+              height: 4,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 7,
+            // shadow android
+            elevation: 8,
+            borderWidth: 0,
+            borderRadius: pxPhone(8),
+          }}>
+            <Text style={themedStyle.txtCustomise}>
+              {'CUSTOMISE'}
+            </Text>
+          </View>
+        )} */}
         <InputItem
           customRef={inputEl2}
           iconStyle={themedStyle.iconSend}
@@ -262,11 +290,14 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                   </View>
                   : group.posts.map(item => {
                     return (
-                      <View style={themedStyle.sectionCard}>
+                      <View style={[
+                        themedStyle.sectionCard,
+                        props.session.options.blurCards && item.user.id !== props.session.createdBy.id && { opacity: 0.1 },
+                      ]}>
                         <View style={themedStyle.viewContent}>
                           <TextInput
                             multiline
-                            style={{ maxWidth: '90%' }}
+                            style={{ maxWidth: '50%' }}
                             onChangeText={setPostSelectedContent}
                             onEndEditing={onPostUnFocus}
                             onFocus={() => onPostFocus(item)}>
@@ -277,6 +308,13 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                             activeOpacity={0.75}>
                             {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
                           </TouchableOpacity>
+                          {props.session.options.allowAuthorVisible && (
+                            <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: pxPhone(12) }}>
+                              <Text style={{ fontSize: pxPhone(12) }}>
+                                {`by ${item.user.name}`}
+                              </Text>
+                            </View>
+                          )}
                         </View>
                         {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
                           <Text style={{ fontSize: pxPhone(13) }}>
@@ -319,17 +357,19 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                               {item.votes.filter(vote => vote.type === 'dislike').length}
                             </Text>
                           </View>
-                          <View style={[themedStyle.viewActions]}>
+                          <View style={[themedStyle.viewActions, !props.session.options.allowActions && { width: pxPhone(50) }]}>
                             <TouchableOpacity
                               onPress={() => onDeletePress(item)}
                               activeOpacity={0.75}>
                               {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
                             </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={() => onActionIconPress(item)}
-                              activeOpacity={0.75}>
-                              {ActionIcon([themedStyle.actionIcon])}
-                            </TouchableOpacity>
+                            {props.session.options.allowActions && (
+                              <TouchableOpacity
+                                onPress={() => onActionIconPress(item)}
+                                activeOpacity={0.75}>
+                                {ActionIcon([themedStyle.actionIcon])}
+                              </TouchableOpacity>
+                            )}
                             <TouchableOpacity
                               onPress={() => onMoveIconPress(item)}
                               activeOpacity={0.75}>
@@ -345,11 +385,14 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
           })}
         {column.posts.map((item) => {
           return (
-            <View style={themedStyle.sectionCard}>
+            <View style={[
+              themedStyle.sectionCard,
+              props.session.options.blurCards && item.user.id !== props.session.createdBy.id && { opacity: 0.1 },
+            ]}>
               <View style={themedStyle.viewContent}>
                 <TextInput
                   multiline
-                  style={{ maxWidth: '90%' }}
+                  style={{ maxWidth: '50%' }}
                   onChangeText={setPostSelectedContent}
                   onEndEditing={onPostUnFocus}
                   onFocus={() => onPostFocus(item)}>
@@ -360,6 +403,13 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                   activeOpacity={0.75}>
                   {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
                 </TouchableOpacity>
+                {props.session.options.allowAuthorVisible && (
+                  <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: pxPhone(12) }}>
+                    <Text style={{ fontSize: pxPhone(12) }}>
+                      {`by ${item.user.name}`}
+                    </Text>
+                  </View>
+                )}
               </View>
               {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
                 <Text style={{ fontSize: pxPhone(13) }}>
@@ -402,17 +452,19 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
                     {item.votes.filter(vote => vote.type === 'dislike').length}
                   </Text>
                 </View>
-                <View style={[themedStyle.viewActions]}>
+                <View style={[themedStyle.viewActions, !props.session.options.allowActions && { width: pxPhone(50) }]}>
                   <TouchableOpacity
                     onPress={() => onDeletePress(item)}
                     activeOpacity={0.75}>
                     {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onActionIconPress(item)}
-                    activeOpacity={0.75}>
-                    {ActionIcon([themedStyle.actionIcon])}
-                  </TouchableOpacity>
+                  {props.session.options.allowActions && (
+                    <TouchableOpacity
+                      onPress={() => onActionIconPress(item)}
+                      activeOpacity={0.75}>
+                      {ActionIcon([themedStyle.actionIcon])}
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity
                     onPress={() => onMoveIconPress(item)}
                     activeOpacity={0.75}>
@@ -470,6 +522,10 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 };
 
 export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
+  txtCustomise: {
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(14.5),
+  },
   txtEmpty: {
     ...textStyle.proDisplayBold,
   },
@@ -527,7 +583,6 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     alignItems: 'center',
   },
   iconSend: {
-
     width: pxPhone(22),
     height: pxPhone(22),
   },

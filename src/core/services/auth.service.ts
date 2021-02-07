@@ -11,6 +11,10 @@ export default class AuthService extends ApiService {
     return this.apiPost<User>('/auth/session/signin', data, null, false);
   }
 
+  public anoSignIn(data: SignInReq) {
+    return this.apiPost<User>('/auth/anonymous/login', data, null, false);
+  }
+
   public signUp(data: SignUpReq) {
     return this.apiPost<ApiResult>('/auth/sign-up', data, null, false);
   }

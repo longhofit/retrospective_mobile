@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList, Switch, KeyboardAvoidingView } from 'react-native';
-import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon, CheckedIcon, EditIcon2 } from '@src/assets/icons';
+import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon, CheckedIcon, EditIcon2, SendIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import Modal from 'react-native-modal';
@@ -18,6 +18,7 @@ import uuid from 'react-native-uuid';
 import Slider from '@react-native-community/slider'
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { themes } from '@src/core/themes';
+import { InputItem } from '@src/components/input/inputItem.component';
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
   onCreateBoard: (data) => void;
@@ -72,6 +73,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const [isShowBoardTemplate, setIsShowBoardTemplate] = useState<boolean>(false);
   const [settingState, setSettingState] = useState<FormSettingState>(initSettingState);
   const [votingState, setVotingState] = useState<FormVotingState>(initVotingState);
+  const [url, setUrl] = useState<string>('');
   const templateColumnSetting = [
     {
       header: 'Private Board',
@@ -802,6 +804,15 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     ));
     wait(500).then(() => setRefreshing(false));
   };
+
+  const onGoToSession = (): void => {
+    console.log(url);
+    const id: string = url.split('/')[url.split('/').length - 1];
+    console.log(id);
+    props.onBoardPress(id);
+  };
+
+
   return (
     <View style={themedStyle.container}>
       <View style={themedStyle.viewHeader2}>
@@ -809,6 +820,16 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
           {'My boards'}
         </Text>
       </View>
+      <InputItem
+        iconStyle={themedStyle.iconSend}
+        onIconPress={onGoToSession}
+        icon={SendIcon}
+        placeholder={'Go to session url..'}
+        // value={post}
+        title={'URL'}
+        titleColor={{ backgroundColor: 'white' }}
+        inputContainerStyle={themedStyle.viewInput}
+        onInputTextChange={setUrl} />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -841,6 +862,16 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  viewInput: {
+    marginTop: pxPhone(15),
+    height: pxToPercentage(40),
+    width: '90%',
+    alignSelf: 'center',
+  },
+  iconSend: {
+    width: pxPhone(22),
+    height: pxPhone(22),
+  },
   txtStart: {
     ...textStyle.proTextBold,
     fontSize: pxPhone(13),

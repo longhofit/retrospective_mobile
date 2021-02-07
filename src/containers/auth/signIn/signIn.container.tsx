@@ -12,12 +12,13 @@ import {
 } from '@src/components';
 import {
   isEmpty,
+  pxPhone,
   pxToPercentage,
 } from '@src/core/utils/utils';
 import { SignInFormData } from '@src/core/models/signUp/signInReq.model';
 import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
-import { onThunkSignInReq } from './store/thunk';
+import { onThunkAnoSignInReq, onThunkSignInReq } from './store/thunk';
 import { NavigationInjectedProps } from 'react-navigation';
 import { onSetUser } from '@src/core/store/reducer/user/actions';
 export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) => {
@@ -70,16 +71,20 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
       onSignInPress();
     }
   };
-  const onSingUpPress = () : void => {
-      props.navigation.navigate({
-        routeName: 'SignUp',
-      })
+  const onSingUpPress = (): void => {
+    props.navigation.navigate({
+      routeName: 'SignUp',
+    })
   }
-  const onForgotPasswordPress = () : void => {
+  const onForgotPasswordPress = (): void => {
     props.navigation.navigate({
       routeName: 'ForgotPassword',
     })
-}
+  }
+
+  const onAnoSignInPress = (): void => {
+    dispatch(onThunkAnoSignInReq({ username: name, password: 'none' }, onSuccess, onError))
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -127,7 +132,9 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
             value={name}
             onChangeText={(name) => setName(name)}
           />
-          <TouchableOpacity style={styles.buttonAno} disabled={hasName()}>
+          <TouchableOpacity
+            onPress={onAnoSignInPress}
+            style={styles.buttonAno} disabled={hasName()}>
             <Text>
               LET'S START
           </Text>
@@ -150,9 +157,10 @@ const styles = StyleSheet.create({
   containerAnonymous: {
     borderWidth: 1,
     marginBottom: 15,
+    borderRadius: pxPhone(8),
   },
   viewHeader: {
-    backgroundColor: '#673ab7',
+    backgroundColor: '#8FDA97',
     height: pxToPercentage(70),
     width: '100%',
   },
@@ -167,7 +175,8 @@ const styles = StyleSheet.create({
     width: '100%',
     borderBottomColor: '#676a6f',
     padding: 15,
-    borderWidth: 1,
+    borderColor: 'gray',
+    borderWidth: pxPhone(1),
     borderRadius: 20,
   },
   textinputAno: {
@@ -176,12 +185,12 @@ const styles = StyleSheet.create({
     margin: 15,
     borderWidth: 1,
     borderColor: 'white',
-    borderBottomColor: '#673ab7',
+    borderBottomColor: '#8FDA97',
   },
   buttonSignIn: {
     marginTop: 20,
     width: '60%',
-    backgroundColor: '#673ab7',
+    backgroundColor: '#8FDA97',
     borderRadius: 10,
     alignSelf: 'center',
   },
@@ -190,7 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 5,
     alignSelf: 'flex-end',
-    backgroundColor: '#673ab7',
+    backgroundColor: '#8FDA97',
     marginBottom: 15,
   },
   buttontext: {

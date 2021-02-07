@@ -29,3 +29,27 @@ export const onThunkSignInReq = (data: SignInFormData,
     onError();
   }
 };
+
+export const onThunkAnoSignInReq = (data: SignInFormData,
+  onSuccess: () => void,
+  onError: () => void,
+): ThunkActionTypes => async dispatch => {
+  const authService = new AuthService();
+  const signInReq: SignInReq = {
+    username: data.username,
+    password: data.password,
+  };
+  try {
+    const res: User = await authService.anoSignIn(signInReq);
+    if (res) {
+      dispatch(onSetUser(res))
+      alerts.alert({ message: 'Login successfully!', onResult: onSuccess });
+    } else {
+      alerts.alert({ message: 'Login no successfully' });
+      onError();
+    }
+  } catch (e) {
+    const { message }: ApiResult = e;
+    onError();
+  }
+};
