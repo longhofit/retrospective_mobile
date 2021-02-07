@@ -79,11 +79,6 @@ export interface EditOptionsAction {
   payload: SessionOptions;
 }
 
-export interface RenameSessionAction {
-  type: typeof RENAME_SESSION;
-  payload: string;
-}
-
 export type SessionActionTypes =
   | ReceivePostAction
   | ReceiveBoardAction
@@ -95,5 +90,4 @@ export type SessionActionTypes =
   | ReceivePostGroupAction
   | UpdatePostGroupAction
   | DeletePostGroupAction
-  | EditOptionsAction
-  | RenameSessionAction;
+  | EditOptionsAction;

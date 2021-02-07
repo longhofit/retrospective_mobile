@@ -1,17 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, createRef } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, TextInput, FlatList } from 'react-native';
-import { EvaArrowIcon, SendIcon, TrashIcon, MoveIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard, Group } from 'react-native';
+import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { getMiddle, getNext, pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import Modal from 'react-native-modal';
-import { ColumnContent, Post, PostGroup, Session, User } from '@src/core/models/type';
+import { ColumnContent, ColumnDefinition, Post, PostGroup, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { InputItem } from '@src/components/input/inputItem.component';
 import { alerts } from '@src/core/utils/alerts';
+import { themes } from '@src/core/themes';
 
 interface ComponentProps {
-  user: User;
   columns: ColumnContent[];
   session: Session;
   onAddPost: (columnIndex: number, content: string, rank: string) => void;
@@ -217,6 +217,33 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const renderColumn = (column: ColumnContent): React.ReactElement => {
     return (
       <View style={themedStyle.sectionColumn}>
+        {/* {column.index === 0 && (
+          <View style={{
+            marginTop: pxPhone(10),
+            marginLeft: pxPhone(10),
+            width: pxPhone(125),
+            height: pxPhone(40),
+            backgroundColor: '#8FDA97',
+            justifyContent: 'center',
+            alignItems: 'center',
+            // shadow ios
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 3,
+              height: 4,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 7,
+            // shadow android
+            elevation: 8,
+            borderWidth: 0,
+            borderRadius: pxPhone(8),
+          }}>
+            <Text style={themedStyle.txtCustomise}>
+              {'CUSTOMISE'}
+            </Text>
+          </View>
+        )} */}
         <InputItem
           customRef={inputEl2}
           iconStyle={themedStyle.iconSend}

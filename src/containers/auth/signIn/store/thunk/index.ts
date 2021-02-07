@@ -19,7 +19,7 @@ export const onThunkSignInReq = (data: SignInFormData,
     const res: User = await authService.signIn(signInReq);
     if (res) {
       dispatch(onSetUser(res))
-      onSuccess()
+      alerts.alert({ message: 'Login successfully!', onResult: onSuccess });
     } else {
       alerts.alert({ message: 'Login no successfully' });
       onError();

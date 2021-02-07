@@ -1,6 +1,6 @@
 import { ColumnContent, Post, PostGroup, Session, SessionOptions, Vote, VoteType } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onClearBoard, onDeletePost, onDeletePostGroupSuccess, onReceiveBoard, onReceiveOptions, onReceivePost, onReceivePostGroup, onReceiveVote, onRenameSession, onSetPlayers, onUpdatePost, onUpdatePostGroup } from '@src/core/store/reducer/session/actions';
+import { onClearBoard, onDeletePost, onDeletePostGroupSuccess, onReceiveBoard, onReceiveOptions, onReceivePost, onReceivePostGroup, onReceiveVote, onSetPlayers, onUpdatePost, onUpdatePostGroup } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -13,6 +13,7 @@ import { onThunkGetPrePublicBoardsReq } from './store/thunk';
 import io from 'socket.io-client';
 import { Actions } from '@src/core/utils/constants';
 import uuid from 'react-native-uuid';
+import { getMiddle, getNext } from '@src/core/utils/utils';
 import useColumns from './useColumns';
 
 export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = (props) => {
@@ -120,10 +121,6 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
       dispatch(onReceiveOptions(options))
     });
 
-    newSocket.on(Actions.RECEIVE_SESSION_NAME, (name: string) => {
-      dispatch(onRenameSession(name));
-    });
-
     return () => {
       console.log('Attempting disconnection');
       if (newSocket) {
@@ -225,7 +222,6 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
 
   const onLike = useCallback(
     (post: Post, like: boolean) => {
-      console.log(user)
       if (send) {
         const type: VoteType = like ? 'like' : 'dislike';
         const existingVote: Vote = post.votes.find(item => item.type === type && item.user.id === user!.id)
@@ -280,7 +276,6 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
 
   return (
     <Board
-      user={user}
       columns={columns}
       onAddPost={onAddPost}
       onEditPost={onEditPost}

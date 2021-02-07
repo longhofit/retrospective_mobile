@@ -816,13 +816,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   return (
     <View style={themedStyle.container}>
       <View style={themedStyle.viewHeader2}>
-        <TouchableOpacity
-          activeOpacity={0.75}
-          onPress={() => props.onBackPress()}
-          style={{ position: 'absolute', left: pxPhone(12) }}>
-          {EvaArrowIcon({ width: pxPhone(30), height: pxPhone(30),tintColor:'#324F6F' })}
-        </TouchableOpacity>
-        <Text style={[themedStyle.txtHeader2, { textAlign: 'center',color:'#324F6F' }]}>
+        <Text style={themedStyle.txtHeader2}>
           {'My boards'}
         </Text>
       </View>
@@ -871,7 +865,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
   viewInput: {
     marginTop: pxPhone(15),
     height: pxToPercentage(40),
-    width: pxToPercentage(340),
+    width: '90%',
     alignSelf: 'center',
   },
   iconSend: {
@@ -895,6 +889,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     color: theme['color-basic-dark-100'],
     ...textStyle.proTextBold,
     fontSize: pxPhone(20),
+    marginLeft: pxPhone(12),
   },
   viewHeader2: {
     flexDirection: 'row',
@@ -913,7 +908,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     elevation: 8,
     borderWidth: 0,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: pxPhone(12),
   },
   HeaderSetting: {

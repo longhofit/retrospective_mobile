@@ -12,7 +12,6 @@ import {
   UPDATE_POST_GROUP,
   DELETE_POST_GROUP,
   EDIT_OPTIONS,
-  RENAME_SESSION,
 } from './types';
 
 const initialState: SessionState = {
@@ -199,18 +198,6 @@ export const sessionReducer = (
         session: {
           ...state.session,
           options: action.payload,
-        },
-      };
-
-    case RENAME_SESSION:
-      if (!state.session) {
-        return state;
-      }
-      return {
-        ...state,
-        session: {
-          ...state.session,
-          name: action.payload,
         },
       };
 
