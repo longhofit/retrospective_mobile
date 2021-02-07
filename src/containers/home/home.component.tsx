@@ -187,9 +187,9 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       [
         {
           text: "YES, I'M SURE",
-          onPress: () => {
-            dispatch(onThunkDeleteBoardReq(idBoard, onSuccess, onError));
-            onRefresh();
+          onPress: async() => {
+            await dispatch(onThunkDeleteBoardReq(idBoard, onSuccess, onError));
+            await onRefresh();
           },
           style: "destructive"
         },
