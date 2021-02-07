@@ -43,7 +43,6 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
   };
 
   const onGetBoardSuccess = (): void => {
-    console.log(boards)
   };
 
   const onGetBoardError = (): void => {

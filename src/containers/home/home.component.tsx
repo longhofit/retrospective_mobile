@@ -1,19 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList, Switch } from 'react-native';
-import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon, CheckedIcon } from '@src/assets/icons';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList, Switch, KeyboardAvoidingView } from 'react-native';
+import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon, CheckedIcon, EditIcon2 } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
-import { BoardRepository } from 'react-native-draganddrop-board';
-import { Board } from 'react-native-draganddrop-board';
 import Modal from 'react-native-modal';
-import io from 'socket.io-client';
-import { Actions } from '@src/core/utils/constants';
+import { Actions, templateColumn } from '@src/core/utils/constants';
 import { User } from '@src/core/models/user/user.model';
 import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
 import { BoardMetaData } from '@src/core/models/board/board.model';
-import { UserState } from '@src/core/store/reducer/user';
 import { useDispatch, useSelector } from 'react-redux';
 import { onThunkDeleteBoardReq } from './store/thunk';
 import { Dispatch } from 'redux';
@@ -21,7 +17,7 @@ import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 import uuid from 'react-native-uuid';
 import Slider from '@react-native-community/slider'
 import { TabView, SceneMap } from 'react-native-tab-view';
-import { color } from 'react-native-reanimated';
+import { themes } from '@src/core/themes';
 interface ComponentProps {
   onBoardPress: (sessionId: string) => void;
   onCreateBoard: (data) => void;
@@ -67,123 +63,9 @@ const initVotingState: FormVotingState = {
 
 export type HomeProps = ComponentProps & ThemedComponentProps;
 
-const templateColumn = [
-  {
-    options: {
-      "allowActions": true,
-      "allowMultipleVotes": false,
-      "allowSelfVoting": false,
-      "allowAuthorVisible": false,
-      "maxDownVotes": null,
-      "maxUpVotes": null,
-      "allowGiphy": true,
-      "allowGrouping": true,
-      "allowReordering": true,
-      "blurCards": false,
-      "isPublic": true
-    },
-    type: 'Default',
-    columns: [
-      {
-        "color": "#E8F5E9",
-        "icon": "satisfied",
-        "label": "What went well?",
-        "id": uuid.v4(),
-        "index": 0,
-        "type": "well"
-      },
-      {
-        "color": "#FFEBEE",
-        "icon": "disatisfied",
-        "label": "What could be improved?",
-        "id": uuid.v4(),
-        "index": 1,
-        "type": "notWell"
-      },
-      {
-        "color": "#FFFDE7",
-        "icon": "sunny",
-        "label": "A brilliant idea to share?",
-        "id": uuid.v4(),
-        "index": 2,
-        "type": "ideas"
-      }
-    ]
-  },
-  {
-    options: {
-      "allowActions": true,
-      "allowMultipleVotes": false,
-      "allowSelfVoting": false,
-      "allowAuthorVisible": false,
-      "maxDownVotes": null,
-      "maxUpVotes": null,
-      "allowGiphy": true,
-      "allowGrouping": true,
-      "allowReordering": true,
-      "blurCards": false,
-      "isPublic": true
-    },
-    type: 'Well / Not Well',
-    columns: []
-  },
-  {
-    options: {
-      "allowActions": true,
-      "allowMultipleVotes": false,
-      "allowSelfVoting": false,
-      "allowAuthorVisible": false,
-      "maxDownVotes": null,
-      "maxUpVotes": null,
-      "allowGiphy": true,
-      "allowGrouping": true,
-      "allowReordering": true,
-      "blurCards": false,
-      "isPublic": true
-    },
-    type: 'Start / Stop / Continue',
-    columns: [
-      {
-        "color": "#E8F5E9",
-        "icon": "play",
-        "label": "Start",
-        "id": uuid.v4(),
-        "index": 0,
-        "type": "start"
-      },
-      {
-        "color": "#FFEBEE",
-        "icon": "pause",
-        "label": "Stop",
-        "id": uuid.v4(),
-        "index": 1,
-        "type": "stop"
-      },
-      {
-        "color": "#BBDEFB",
-        "icon": "fast-forward",
-        "label": "Continue",
-        "id": uuid.v4(),
-        "index": 2,
-        "type": "continue"
-      }
-    ]
-  },
-  { type: 'Four Ls', columns: [] },
-  { type: 'Sailboat', columns: [] },
-]
-
 const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const dispatch: Dispatch<any> = useDispatch();
   const { themedStyle, boards } = props;
-  const [isShowPicker, setIsShowPicker] = useState<boolean>(false);
-  const [isShowAdd, setIsShowAdd] = useState<boolean>(false);
-  const [idColumnAddSelected, setColumnAddSelected] = useState<number>(0);
-  const [cardName, setCardName] = useState<string>('');
-  const [lastId, setLastId] = useState<number>(8);
-  const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [cardID, setCardID] = useState<string>('');
-  const [socket, setSocket] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isCreateBoard, setIsShowCreateBoard] = useState<boolean>(false);
   const [templateSelected, setTemplateSelected] = useState(templateColumn[0]);
@@ -231,42 +113,9 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
   const user = props.user;
 
-  const onCancle = (): void => {
-    setIsShowPicker(false);
-  };
-
-  const onDragEnd = (): void => { };
-
-  const onCancelAddPress = (): void => {
-  };
-
   const onIconAddPress = (): void => {
     // setIsShowPicker(true);
     setIsShowCreateBoard(true);
-  };
-
-  const onColumnPress = (id: number): void => {
-    setCardName('');
-    setIsShowPicker(false);
-    setColumnAddSelected(id);
-    setTimeout(() => {
-      setIsShowAdd(true);
-    }, 500);
-  };
-
-  const renderCard = (item): React.ReactElement => {
-    return (
-      <View style={themedStyle.card}>
-        <Text>{item.name}</Text>
-      </View>
-    );
-  };
-
-  const onItemPress = (item): void => {
-    setCardID(item.id);
-    setCardName(item.name);
-    setIsShowAdd(true);
-    setIsEdit(true);
   };
 
   const onBoardPress = (sessionId: string) => {
@@ -278,11 +127,11 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     var boardCreatedDateTime = new Date(String(boardCreated));
 
     var timeDiff = Math.abs(currentDate.getTime() - boardCreatedDateTime.getTime());
-    var diffDays = Math.ceil(timeDiff/(1000*3600*24));
-    var convertYear : number = (diffDays - 1) / 365;
-    var monthRemainder : number = (diffDays - 1) % 365;
-    var convertMonth : number = monthRemainder / 30;
-    var convertDate : number = monthRemainder % 30;
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    var convertYear: number = (diffDays - 1) / 365;
+    var monthRemainder: number = (diffDays - 1) % 365;
+    var convertMonth: number = monthRemainder / 30;
+    var convertDate: number = monthRemainder % 30;
 
 
     if (convertYear == 1) {
@@ -292,7 +141,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       return convertYear + " years ago";
     }
 
-    
+
     if (convertMonth == 1) {
       return convertMonth + " month ago";
     }
@@ -307,19 +156,19 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       return convertDate + " days ago";
     }
 
-    const convertHour : number = timeDiff/(1000*3600*24) * 24;
-    if(convertHour >= 2){
+    const convertHour: number = timeDiff / (1000 * 3600 * 24) * 24;
+    if (convertHour >= 2) {
       return parseInt(String(convertHour)) + " hours ago";
     }
-    if(convertHour >= 1){
+    if (convertHour >= 1) {
       return parseInt(String(convertHour)) + " hour ago";
     }
 
-    const convertMin : number = convertHour * 60;
-    if(convertMin >= 2){
+    const convertMin: number = convertHour * 60;
+    if (convertMin >= 2) {
       return parseInt(String(convertMin)) + " minutes ago";
     }
-    if(convertMin >= 1){
+    if (convertMin >= 1) {
       return parseInt(String(convertMin)) + " minute ago";
     }
     return "less than a minute ago";
@@ -445,6 +294,60 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     />;
   };
 
+  // const onRenderColumnTemplate = (): React.ReactElement => {
+  //   return <FlatList
+  //     data={templateSelected.columns}
+  //     extraData={templateSelected.columns}
+  //     showsVerticalScrollIndicator={false}
+  //     keyExtractor={(item, index) => index.toString()}
+  //     renderItem={({ item, index }) => (
+  //       <React.Fragment>
+  //         <View style={themedStyle.hr} />
+  //         <TextInput
+  //           onChangeText={text => onColumnNameChange(text, item.index)}
+  //           value={item.label}
+  //           style={{ marginTop: pxPhone(5) }}>
+  //         </TextInput>
+  //       </React.Fragment>
+  //     )}
+  //   />;
+  // };
+
+  const renderTemplatePicker = (): React.ReactElement => {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#FAFAFA', borderRadius: pxPhone(8), marginVertical: pxPhone(30) }}>
+        <Text>
+          {'Template'}
+        </Text>
+        <View style={{ height: pxPhone(30), width: '70%', borderBottomWidth: pxPhone(1), borderColor: '#BDBDBD', marginLeft: pxPhone(5) }}>
+          <Picker
+            selectedValue={templateSelected.type}
+            style={{ flex: 1 }}
+            onValueChange={(itemValue, index) => { setTemplateSelected(templateColumn[index]) }}>
+            {templateColumn.map((template, index) => {
+              return (
+                <Picker.Item label={template.type} value={template.type} />
+              )
+            })}
+          </Picker>
+        </View>
+      </View>
+    )
+  };
+
+  const onIconAdd2Press = (): void => {
+    setTemplateSelected({
+      ...templateSelected, columns: [...templateSelected.columns, {
+        color: '#D1C4E9',
+        icon: 'help',
+        label: 'Custom Column',
+        id: uuid.v4(),
+        index: templateSelected.columns.length,
+        type: 'custom'
+      }]
+    })
+  };
+
   const onRenderColumnTemplate = (): React.ReactElement => {
     return <FlatList
       data={templateSelected.columns}
@@ -453,12 +356,24 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       keyExtractor={(item, index) => index.toString()}
       renderItem={({ item, index }) => (
         <React.Fragment>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TextInput
+              multiline
+              onChangeText={text => onColumnNameChange(text, item.index)}
+              value={item.label}
+              style={{ marginTop: pxPhone(5), maxWidth: '90%' }}>
+            </TextInput>
+            {EditIcon2({ width: pxPhone(12), height: pxPhone(12) })}
+          </View>
           <View style={themedStyle.hr} />
-          <TextInput
-            onChangeText={text => onColumnNameChange(text, item.index)}
-            value={item.label}
-            style={{ marginTop: pxPhone(5) }}>
-          </TextInput>
+          {index === (templateSelected.columns.length - 1) && (
+            <TouchableOpacity
+              onPress={onIconAdd2Press}
+              activeOpacity={0.75}
+              style={themedStyle.viewAdd2}>
+              {AddIcon({ width: pxPhone(30), height: pxPhone(30), tintColor: 'gray' })}
+            </TouchableOpacity>
+          )}
         </React.Fragment>
       )}
     />;
@@ -467,18 +382,48 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const renderCreateCustomBoard = (): React.ReactElement => {
     return (
       <View style={themedStyle.boxSetting}>
-        <Text style={themedStyle.txtNote}>
-          {'Create custom board'}
-        </Text>
-        {onRenderColumnName()}
-        <TouchableOpacity
-          style={themedStyle.btnCancel}
-          activeOpacity={0.75}
-          onPress={onDoneCreateBoard}>
-          <Text style={themedStyle.txtCancel}>
-            {'OK'}
+        <View style={{ width: '90%', height: pxPhone(50), backgroundColor: '#EFF7ED', borderRadius: pxPhone(5), justifyContent: 'center' }}>
+          <Text style={themedStyle.txtTemplateNote}>
+            {'Set the number of columns and their characteristics'}
           </Text>
-        </TouchableOpacity>
+        </View>
+        {/* {onRenderColumnName()} */}
+        {renderTemplatePicker()}
+        {onRenderColumnTemplate()}
+        <View style={{ flexDirection: 'row', bottom: pxPhone(10) }}>
+          <TouchableOpacity
+            style={[{ borderRadius: pxPhone(8), padding: pxPhone(12) }]}
+            activeOpacity={0.75}
+            onPress={() => setIsShowCreateBoard(false)}>
+            <Text style={themedStyle.txtStart}>
+              {'CANCEL'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onDoneCreateBoard}
+            activeOpacity={0.75}
+            style={{
+              backgroundColor: themes["App Theme"]['color-green-1'],
+              borderRadius: pxPhone(8),
+              padding: pxPhone(12),
+              marginLeft: pxPhone(5),
+              // shadow ios
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 3,
+                height: 4,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 7,
+              // shadow android
+              elevation: 8,
+              borderWidth: 0,
+            }}>
+            <Text style={themedStyle.txtStart}>
+              {'START THE SESSION'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     )
   }
@@ -759,11 +704,19 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     { key: 'three', title: 'Voting' },
   ]);
 
-  const renderScene = SceneMap({
-    first: renderCreateCustomBoard,
-    second: renderCreateSettingCustomBoard,
-    three: renderCreateVotingCustomBoard,
-  });
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'first':
+        return renderCreateCustomBoard();
+      case 'second':
+        return renderCreateSettingCustomBoard();
+      case 'three':
+        return renderCreateVotingCustomBoard();
+      default:
+        return null;
+    }
+  }
+
   // tab create custom board
   const renderTabCreateCustomBoard = (): React.ReactElement => {
     return (
@@ -927,6 +880,19 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 };
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
+  txtStart: {
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(13),
+  },
+  viewAdd2: {
+    marginTop: pxPhone(5),
+  },
+  txtTemplateNote: {
+    color: '#324828',
+    ...textStyle.proTextRegular,
+    fontSize: pxPhone(12),
+    marginLeft: pxPhone(12),
+  },
   txtHeader2: {
     color: theme['color-basic-dark-100'],
     ...textStyle.proTextBold,
@@ -1031,9 +997,11 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     textAlign: 'center',
   },
   boxSetting: {
+    borderBottomLeftRadius: pxPhone(10),
+    borderBottomRightRadius: pxPhone(10),
     borderRadius: pxPhone(10),
     width: '100%',
-    height: '70%',
+    height: '100%',
     paddingTop: pxPhone(15),
     backgroundColor: theme['color-basic-light-100'],
     alignItems: 'center',

@@ -3,18 +3,12 @@ import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard, Group } from 'react-native';
 import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
-import { getBetween, getMiddle, getNext, getPrevious, pxPhone, pxToPercentage } from '@src/core/utils/utils';
-import { BoardRepository } from 'react-native-draganddrop-board';
+import {getMiddle, getNext, pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import Modal from 'react-native-modal';
-import io from 'socket.io-client';
-import { Actions } from '@src/core/utils/constants';
-import { User } from '@src/core/models/user/user.model';
 import { ColumnContent, ColumnDefinition, Post, PostGroup, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
-import { BoardMetaData } from '@src/core/models/board/board.model';
 import { InputItem } from '@src/components/input/inputItem.component';
 import { alerts } from '@src/core/utils/alerts';
-import { calculateRank, getMovingEntities } from './moving-logic';
 
 interface ComponentProps {
   columns: ColumnContent[];
@@ -44,7 +38,6 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   const [actionIndex, setActionIndex] = useState<string>(undefined);
   const [postSelectedContent, setPostSelectedContent] = useState<string>('');
   const [postActionSelectedContent, setPostActionSelectedContent] = useState<string>('');
-  const [desColumnSelected, setDesColumnSelected] = useState<ColumnDefinition>(undefined);
 
 
   const calculateRankForNewPost = (column: ColumnContent): string => {
@@ -219,17 +212,6 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   }
 
   const inputEl2 = useRef(null);
-
-  // const renderPost = (group: PostGroup): React.ReactElement => {
-  //   // console.log(group.posts, 'postttt', props.columns[group.column].color)
-  //   group.posts.map((post) => {
-  //     return (
-  //       <React.Fragment>
-
-  //       </React.Fragment>
-  //     );
-  //   })
-  // };
 
   const renderColumn = (column: ColumnContent): React.ReactElement => {
     return (
@@ -545,7 +527,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     alignItems: 'center',
   },
   iconSend: {
-    tintColor: theme['color-green-1'],
+
     width: pxPhone(22),
     height: pxPhone(22),
   },
