@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, createRef } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList, Clipboard, Group } from 'react-native';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, FlatList } from 'react-native';
 import { EvaArrowIcon, AddIcon, SendIcon, TrashIcon, MoveIcon, EditIcon, ShareIcon, LikeIcon, DislikeIcon, EditIcon2, ActionIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { getMiddle, getNext, pxPhone, pxToPercentage } from '@src/core/utils/utils';

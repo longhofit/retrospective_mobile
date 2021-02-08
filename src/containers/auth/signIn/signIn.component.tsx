@@ -8,6 +8,9 @@ import {
   View,
   Text,
   ScrollView,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
 } from 'react-native';
 import {
   textStyle,
@@ -17,15 +20,18 @@ import {
   pxToPercentage,
 } from '@src/core/utils/utils';
 
+export interface Props {
+  customStyle?: ViewStyle;
+};
 
-export type SignInProps = ThemedComponentProps
+export type SignInProps = ThemedComponentProps & Props;
 
 const SignInComponent: React.FunctionComponent<SignInProps> = (props) => {
 
-  const { themedStyle } = props;
+  const { themedStyle, customStyle } = props;
 
   return (
-    <ScrollView contentContainerStyle={themedStyle.container}>
+    <ScrollView contentContainerStyle={customStyle ? customStyle : themedStyle.container}>
       <View style={themedStyle.sectionLogo}>
         <View style={[themedStyle.viewLogo, { overflow: 'hidden' }]}>
           <Text style={themedStyle.txtLogo}>

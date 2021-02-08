@@ -1,7 +1,7 @@
 import React from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { EvaArrowIcon, ShareIcon } from '@src/assets/icons';
-import { View, Text, TouchableOpacity, Clipboard, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { textStyle } from '@src/components/textStyle';
 import { Session } from '@src/core/models/type';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
@@ -10,6 +10,8 @@ import { BoardContainer } from '../board/board.container';
 import { SummaryContainer } from '../summary/summary.container';
 import { ParticipantsContainer } from '../participants/participants.container';
 import { themes } from '@src/core/themes';
+import Clipboard from '@react-native-community/clipboard'
+import { toasts } from '@src/core/utils/toasts';
 interface ComponentProps {
   sessionId: string
   session: Session;
@@ -43,6 +45,11 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
     />
   );
 
+  const onShareIconPress = (): void => {
+    toasts.success('Copied board url!!!');
+    Clipboard.setString(`http://retrospective.ai/game/${props.session.id}`)
+  }
+
   return (
     <React.Fragment>
       <View style={themedStyle.viewHeader}>
@@ -57,7 +64,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
         </Text>
         <TouchableOpacity
           style={{ position: 'absolute', right: pxPhone(12) }}
-          onPress={() => Clipboard.setString(`http://retrospective.ai/game/${props.session.id}`)}
+          onPress={onShareIconPress}
           activeOpacity={0.75}>
           {ShareIcon(themedStyle.iconShare)}
         </TouchableOpacity>

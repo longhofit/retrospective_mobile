@@ -1,14 +1,14 @@
-import { BoardMetaData } from '@src/core/models/board/board.model';
 import { Post, Session } from '@src/core/models/type';
 import { AppState } from '@src/core/store';
-import { onReceiveBoard, onReceivePost } from '@src/core/store/reducer/session/actions';
 import { SessionState } from '@src/core/store/reducer/session/types';
 import { UserState } from '@src/core/store/reducer/user';
+import { toasts } from '@src/core/utils/toasts';
 import React, { useEffect } from 'react';
 import { NavigationInjectedProps } from 'react-navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Home } from './home.component';
+import { onClearBoards } from './store/reducer/actions';
 import { HomeState } from './store/reducer/types';
 import { onThunkCreateBoardReq, onThunkCreateCustomBoardReq, onThunkGetPrePrivateBoardsReq, onThunkGetPrePublicBoardsReq } from './store/thunk';
 
@@ -21,6 +21,12 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
   useEffect(() => {
     onGetPrePublicBoards();
     onGetPrePrivateBoards();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(onClearBoards());
+    };
   }, []);
 
   const onBoardPress = (sessionId: string): void => {
@@ -49,6 +55,7 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
   };
 
   const onCreateBoardSuccess = (): void => {
+    toasts.success('Create board successfully!!!');
     onGetPrePublicBoards();
     onGetPrePrivateBoards();
   };

@@ -8,6 +8,7 @@ export interface HomeState {
 export const GET_PREV_PUBLIC_BOARD = 'GET_PREV_PUBLIC_BOARD';
 export const GET_PREV_PRIVATE_BOARD = 'GET_PREV_PRIVATE_BOARD';
 export const CREATE_BOARD = 'CREATE_BOARD';
+export const CLEAR_BOARDS = 'CLEAR_BOARDS';
 
 export interface GetPrePublicBoardAction {
   type: typeof GET_PREV_PUBLIC_BOARD;
@@ -24,5 +25,11 @@ export interface CreateBoardAction {
   payload: BoardMetaData[];
 }
 
-export type HomeActionTypes = GetPrePublicBoardAction &
-  GetPrePrivateBoardAction;
+export interface ClearBoardsAction {
+  type: typeof CLEAR_BOARDS;
+}
+
+export type HomeActionTypes =
+  | GetPrePublicBoardAction
+  | GetPrePrivateBoardAction
+  | ClearBoardsAction;

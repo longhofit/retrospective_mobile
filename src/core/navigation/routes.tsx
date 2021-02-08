@@ -14,6 +14,7 @@ import SignIn from '@src/containers/auth/signIn/signIn.container';
 import { BoardContainer } from '@src/containers/board/board.container';
 import { ForgotPasswordContainer } from '@src/containers/auth/forgotPassword/forgotPassword.container';
 import { DetailBoardContainer } from '@src/containers/DetailBoard/detail-board.container';
+import { ApplicationLoaderContainer } from '@src/containers/appLoader/appLoader.container';
 
 const HomeNavigator: NavigationContainer = createStackNavigator(
   {
@@ -35,11 +36,11 @@ const HomeNavigator: NavigationContainer = createStackNavigator(
 const createAppRouter = (container: NavigationContainer): NavigationContainer => {
   return createAppContainer(createSwitchNavigator(
     {
-      ['Test']: TestContainer,
+      ['AppLoader']: ApplicationLoaderContainer,
       ['App']: container,
     },
     {
-      initialRouteName: 'App',
+      initialRouteName: 'AppLoader',
     },
   ));
 };

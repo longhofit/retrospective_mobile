@@ -3,6 +3,7 @@ import {
   HomeActionTypes,
   GET_PREV_PUBLIC_BOARD,
   GET_PREV_PRIVATE_BOARD,
+  CLEAR_BOARDS,
 } from './types';
 
 const initialState: HomeState = {
@@ -26,6 +27,14 @@ export const homeReducer = (
       return {
         ...state,
         privateBoards: action.payload,
+      };
+    }
+
+    case CLEAR_BOARDS: {
+      console.log('crear')
+      return {
+        boards: [],
+        privateBoards: [],
       };
     }
 

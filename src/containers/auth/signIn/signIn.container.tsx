@@ -93,10 +93,10 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
       <ScrollView style={styles.container1}>
         <SignInLogo />
         <InputItem
+          style={{ ...textStyle.proTextRegular }}
           titleColor={{ backgroundColor: 'white' }}
-          keyboardType={'email-address'}
-          autoFocus={true}
           title={'Username'}
+          placeholder={'Username'}
           inputContainerStyle={{ height: pxToPercentage(40), marginTop: pxPhone(60), }}
           value={signInFormData.username}
           onInputTextChange={(username) => {
@@ -104,8 +104,10 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
           }} />
         <InputItem
           secureTextEntry={true}
+          style={{ ...textStyle.proTextRegular }}
           titleColor={{ backgroundColor: 'white' }}
           title={'Password'}
+          placeholder={'Password'}
           inputContainerStyle={{ height: pxToPercentage(40), marginTop: pxPhone(25) }}
           value={signInFormData.password}
           onInputTextChange={(password) => {
@@ -127,7 +129,7 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
         </Text>
         <View style={styles.containerAnonymous}>
           <Text style={styles.header1}>Anonymous Login</Text>
-          <View style={{ padding: pxPhone(12), borderRadius: pxPhone(5), backgroundColor: '#e8f4fd', }}>
+          <View style={{ padding: pxPhone(12), borderRadius: pxPhone(5), backgroundColor: '#e8f4fd',marginTop:pxPhone(12) }}>
             <Text >This will create an anonymous account. Some features won't be available.</Text>
           </View>
           <TextInput
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: pxPhone(30),
   },
   containerAnonymous: {
-    marginTop: pxPhone(12),
+    marginTop: pxPhone(8),
   },
   viewHeader: {
     flexDirection: 'row',
@@ -199,7 +201,7 @@ const styles = StyleSheet.create({
   textinputAno: {
     height: 50,
     padding: 15,
-    margin: 15,
+    margin: pxPhone(3),
     borderWidth: 1,
     borderColor: 'white',
     borderBottomColor: '#8FDA97',
@@ -234,9 +236,10 @@ const styles = StyleSheet.create({
   },
   header1: {
     fontSize: 22,
-    marginTop: 15,
+    marginTop: pxPhone(4),
     color: 'black',
     marginLeft: 10,
+    textAlign:'center',
   },
   text: {
     fontSize: 18,

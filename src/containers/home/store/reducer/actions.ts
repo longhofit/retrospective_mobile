@@ -4,6 +4,8 @@ import {
   GetPrePublicBoardAction,
   GET_PREV_PRIVATE_BOARD,
   GetPrePrivateBoardAction,
+  ClearBoardsAction,
+  CLEAR_BOARDS,
 } from './types';
 
 export const onGetPrevPublicBoard = (payload: BoardMetaData[]): GetPrePublicBoardAction => ({
@@ -15,3 +17,8 @@ export const onGetPrevPrivateBoard = (payload: BoardMetaData[]): GetPrePrivateBo
   type: GET_PREV_PRIVATE_BOARD,
   payload,
 });
+
+export const onClearBoards = (): ClearBoardsAction => ({
+  type: CLEAR_BOARDS,
+});
+
