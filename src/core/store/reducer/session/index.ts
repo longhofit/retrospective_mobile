@@ -88,7 +88,6 @@ export const sessionReducer = (
       };
 
     case DELETE_POST:
-      console.log(action.payload);
       if (!state.session) {
         return state;
       }
@@ -104,7 +103,6 @@ export const sessionReducer = (
       return {...state, players: action.payload};
 
     case RECEIVE_VOTE:
-      console.log(action.payload);
       if (!state.session) {
         return state;
       }

@@ -43,7 +43,6 @@ export const onThunkGetPrePrivateBoardsReq = (
       onError();
     }
   } catch (e) {
-    console.log(e);
     alerts.alert({message: 'Get private boards not successfully'});
     onError();
   }

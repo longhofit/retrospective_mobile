@@ -9,7 +9,6 @@ export const DetailBoardContainer: React.FunctionComponent<NavigationInjectedPro
   const sessionId: string = props.navigation.getParam('sessionId');
   const name: string = props.navigation.getParam('name');
   const { session }: SessionState = useSelector((state: AppState) => state.session);
-  console.log(name);
   return (
     <DetailBoard
       onBack={() => props.navigation.goBack()}

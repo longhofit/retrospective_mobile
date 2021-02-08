@@ -1,7 +1,7 @@
 import React from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
 import { EvaArrowIcon, ShareIcon } from '@src/assets/icons';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { textStyle } from '@src/components/textStyle';
 import { Session } from '@src/core/models/type';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
@@ -27,7 +27,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
   const [routes] = React.useState([
     { key: 'first', title: 'BOARD', params: { sessionId } },
     { key: 'second', title: 'SUMMARY', params: { sessionId } },
-    { key: 'three', title: 'PARTICIPANTS', params: { sessionId } },
+    { key: 'three', title: 'PARTICIPANT', params: { sessionId } },
   ]);
 
   const renderScene = SceneMap({
@@ -39,7 +39,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
   const renderTabBar = props => (
     <TabBar
       {...props}
-      indicatorStyle={{ backgroundColor: 'black' }}
+      indicatorStyle={{ backgroundColor: '#324F6F' }}
       style={{ backgroundColor: themes["App Theme"]['color-green-1'] }}
       activeColor={'#324F6F'}
     />
@@ -51,7 +51,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
   }
 
   return (
-    <React.Fragment>
+    <SafeAreaView style={{flex:1}}>
       <View style={themedStyle.viewHeader}>
         <TouchableOpacity
           activeOpacity={0.75}
@@ -78,7 +78,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
         lazy={true}
         swipeEnabled={false}
       />
-    </React.Fragment>
+    </SafeAreaView>
   );
 };
 

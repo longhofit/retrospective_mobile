@@ -14,13 +14,11 @@ export const ForgotPasswordContainer: React.FunctionComponent<NavigationInjected
 
   const onSuccess = (): void => {
     setValueReturnSendOTP(true);
-    console.log("valueReturnSendOTPSuccess:",valueReturnSendOTP);
   };
 
   const onError = (): void => {
     Alert.alert("Email does not exist");
     setValueReturnSendOTP(false);
-    console.log("valueReturnSendOTPError:",valueReturnSendOTP);
   };
 
   const onSuccessFPW = (): void => {

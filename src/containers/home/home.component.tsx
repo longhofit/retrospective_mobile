@@ -181,7 +181,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const onError = (): void => {
   };
   const onPressDeleteBoard = (idBoard: String): void => {
-    console.log("id board:", idBoard);
     Alert.alert(
       'Deleting "My Retrospective" ?',
       'Deleting a session is irreversible. It will delete all posts, votes, groups, and the session itself. The data cannot be restored.Are you sure you want to delete this session and all its content?',
@@ -420,7 +419,6 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
   // render setting
   const onTemplateSettingPress = (index: number): void => {
-    console.log("index:", index);
     switch (index) {
       case 0:
         setSettingState({ ...settingState, isPrivateBoard: !settingState.isPrivateBoard });
@@ -829,9 +827,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   };
 
   const onGoToSession = (): void => {
-    console.log(url);
     const id: string = url.split('/')[url.split('/').length - 1];
-    console.log(id);
     props.onBoardPress(id);
   };
 

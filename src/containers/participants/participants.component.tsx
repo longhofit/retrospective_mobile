@@ -17,7 +17,6 @@ export type ParticipantsProps = ComponentProps & ThemedComponentProps;
 const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props) => {
   const { themedStyle } = props;
   const renderColumn = (item: User, index: number): React.ReactElement => {
-    //console.log("props.players:",props.players.length);
     return (
       <View style={themedStyle.viewItemParticipants}>
         <Text style={{ width: '20%', textAlign: 'center', alignSelf: 'center' }}>{index + 1}</Text>

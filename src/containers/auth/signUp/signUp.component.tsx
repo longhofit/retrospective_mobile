@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
 import {
   textStyle,
@@ -70,7 +71,7 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
   const { themedStyle } = props;
 
   return (
-    <View
+    <SafeAreaView
       style={themedStyle.container}>
       <View style={themedStyle.viewHeader}>
         <TouchableOpacity
@@ -124,7 +125,7 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
 
   );
 };

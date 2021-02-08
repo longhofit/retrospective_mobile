@@ -5,7 +5,8 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Alert
+  Alert,
+  SafeAreaView
 } from 'react-native';
 import {
   ThemedComponentProps,
@@ -49,7 +50,6 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
       Alert.alert('Invalid email!');
     } else {
       let getValueReturnSendOTP = props.onSendOTPPress(sendOTPData);
-      console.log("getValueReturnSendOTP:", getValueReturnSendOTP);
       setCheckSendOTP(getValueReturnSendOTP);
       setDisplayButton('none');
     }
@@ -71,7 +71,6 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
   };
 
   const onBackButtonPress = (): void => {
-    console.log('as')
     props.onBackPress();
   };
 
@@ -115,7 +114,7 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.viewHeader}>
         <TouchableOpacity
           activeOpacity={0.75}
@@ -142,7 +141,7 @@ const ForgotPassword: React.FunctionComponent<ForgotPasswordProps> = (props) => 
         </TouchableOpacity>
         {viewChangePassword()}
       </View>
-    </View>
+    </SafeAreaView>
 
   );
 };

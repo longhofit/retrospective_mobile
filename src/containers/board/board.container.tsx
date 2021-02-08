@@ -26,7 +26,6 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
   const { boards }: HomeState = useSelector((state: AppState) => state.home);
   const dispatch: Dispatch<any> = useDispatch();
   const [socket, setSocket] = useState(null);
-  console.log(sessionId);
   // socket connection
 
   function sendFactory(socket, sessionId) {

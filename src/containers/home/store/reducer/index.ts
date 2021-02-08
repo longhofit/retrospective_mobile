@@ -31,11 +31,7 @@ export const homeReducer = (
     }
 
     case CLEAR_BOARDS: {
-      console.log('crear')
-      return {
-        boards: [],
-        privateBoards: [],
-      };
+      return initialState;
     }
 
     default:

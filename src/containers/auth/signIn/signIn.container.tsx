@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   buttonAno: {
+    marginTop:pxPhone(12),
     marginRight: 10,
     padding: pxPhone(12),
     alignSelf: 'flex-end',
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
   },
   header1: {
     fontSize: 22,
-    marginTop: pxPhone(4),
+    marginTop: pxPhone(12),
     color: 'black',
     marginLeft: 10,
     textAlign:'center',
