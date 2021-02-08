@@ -20,13 +20,13 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
     //console.log("props.players:",props.players.length);
     return (
       <View style={themedStyle.viewItemParticipants}>
-        <Text style={{width: '15%', textAlign:'center', alignSelf: 'center'}}>{index + 1}</Text>
-        <View style={{flexDirection: 'row',width:'45%', alignItems: 'center'}}>
+        <Text style={{width: '20%', textAlign:'center', alignSelf: 'center'}}>{index + 1}</Text>
+        <View style={{flexDirection: 'row',width:'40%', alignItems: 'center'}}>
           <Image
             source={{ uri: `https://www.gravatar.com/avatar/$%7Bmd5(${item})%7D?d=retro` }}
             style={themedStyle.image}
           />
-          <Text style={{marginHorizontal:pxPhone(5)}}>{item.name}</Text>
+          <Text style={{marginHorizontal:pxPhone(5), width:'80%'}}>{item.name}</Text>
         </View>
         <Text style={{width: '30%', textAlign:'center', alignSelf: 'center'}}>{item.accountType}</Text>
         <TouchableOpacity style={{width: '10%', alignItems:'center', alignSelf: 'center'}}>
@@ -65,8 +65,8 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
     <React.Fragment>
       <View style={themedStyle.container}>
           <View style={themedStyle.viewHeaderItemParticipants}>
-              <Text style={{width: '15%', textAlign:'center'}}>Number</Text>
-              <Text style={{width: '45%'}}>Participants</Text>
+              <Text style={{width: '20%', textAlign:'center'}}>Number</Text>
+              <Text style={{width: '40%'}}>Participants</Text>
               <Text style={{width: '30%', textAlign:'center'}}>Account Type</Text>
               <Text style={{width: '10%', textAlign:'center'}}></Text>
           </View>
