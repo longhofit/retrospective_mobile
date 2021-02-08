@@ -91,6 +91,7 @@ const SignupFormComponent: React.FunctionComponent<SignupFormProps> = (props) =>
       ]}
       {...restProps}>
       <InputItem
+        titleColor={{ backgroundColor: 'white' }}
         keyboardType={'email-address'}
         autoFocus={true}
         placeholder={'Enter email'}
@@ -98,6 +99,7 @@ const SignupFormComponent: React.FunctionComponent<SignupFormProps> = (props) =>
         inputContainerStyle={themedStyle.viewInput}
         onInputTextChange={onUsernameInputTextChange} />
       <InputItem
+        titleColor={{ backgroundColor: 'white' }}
         secureTextEntry={true}
         placeholder={'Enter password'}
         title={'Password'}

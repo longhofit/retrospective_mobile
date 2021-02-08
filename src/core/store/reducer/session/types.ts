@@ -1,4 +1,10 @@
-import {Post, PostGroup, Session, SessionOptions} from '@src/core/models/type';
+import {
+  ColumnDefinition,
+  Post,
+  PostGroup,
+  Session,
+  SessionOptions,
+} from '@src/core/models/type';
 import {User} from '@src/core/models/user/user.model';
 
 export interface SessionState {
@@ -79,12 +85,15 @@ export interface EditOptionsAction {
   payload: SessionOptions;
 }
 
-
 export interface RenameSessionAction {
   type: typeof RENAME_SESSION;
   payload: string;
 }
 
+export interface EditColumnsAction {
+  type: typeof EDIT_COLUMNS;
+  payload: ColumnDefinition[];
+}
 
 export type SessionActionTypes =
   | ReceivePostAction
@@ -98,4 +107,5 @@ export type SessionActionTypes =
   | UpdatePostGroupAction
   | DeletePostGroupAction
   | EditOptionsAction
-  | RenameSessionAction;
+  | RenameSessionAction
+  | EditColumnsAction;

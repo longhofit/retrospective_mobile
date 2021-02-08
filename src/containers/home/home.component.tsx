@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import { withStyles, ThemeType, ThemedComponentProps } from '@kitten/theme';
-import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, AppState, RefreshControl, FlatList, Switch, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TouchableOpacity, Picker, TextInput, ScrollView, Image, Alert, RefreshControl, FlatList, Switch, KeyboardAvoidingView } from 'react-native';
 import { EvaArrowIcon, AddIcon, TrashIcon, InformationIcon, CheckedIcon, EditIcon2, SendIcon } from '@src/assets/icons';
 import { textStyle } from '@src/components/textStyle';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
 import Modal from 'react-native-modal';
-import { Actions, templateColumn } from '@src/core/utils/constants';
+import { templateColumn } from '@src/core/utils/constants';
 import { User } from '@src/core/models/user/user.model';
 import { Post, Session } from '@src/core/models/type';
 import { viewStyle } from '@src/components/viewStyle';
@@ -16,7 +16,7 @@ import { Dispatch } from 'redux';
 import { onThunkGetPrePublicBoardsReq } from '../board/store/thunk';
 import uuid from 'react-native-uuid';
 import Slider from '@react-native-community/slider'
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabBar, TabView } from 'react-native-tab-view';
 import { themes } from '@src/core/themes';
 import { InputItem } from '@src/components/input/inputItem.component';
 interface ComponentProps {
@@ -329,40 +329,43 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   };
 
   const onRenderColumnTemplate = (): React.ReactElement => {
-    return <FlatList
-      data={templateSelected.columns}
-      extraData={templateSelected.columns}
-      showsVerticalScrollIndicator={false}
-      keyExtractor={(item, index) => index.toString()}
-      renderItem={({ item, index }) => (
-        <React.Fragment>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TextInput
-              multiline
-              onChangeText={text => onColumnNameChange(text, item.index)}
-              value={item.label}
-              style={{ marginTop: pxPhone(5), maxWidth: '90%' }}>
-            </TextInput>
-            {EditIcon2({ width: pxPhone(12), height: pxPhone(12) })}
-          </View>
-          <View style={themedStyle.hr} />
-          {index === (templateSelected.columns.length - 1) && (
-            <TouchableOpacity
-              onPress={onIconAdd2Press}
-              activeOpacity={0.75}
-              style={themedStyle.viewAdd2}>
-              {AddIcon({ width: pxPhone(30), height: pxPhone(30), tintColor: 'gray' })}
-            </TouchableOpacity>
-          )}
-        </React.Fragment>
-      )}
-    />;
+    return (
+      <ScrollView
+        keyboardDismissMode={'interactive'}
+        showsVerticalScrollIndicator={false}>
+        {templateSelected.columns && templateSelected.columns.map((item, index) => {
+          return (
+            <React.Fragment>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TextInput
+                  multiline
+                  onChangeText={text => onColumnNameChange(text, item.index)}
+                  value={item.label}
+                  style={{ marginTop: pxPhone(5), maxWidth: '90%' }}>
+                </TextInput>
+                {EditIcon2({ width: pxPhone(12), height: pxPhone(12) })}
+              </View>
+              <View style={themedStyle.hr} />
+              {index === (templateSelected.columns.length - 1) && (
+                <TouchableOpacity
+                  onPress={onIconAdd2Press}
+                  activeOpacity={0.75}
+                  style={themedStyle.viewAdd2}>
+                  {AddIcon({ width: pxPhone(30), height: pxPhone(30), tintColor: 'gray' })}
+                </TouchableOpacity>
+              )}
+            </React.Fragment>
+          )
+        })}
+      </ScrollView>
+    )
   };
 
   const renderCreateCustomBoard = (): React.ReactElement => {
     return (
       <View style={themedStyle.boxSetting}>
-        <View style={{ width: '90%', height: pxPhone(50), backgroundColor: '#EFF7ED', borderRadius: pxPhone(5), justifyContent: 'center' }}>
+        <View style={{ width: '95%', paddingLeft: pxPhone(15), paddingVertical: pxPhone(15), backgroundColor: '#EFF7ED', borderRadius: pxPhone(5), flexDirection: 'row' }}>
+          {CheckedIcon(themedStyle.iconCheckedIcon)}
           <Text style={themedStyle.txtTemplateNote}>
             {'Set the number of columns and their characteristics'}
           </Text>
@@ -471,14 +474,11 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const renderCreateSettingCustomBoard = (): React.ReactElement => {
     return (
       <View style={themedStyle.boxSetting}>
-        <View style={themedStyle.HeaderSetting}>
+        <View style={{ width: '90%', paddingLeft: pxPhone(12), paddingVertical: pxPhone(15), backgroundColor: '#EFF7ED', borderRadius: pxPhone(5), justifyContent: 'center', flexDirection: 'row' }}>
           {CheckedIcon(themedStyle.iconCheckedIcon)}
-          <Text style={{
-            fontSize: pxPhone(15),
-            ...textStyle.proTextBold,
-          }}>
-            Set the rules about what a user can do when creating or viewing a post
-            </Text>
+          <Text style={themedStyle.txtTemplateNote}>
+            {'Set the rules about what a user can do when creating or viewing a post'}
+          </Text>
         </View>
         {onRenderSettingColumnName()}
         <View style={{ flexDirection: 'row', padding: pxPhone(12) }}>
@@ -634,14 +634,11 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const renderCreateVotingCustomBoard = (): React.ReactElement => {
     return (
       <View style={themedStyle.boxSetting}>
-        <View style={themedStyle.HeaderSetting}>
+        <View style={{ width: '95%', paddingLeft: pxPhone(15), paddingVertical: pxPhone(15), backgroundColor: '#EFF7ED', borderRadius: pxPhone(5), flexDirection: 'row' }}>
           {CheckedIcon(themedStyle.iconCheckedIcon)}
-          <Text style={{
-            fontSize: pxPhone(15),
-            ...textStyle.proTextBold,
-          }}>
-            Set the rules about likes and dislikes
-            </Text>
+          <Text style={themedStyle.txtTemplateNote}>
+            {'Set the rules about likes and dislikes'}
+          </Text>
         </View>
         {onRenderVotingColumnName()}
         <View style={{ flexDirection: 'row', padding: pxPhone(12) }}>
@@ -707,6 +704,15 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
     }
   }
 
+  const renderTabBar = props => (
+    <TabBar
+      {...props}
+      indicatorStyle={{ backgroundColor: 'black' }}
+      style={{ backgroundColor: themes["App Theme"]['color-green-1'] }}
+      activeColor={'#324F6F'}
+    />
+  );
+
   // tab create custom board
   const renderTabCreateCustomBoard = (): React.ReactElement => {
     return (
@@ -722,6 +728,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
         style={{ alignItems: 'center', justifyContent: 'center', height: '100%', margin: 0 }}>
         <TabView
+          renderTabBar={renderTabBar}
           style={{ width: '100%', height: '100%' }}
           navigationState={{ index, routes }}
           renderScene={renderScene}
@@ -736,7 +743,22 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
   const onDoneCreateBoard = (): void => {
     setIsShowCreateBoard(false);
     setIsShowBoardTemplate(false);
-    const templateData = { ...templateSelected, options: { ...templateSelected.options, isPublic: !settingState.isPrivateBoard } };
+    const templateData = {
+      ...templateSelected,
+      options: {
+        isPublic: !settingState.isPrivateBoard,
+        allowActions: settingState.isAllowActions,
+        allowMultipleVotes: votingState.isAllowMultiple,
+        allowSelfVoting: votingState.isAllowSelfVoting,
+        allowAuthorVisible: settingState.isShowAuthor,
+        maxDownVotes: null,
+        maxUpVotes: null,
+        allowGiphy: true,
+        allowGrouping: settingState.isAllowGrouping,
+        allowReordering: true,
+        blurCards: settingState.isBlurCards,
+      }
+    };
     props.onCreateBoard(templateData);
     setTemplateSelected(templateColumn[0]);
     setSettingState(initSettingState);
@@ -830,7 +852,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         iconStyle={themedStyle.iconSend}
         onIconPress={onGoToSession}
         icon={SendIcon}
-        placeholder={'Go to session url..'}
+        placeholder={'Enter url or board id...'}
         // value={post}
         title={'URL'}
         titleColor={{ backgroundColor: 'white' }}
@@ -869,7 +891,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
 export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
   viewInput: {
-    marginTop: pxPhone(15),
+    marginVertical: pxPhone(15),
     height: pxToPercentage(40),
     width: pxToPercentage(340),
     alignSelf: 'center',
@@ -886,20 +908,21 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     marginTop: pxPhone(5),
   },
   txtTemplateNote: {
+    marginLeft: pxPhone(5),
     color: '#324828',
     ...textStyle.proTextRegular,
     fontSize: pxPhone(12),
+    textAlign: 'center',
   },
   txtHeader2: {
     color: theme['color-basic-dark-100'],
     ...textStyle.proTextBold,
     fontSize: pxPhone(20),
-    marginLeft: pxPhone(12),
   },
   viewHeader2: {
     flexDirection: 'row',
     width: '100%',
-    height: pxPhone(50),
+    height: pxPhone(70),
     backgroundColor: theme['color-green-1'],
     // shadow ios
     shadowColor: '#000',
@@ -947,7 +970,6 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     height: '50%'
   },
   iconCheckedIcon: {
-    marginRight: pxPhone(5),
     width: pxPhone(20),
     height: pxPhone(20),
     tintColor: "#66b066",
@@ -1066,7 +1088,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     width: '100%',
     justifyContent: 'space-around',
     marginTop: pxPhone(15),
-    backgroundColor: "#d6d4d1",
+    backgroundColor: "#F4F4F4",
     paddingTop: 10,
     paddingBottom: 5,
     paddingHorizontal: 10,
@@ -1137,7 +1159,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     ...textStyle.proTextSemibold,
   },
   viewHeader: {
-    backgroundColor: theme['color-app'],
+    backgroundColor: theme['color-green-1'],
     height: pxToPercentage(70),
     width: '100%',
   },
@@ -1174,7 +1196,7 @@ export const Home = withStyles(HomeComponent, (theme: ThemeType) => ({
     fontSize: pxToPercentage(14),
     lineHeight: pxToPercentage(20),
     ...textStyle.robotoMedium,
-    color: theme['color-app'],
+    color: theme['color-green-1'],
   },
   viewAddNotificationsBottom: {
     alignSelf: 'flex-end',

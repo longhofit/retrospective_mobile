@@ -17,6 +17,7 @@ import {
 } from '@src/components';
 import {
   isEmpty,
+  pxPhone,
   pxToPercentage,
 } from '@src/core/utils/utils';
 import { ImageSource, imageBackground1 } from '@src/assets/images';
@@ -30,6 +31,7 @@ import I18n from '@src/assets/i18n';
 import { SignUpFormData } from '@src/core/models/signUp/signUp.model';
 import { SignupForm as SignUpForm } from './signUpForm.component';
 import { EmailValidator } from '@src/core/validators';
+import { EvaArrowIcon } from '@src/assets/icons';
 interface ComponentProps {
   onSignUpPress: (formData: SignUpFormData) => void;
   onBackPress: () => void;
@@ -71,7 +73,13 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
     <View
       style={themedStyle.container}>
       <View style={themedStyle.viewHeader}>
-        <Text style={themedStyle.txtHeader}>
+        <TouchableOpacity
+          activeOpacity={0.75}
+          onPress={() => props.onBackPress()}
+          style={{ position: 'absolute', left: pxPhone(12) }}>
+          {EvaArrowIcon({ width: pxPhone(30), height: pxPhone(30), tintColor: '#324F6F' })}
+        </TouchableOpacity>
+        <Text style={[themedStyle.txtHeader, { color: '#324F6F' }]}>
           {'Sign up for your acccount'}
         </Text>
       </View>
@@ -87,7 +95,7 @@ const SignUpComponent: React.FunctionComponent<SignUpProps> = (props) => {
             position: 'absolute',
             alignSelf: 'flex-start',
             left: pxToPercentage(-20),
-            top:pxToPercentage(-20),
+            top: pxToPercentage(-20),
           },
           {
             transform: [{ rotate: "-45deg" }]
@@ -127,13 +135,13 @@ export const SignUp = withStyles(SignUpComponent, (theme: ThemeType) => ({
     flex: 1,
   },
   sectionLogo: {
-    marginTop: pxToPercentage(150),
+    marginTop: pxToPercentage(50),
     flexDirection: 'row',
   },
   viewLogo: {
     flexDirection: 'row',
     width: pxToPercentage(60),
-    backgroundColor: theme['color-app'],
+    backgroundColor: theme['color-green-1'],
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -144,15 +152,28 @@ export const SignUp = withStyles(SignUpComponent, (theme: ThemeType) => ({
   },
   txtLogo2: {
     marginLeft: pxToPercentage(2),
-    color: theme['color-app'],
+    color: theme['color-green-1'],
     fontSize: pxToPercentage(55),
   },
   viewHeader: {
-    backgroundColor: theme['color-app'],
-    height: pxToPercentage(70),
+    flexDirection: 'row',
     width: '100%',
-    justifyContent: 'center',
+    height: pxPhone(70),
+    backgroundColor: theme['color-green-1'],
+    // shadow ios
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 3,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    // shadow android
+    elevation: 8,
+    borderWidth: 0,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: pxPhone(12),
   },
   sectionContainer: {
     flex: 1,
@@ -164,10 +185,10 @@ export const SignUp = withStyles(SignUpComponent, (theme: ThemeType) => ({
     alignItems: 'center',
   },
   txtHeader: {
-    marginTop: pxToPercentage(25),
-    fontSize: pxToPercentage(18),
-    color: theme['color-basic-light-100'],
-    ...textStyle.proDisplayRegular,
+    color: theme['color-basic-dark-100'],
+    ...textStyle.proTextBold,
+    fontSize: pxPhone(20),
+    marginLeft: pxPhone(12),
   },
   txtPhoneNumber: {
     marginTop: pxToPercentage(9.2),
@@ -221,7 +242,7 @@ export const SignUp = withStyles(SignUpComponent, (theme: ThemeType) => ({
   viewButton: {
     borderRadius: pxToPercentage(9),
     marginTop: pxToPercentage(20),
-    backgroundColor: theme['color-app'],
+    backgroundColor: theme['color-green-1'],
     height: pxToPercentage(40),
     width: '100%',
     justifyContent: 'center',

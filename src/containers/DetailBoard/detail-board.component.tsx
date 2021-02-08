@@ -5,10 +5,11 @@ import { View, Text, TouchableOpacity, Clipboard, Image } from 'react-native';
 import { textStyle } from '@src/components/textStyle';
 import { Session } from '@src/core/models/type';
 import { pxPhone, pxToPercentage } from '@src/core/utils/utils';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { BoardContainer } from '../board/board.container';
 import { SummaryContainer } from '../summary/summary.container';
 import { ParticipantsContainer } from '../participants/participants.container';
+import { themes } from '@src/core/themes';
 interface ComponentProps {
   sessionId: string
   session: Session;
@@ -32,6 +33,16 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
     second: SummaryContainer,
     three: ParticipantsContainer,
   });
+
+  const renderTabBar = props => (
+    <TabBar
+      {...props}
+      indicatorStyle={{ backgroundColor: 'black' }}
+      style={{ backgroundColor: themes["App Theme"]['color-green-1'] }}
+      activeColor={'#324F6F'}
+    />
+  );
+
   return (
     <React.Fragment>
       <View style={themedStyle.viewHeader}>
@@ -52,6 +63,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
         </TouchableOpacity>
       </View>
       <TabView
+        renderTabBar={renderTabBar}
         style={{ width: '100%', height: '100%' }}
         navigationState={{ index, routes }}
         renderScene={renderScene}
@@ -67,7 +79,7 @@ export const DetailBoard = withStyles(DetailBoardComponent, (theme: ThemeType) =
   viewHeader: {
     flexDirection: 'row',
     width: '100%',
-    height: pxPhone(50),
+    height: pxPhone(70),
     backgroundColor: theme['color-green-1'],
     // shadow ios
     shadowColor: '#000',

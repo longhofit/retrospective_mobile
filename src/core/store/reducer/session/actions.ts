@@ -24,8 +24,10 @@ import {
   EditOptionsAction,
   RenameSessionAction,
   RENAME_SESSION,
+  EditColumnsAction,
+  EDIT_COLUMNS,
 } from './types';
-import {Post, PostGroup, Session, SessionOptions} from '@src/core/models/type';
+import {ColumnDefinition, Post, PostGroup, Session, SessionOptions} from '@src/core/models/type';
 
 export const onReceivePost = (payload: Post): ReceivePostAction => ({
   type: RECEIVE_POST,
@@ -83,5 +85,10 @@ export const onReceiveOptions = (payload: SessionOptions): EditOptionsAction => 
 
 export const onRenameSession = (payload: string): RenameSessionAction => ({
   type: RENAME_SESSION,
+  payload,
+});
+
+export const onEditColumns = (payload: ColumnDefinition[]): EditColumnsAction => ({
+  type: EDIT_COLUMNS,
   payload,
 });

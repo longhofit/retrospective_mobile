@@ -21,14 +21,16 @@ import { useDispatch } from 'react-redux';
 import { onThunkAnoSignInReq, onThunkSignInReq } from './store/thunk';
 import { NavigationInjectedProps } from 'react-navigation';
 import { onSetUser } from '@src/core/store/reducer/user/actions';
+import { SignInLogo } from './signIn.component';
+import { InputItem } from '@src/components/input/inputItem.component';
 export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) => {
   const navigationKey: string = 'SignInContainer';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [signInFormData, setSignInFormData] = useState<SignInFormData>({
-    username: 'longhoimt3',
-    password: '123456',
+    username: '',
+    password: '',
   });
   const dispatch: Dispatch<any> = useDispatch();
 
@@ -88,31 +90,32 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.viewHeader}>
-        <Text style={styles.txtHeader}>
-          Sign into your account
-        </Text>
-      </View>
       <ScrollView style={styles.container1}>
-        <Text style={styles.text}>Username</Text>
-        <TextInput
+        <SignInLogo />
+        <InputItem
+          titleColor={{ backgroundColor: 'white' }}
+          keyboardType={'email-address'}
+          autoFocus={true}
+          title={'Username'}
+          inputContainerStyle={{ height: pxToPercentage(40), marginTop: pxPhone(60), }}
           value={signInFormData.username}
-          onChangeText={(username) => {
+          onInputTextChange={(username) => {
             setSignInFormData({ ...signInFormData, username });
-          }}
-          style={styles.textinput}
-        />
-        <Text style={styles.text}>Password</Text>
-        <TextInput
-          value={signInFormData.password}
-          onChangeText={(password) => {
-            setSignInFormData({ ...signInFormData, password });
-          }}
-          style={styles.textinput}
+          }} />
+        <InputItem
           secureTextEntry={true}
-        />
-        <TouchableOpacity style={styles.buttonSignIn}>
-          <Text style={styles.buttontext} onPress={onPressButton}>
+          titleColor={{ backgroundColor: 'white' }}
+          title={'Password'}
+          inputContainerStyle={{ height: pxToPercentage(40), marginTop: pxPhone(25) }}
+          value={signInFormData.password}
+          onInputTextChange={(password) => {
+            setSignInFormData({ ...signInFormData, password });
+          }} />
+        <TouchableOpacity
+          activeOpacity={0.75}
+          onPress={onPressButton}
+          style={styles.buttonSignIn}>
+          <Text style={styles.buttontext}>
             SIGN IN
           </Text>
         </TouchableOpacity>
@@ -122,10 +125,11 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
         <Text style={styles.text1} onPress={onSingUpPress}>
           SIGN UP FREE
         </Text>
-        <Text style={styles.header}>Or</Text>
         <View style={styles.containerAnonymous}>
           <Text style={styles.header1}>Anonymous Login</Text>
-          <Text style={styles.notify}>This will create an anonymous account. Some features won't be available.</Text>
+          <View style={{ padding: pxPhone(12), borderRadius: pxPhone(5), backgroundColor: '#e8f4fd', }}>
+            <Text >This will create an anonymous account. Some features won't be available.</Text>
+          </View>
           <TextInput
             style={styles.textinputAno}
             placeholder='please enter a name or nickname here'
@@ -133,6 +137,7 @@ export const SignIn: React.FunctionComponent<NavigationInjectedProps> = (props) 
             onChangeText={(name) => setName(name)}
           />
           <TouchableOpacity
+            activeOpacity={0.75}
             onPress={onAnoSignInPress}
             style={styles.buttonAno} disabled={hasName()}>
             <Text>
@@ -150,25 +155,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container1: {
-    marginLeft: 30,
-    marginRight: 30,
-    marginTop: 40,
+    paddingVertical: pxPhone(60),
+    paddingHorizontal: pxPhone(30),
   },
   containerAnonymous: {
-    borderWidth: 1,
-    marginBottom: 15,
-    borderRadius: pxPhone(8),
+    marginTop: pxPhone(12),
   },
   viewHeader: {
-    backgroundColor: '#8FDA97',
-    height: pxToPercentage(70),
+    flexDirection: 'row',
     width: '100%',
+    height: pxPhone(70),
+    backgroundColor: '#8FDA97',
+    // shadow ios
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 3,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    // shadow android
+    elevation: 8,
+    borderWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: pxPhone(12),
   },
   txtHeader: {
-    marginTop: pxToPercentage(25),
-    fontSize: pxToPercentage(18),
-    color: 'white',
+    color: '#324F6F',
     textAlign: 'center',
+    fontStyle: 'normal',
+    fontSize: pxPhone(20),
   },
   textinput: {
     height: 50,
@@ -188,7 +205,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#8FDA97',
   },
   buttonSignIn: {
-    marginTop: 20,
+    marginTop: pxPhone(20),
     width: '60%',
     backgroundColor: '#8FDA97',
     borderRadius: 10,
@@ -196,11 +213,11 @@ const styles = StyleSheet.create({
   },
   buttonAno: {
     marginRight: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 5,
+    padding: pxPhone(12),
     alignSelf: 'flex-end',
     backgroundColor: '#8FDA97',
     marginBottom: 15,
+    borderRadius: pxPhone(8),
   },
   buttontext: {
     fontSize: 18,
@@ -224,17 +241,13 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     marginTop: 5,
-    color: '#09577b',
+    color: '#324F6F',
   },
   text1: {
     fontSize: 18,
-    marginTop: 20,
-    color: '#09577b',
+    marginTop: pxPhone(10),
+    color: '#324F6F',
     textAlign: 'center',
   },
-  notify: {
-    backgroundColor: '#e8f4fd',
-    margin: 10,
-  }
 });
 export default SignIn;

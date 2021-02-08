@@ -49,9 +49,11 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
   };
 
   const onAddPost = (column: ColumnContent): void => {
-    props.onAddPost(column.index, post, calculateRankForNewPost(column));
-    setPost('');
-    inputEl2.current.clear();
+    if (post.length > 0) {
+      props.onAddPost(column.index, post, calculateRankForNewPost(column));
+      setPost('');
+      inputEl2.current.clear();
+    }
   };
 
   const onCancelAddPress = (): void => {
@@ -244,237 +246,244 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
             </Text>
           </View>
         )} */}
-        <InputItem
-          customRef={inputEl2}
-          iconStyle={themedStyle.iconSend}
-          onIconPress={() => onAddPost(column)}
-          icon={SendIcon}
-          placeholder={column.label}
-          // value={post}
-          title={'Post'}
-          inputContainerStyle={themedStyle.viewInput}
-          onInputTextChange={setPost} />
-        {
-          column.groups.map(group => {
-            return (
-              <View style={themedStyle.viewGroup}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: pxPhone(12), marginTop: pxPhone(12), paddingHorizontal: pxPhone(12) }}>
-                  <TextInput
-                    multiline
-                    style={{ maxWidth: '85%', fontSize: pxPhone(20), padding: 0, color: 'gray' }}
-                    onChangeText={setPostGroupSelectedContent}
-                    onEndEditing={onPostGroupUnFocus}
-                    onFocus={() => onGroupFocus(group)}>
-                    {group.label}
-                  </TextInput>
-                  <TouchableOpacity
-                    onPress={() => { }}
-                    activeOpacity={0.75}>
-                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(5) })}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ flex: 1, alignItems: 'flex-end' }}
-                    onPress={() => { props.onDeletePostGroup(group) }}
-                    activeOpacity={0.75}>
-                    {TrashIcon({ height: pxPhone(20), width: pxPhone(20) })}
-                  </TouchableOpacity>
-                </View>
-                {group.posts.length === 0
-                  ? <View style={{ backgroundColor: '#EBF3FD', padding: pxPhone(20), margin: pxPhone(20), borderRadius: pxPhone(8) }}>
-                    <Text style={themedStyle.txtEmpty}>
-                      {'This is an empty group'}
-                    </Text>
-                    <Text style={themedStyle.txtEmpty2}>
-                      {'Move a post here to fill this group'}
-                    </Text>
+        <View style={{ padding: pxPhone(12) }}>
+          <InputItem
+            customRef={inputEl2}
+            iconStyle={themedStyle.iconSend}
+            onIconPress={() => onAddPost(column)}
+            icon={SendIcon}
+            placeholder={column.label}
+            // value={post}
+            title={'Post'}
+            inputContainerStyle={themedStyle.viewInput}
+            onInputTextChange={setPost} />
+        </View>
+        <ScrollView
+          keyboardDismissMode={'interactive'}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: pxPhone(10), paddingBottom: pxToPercentage(12) }}>
+          {
+            column.groups.map(group => {
+              return (
+                <View style={themedStyle.viewGroup}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: pxPhone(12), marginTop: pxPhone(12), paddingHorizontal: pxPhone(12) }}>
+                    <TextInput
+                      multiline
+                      style={{ maxWidth: '85%', fontSize: pxPhone(20), padding: 0, color: 'gray' }}
+                      onChangeText={setPostGroupSelectedContent}
+                      onEndEditing={onPostGroupUnFocus}
+                      onFocus={() => onGroupFocus(group)}>
+                      {group.label}
+                    </TextInput>
+                    <TouchableOpacity
+                      onPress={() => { }}
+                      activeOpacity={0.75}>
+                      {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(5) })}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ flex: 1, alignItems: 'flex-end' }}
+                      onPress={() => { props.onDeletePostGroup(group) }}
+                      activeOpacity={0.75}>
+                      {TrashIcon({ height: pxPhone(20), width: pxPhone(20) })}
+                    </TouchableOpacity>
                   </View>
-                  : group.posts.map(item => {
-                    return (
-                      <View style={[
-                        themedStyle.sectionCard,
-                        props.session.options.blurCards && item.user.id !== props.session.createdBy.id && { opacity: 0.1 },
-                      ]}>
-                        <View style={themedStyle.viewContent}>
-                          <TextInput
-                            multiline
-                            style={{ maxWidth: '50%' }}
-                            onChangeText={setPostSelectedContent}
-                            onEndEditing={onPostUnFocus}
-                            onFocus={() => onPostFocus(item)}>
-                            {item.content}
-                          </TextInput>
-                          <TouchableOpacity
-                            onPress={() => onEditIconPress(item)}
-                            activeOpacity={0.75}>
-                            {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
-                          </TouchableOpacity>
-                          {props.session.options.allowAuthorVisible && (
-                            <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: pxPhone(12) }}>
-                              <Text style={{ fontSize: pxPhone(12) }}>
-                                {`by ${item.user.name}`}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                        {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
-                          <Text style={{ fontSize: pxPhone(13) }}>
-                            {'Action:'}
-                          </Text>
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {group.posts.length === 0
+                    ? <View style={{ backgroundColor: '#EBF3FD', padding: pxPhone(20), margin: pxPhone(20), borderRadius: pxPhone(8) }}>
+                      <Text style={themedStyle.txtEmpty}>
+                        {'This is an empty group'}
+                      </Text>
+                      <Text style={themedStyle.txtEmpty2}>
+                        {'Move a post here to fill this group'}
+                      </Text>
+                    </View>
+                    : group.posts.map(item => {
+                      return (
+                        <View style={[
+                          themedStyle.sectionCard,
+                          props.session.options.blurCards && item.user.id !== props.session.createdBy.id && { opacity: 0.1 },
+                        ]}>
+                          <View style={themedStyle.viewContent}>
                             <TextInput
                               multiline
-                              style={{ maxWidth: '90%', padding: 0 }}
-                              onChangeText={setPostActionSelectedContent}
+                              style={{ maxWidth: '50%' }}
+                              onChangeText={setPostSelectedContent}
                               onEndEditing={onPostUnFocus}
                               onFocus={() => onPostFocus(item)}>
-                              {item.action}
+                              {item.content}
                             </TextInput>
                             <TouchableOpacity
                               onPress={() => onEditIconPress(item)}
                               activeOpacity={0.75}>
-                              {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                              {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
                             </TouchableOpacity>
-                          </View>
-                        </View>}
-                        <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
-                          <View style={themedStyle.viewVotes}>
-                            <TouchableOpacity
-                              onPress={() => onVotePress(item, true)}
-                              activeOpacity={0.75}
-                              style={themedStyle.viewVote}>
-                              {LikeIcon(themedStyle.iconLike)}
-                            </TouchableOpacity>
-                            <Text style={themedStyle.txtVote}>
-                              {item.votes.filter(vote => vote.type === 'like').length}
-                            </Text>
-                            <TouchableOpacity
-                              onPress={() => onVotePress(item, false)}
-                              activeOpacity={0.75}
-                              style={themedStyle.viewVote}>
-                              {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
-                            </TouchableOpacity>
-                            <Text style={themedStyle.txtVote}>
-                              {item.votes.filter(vote => vote.type === 'dislike').length}
-                            </Text>
-                          </View>
-                          <View style={[themedStyle.viewActions, !props.session.options.allowActions && { width: pxPhone(50) }]}>
-                            <TouchableOpacity
-                              onPress={() => onDeletePress(item)}
-                              activeOpacity={0.75}>
-                              {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
-                            </TouchableOpacity>
-                            {props.session.options.allowActions && (
-                              <TouchableOpacity
-                                onPress={() => onActionIconPress(item)}
-                                activeOpacity={0.75}>
-                                {ActionIcon([themedStyle.actionIcon])}
-                              </TouchableOpacity>
+                            {props.session.options.allowAuthorVisible && (
+                              <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: pxPhone(12) }}>
+                                <Text style={{ fontSize: pxPhone(12) }}>
+                                  {`by ${item.user.name}`}
+                                </Text>
+                              </View>
                             )}
-                            <TouchableOpacity
-                              onPress={() => onMoveIconPress(item)}
-                              activeOpacity={0.75}>
-                              {MoveIcon(themedStyle.actionIcon)}
-                            </TouchableOpacity>
+                          </View>
+                          {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
+                            <Text style={{ fontSize: pxPhone(13) }}>
+                              {'Action:'}
+                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              <TextInput
+                                multiline
+                                style={{ maxWidth: '90%', padding: 0 }}
+                                onChangeText={setPostActionSelectedContent}
+                                onEndEditing={onPostUnFocus}
+                                onFocus={() => onPostFocus(item)}>
+                                {item.action}
+                              </TextInput>
+                              <TouchableOpacity
+                                onPress={() => onEditIconPress(item)}
+                                activeOpacity={0.75}>
+                                {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                              </TouchableOpacity>
+                            </View>
+                          </View>}
+                          <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
+                            <View style={themedStyle.viewVotes}>
+                              <TouchableOpacity
+                                onPress={() => onVotePress(item, true)}
+                                activeOpacity={0.75}
+                                style={themedStyle.viewVote}>
+                                {LikeIcon(themedStyle.iconLike)}
+                              </TouchableOpacity>
+                              <Text style={themedStyle.txtVote}>
+                                {item.votes.filter(vote => vote.type === 'like').length}
+                              </Text>
+                              <TouchableOpacity
+                                onPress={() => onVotePress(item, false)}
+                                activeOpacity={0.75}
+                                style={themedStyle.viewVote}>
+                                {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
+                              </TouchableOpacity>
+                              <Text style={themedStyle.txtVote}>
+                                {item.votes.filter(vote => vote.type === 'dislike').length}
+                              </Text>
+                            </View>
+                            <View style={[themedStyle.viewActions, !props.session.options.allowActions && { width: pxPhone(50) }]}>
+                              <TouchableOpacity
+                                onPress={() => onDeletePress(item)}
+                                activeOpacity={0.75}>
+                                {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                              </TouchableOpacity>
+                              {props.session.options.allowActions && (
+                                <TouchableOpacity
+                                  onPress={() => onActionIconPress(item)}
+                                  activeOpacity={0.75}>
+                                  {ActionIcon([themedStyle.actionIcon])}
+                                </TouchableOpacity>
+                              )}
+                              <TouchableOpacity
+                                onPress={() => onMoveIconPress(item)}
+                                activeOpacity={0.75}>
+                                {MoveIcon(themedStyle.actionIcon)}
+                              </TouchableOpacity>
+                            </View>
                           </View>
                         </View>
-                      </View>
-                    )
-                  })}
-              </View>
-            )
-          })}
-        {column.posts.map((item) => {
-          return (
-            <View style={[
-              themedStyle.sectionCard,
-              props.session.options.blurCards && item.user.id !== props.session.createdBy.id && { opacity: 0.1 },
-            ]}>
-              <View style={themedStyle.viewContent}>
-                <TextInput
-                  multiline
-                  style={{ maxWidth: '50%' }}
-                  onChangeText={setPostSelectedContent}
-                  onEndEditing={onPostUnFocus}
-                  onFocus={() => onPostFocus(item)}>
-                  {item.content}
-                </TextInput>
-                <TouchableOpacity
-                  onPress={() => onEditIconPress(item)}
-                  activeOpacity={0.75}>
-                  {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
-                </TouchableOpacity>
-                {props.session.options.allowAuthorVisible && (
-                  <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: pxPhone(12) }}>
-                    <Text style={{ fontSize: pxPhone(12) }}>
-                      {`by ${item.user.name}`}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
-                <Text style={{ fontSize: pxPhone(13) }}>
-                  {'Action:'}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      )
+                    })}
+                </View>
+              )
+            })}
+          {column.posts.map((item) => {
+            return (
+              <View style={[
+                themedStyle.sectionCard,
+                props.session.options.blurCards && item.user.id !== props.session.createdBy.id && { opacity: 0.1 },
+              ]}>
+                <View style={themedStyle.viewContent}>
                   <TextInput
                     multiline
-                    style={{ maxWidth: '90%', padding: 0 }}
-                    onChangeText={setPostActionSelectedContent}
+                    style={{ maxWidth: '50%' }}
+                    onChangeText={setPostSelectedContent}
                     onEndEditing={onPostUnFocus}
                     onFocus={() => onPostFocus(item)}>
-                    {item.action}
+                    {item.content}
                   </TextInput>
                   <TouchableOpacity
                     onPress={() => onEditIconPress(item)}
                     activeOpacity={0.75}>
-                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                    {EditIcon2({ height: pxPhone(10), width: pxPhone(10) })}
                   </TouchableOpacity>
-                </View>
-              </View>}
-              <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
-                <View style={themedStyle.viewVotes}>
-                  <TouchableOpacity
-                    onPress={() => onVotePress(item, true)}
-                    activeOpacity={0.75}
-                    style={themedStyle.viewVote}>
-                    {LikeIcon(themedStyle.iconLike)}
-                  </TouchableOpacity>
-                  <Text style={themedStyle.txtVote}>
-                    {item.votes.filter(vote => vote.type === 'like').length}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => onVotePress(item, false)}
-                    activeOpacity={0.75}
-                    style={themedStyle.viewVote}>
-                    {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
-                  </TouchableOpacity>
-                  <Text style={themedStyle.txtVote}>
-                    {item.votes.filter(vote => vote.type === 'dislike').length}
-                  </Text>
-                </View>
-                <View style={[themedStyle.viewActions, !props.session.options.allowActions && { width: pxPhone(50) }]}>
-                  <TouchableOpacity
-                    onPress={() => onDeletePress(item)}
-                    activeOpacity={0.75}>
-                    {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
-                  </TouchableOpacity>
-                  {props.session.options.allowActions && (
-                    <TouchableOpacity
-                      onPress={() => onActionIconPress(item)}
-                      activeOpacity={0.75}>
-                      {ActionIcon([themedStyle.actionIcon])}
-                    </TouchableOpacity>
+                  {props.session.options.allowAuthorVisible && (
+                    <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: pxPhone(12) }}>
+                      <Text style={{ fontSize: pxPhone(12) }}>
+                        {`by ${item.user.name}`}
+                      </Text>
+                    </View>
                   )}
-                  <TouchableOpacity
-                    onPress={() => onMoveIconPress(item)}
-                    activeOpacity={0.75}>
-                    {MoveIcon(themedStyle.actionIcon)}
-                  </TouchableOpacity>
+                </View>
+                {(actionIndex === item.id || item.action !== null && item.action.length > 0) && <View style={themedStyle.viewAction}>
+                  <Text style={{ fontSize: pxPhone(13) }}>
+                    {'Action:'}
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                      multiline
+                      style={{ maxWidth: '90%', padding: 0 }}
+                      onChangeText={setPostActionSelectedContent}
+                      onEndEditing={onPostUnFocus}
+                      onFocus={() => onPostFocus(item)}>
+                      {item.action}
+                    </TextInput>
+                    <TouchableOpacity
+                      onPress={() => onEditIconPress(item)}
+                      activeOpacity={0.75}>
+                      {EditIcon2({ height: pxPhone(10), width: pxPhone(10), marginLeft: pxPhone(2) })}
+                    </TouchableOpacity>
+                  </View>
+                </View>}
+                <View style={[themedStyle.card2, { backgroundColor: column.color }]}>
+                  <View style={themedStyle.viewVotes}>
+                    <TouchableOpacity
+                      onPress={() => onVotePress(item, true)}
+                      activeOpacity={0.75}
+                      style={themedStyle.viewVote}>
+                      {LikeIcon(themedStyle.iconLike)}
+                    </TouchableOpacity>
+                    <Text style={themedStyle.txtVote}>
+                      {item.votes.filter(vote => vote.type === 'like').length}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => onVotePress(item, false)}
+                      activeOpacity={0.75}
+                      style={themedStyle.viewVote}>
+                      {DislikeIcon([themedStyle.actionIcon, themedStyle.iconDisLike])}
+                    </TouchableOpacity>
+                    <Text style={themedStyle.txtVote}>
+                      {item.votes.filter(vote => vote.type === 'dislike').length}
+                    </Text>
+                  </View>
+                  <View style={[themedStyle.viewActions, !props.session.options.allowActions && { width: pxPhone(50) }]}>
+                    <TouchableOpacity
+                      onPress={() => onDeletePress(item)}
+                      activeOpacity={0.75}>
+                      {TrashIcon([themedStyle.actionIcon, themedStyle.iconTrash])}
+                    </TouchableOpacity>
+                    {props.session.options.allowActions && (
+                      <TouchableOpacity
+                        onPress={() => onActionIconPress(item)}
+                        activeOpacity={0.75}>
+                        {ActionIcon([themedStyle.actionIcon])}
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                      onPress={() => onMoveIconPress(item)}
+                      activeOpacity={0.75}>
+                      {MoveIcon(themedStyle.actionIcon)}
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
-            </View>
-          )
-        })}
+            )
+          })}
+        </ScrollView>
       </View>
     );
   };
@@ -486,19 +495,19 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 
   const onRenderColumnName = (): React.ReactElement => {
     return <FlatList
-      data={props.columns}
-      extraData={props.columns}
+      data={postSelected && props.columns && props.columns.filter(item => item.index !== postSelected.column)}
+      extraData={postSelected && props.columns && props.columns.filter(item => item.index !== postSelected.column)}
       showsVerticalScrollIndicator={false}
       keyExtractor={(item, index) => index.toString()}
       renderItem={({ item }) => (
         <React.Fragment>
           <View style={themedStyle.hr} />
           <TouchableOpacity
-            style={{ marginTop: pxPhone(5) }}
+            style={{ marginTop: pxPhone(10) }}
             activeOpacity={0.75}
             onPress={() => onDesColumnSelected(item)}>
             <Text style={{ textAlign: 'center' }}>
-              {item.type}
+              {item.label}
             </Text>
           </TouchableOpacity>
         </React.Fragment>
@@ -508,13 +517,14 @@ const BoardComponent: React.FunctionComponent<BoardProps> = (props) => {
 
   return (
     <React.Fragment>
-      <FlatList
-        data={props.columns}
-        extraData={props.columns}
-        renderItem={({ item, index }) => {
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        horizontal={true}
+        keyboardDismissMode='interactive'>
+        {props.columns && props.columns.map(item => {
           return renderColumn(item);
-        }}>
-      </FlatList>
+        })}
+      </ScrollView>
       {renderEditCard()}
       {renderSelectComlumnModal()}
     </React.Fragment >
@@ -545,8 +555,9 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     padding: pxPhone(3),
   },
   sectionColumn: {
-    paddingVertical: pxPhone(12),
-    paddingHorizontal: pxPhone(25),
+    width: pxPhone(350),
+    padding: pxPhone(12),
+    paddingBottom: 0,
     margin: pxPhone(12),
     borderRadius: pxPhone(8),
     backgroundColor: '#F4F4F7',
@@ -606,7 +617,6 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     borderRadius: pxPhone(10),
     alignItems: 'center',
     width: pxPhone(285),
-    height: pxPhone(170),
     paddingTop: pxPhone(15),
     backgroundColor: theme['color-basic-light-100'],
   },
@@ -663,7 +673,6 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     ...textStyle.proDisplayRegular,
   },
   viewInput: {
-    marginTop: pxPhone(15),
     height: pxToPercentage(40),
   },
   viewAddButton: {
@@ -798,7 +807,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     width: pxToPercentage(50),
     height: pxToPercentage(50),
     borderRadius: pxToPercentage(25),
-    backgroundColor: theme['color-app'],
+    backgroundColor: theme['color-green-1'],
   },
   sectionAddNotifications: {
     width: '100%',
@@ -816,7 +825,7 @@ export const Board = withStyles(BoardComponent, (theme: ThemeType) => ({
     fontSize: pxToPercentage(14),
     lineHeight: pxToPercentage(20),
     ...textStyle.robotoMedium,
-    color: theme['color-app'],
+    color: theme['color-green-1'],
   },
   viewAddNotificationsBottom: {
     alignSelf: 'flex-end',

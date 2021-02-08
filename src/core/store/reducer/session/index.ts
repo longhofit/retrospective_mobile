@@ -13,6 +13,7 @@ import {
   DELETE_POST_GROUP,
   EDIT_OPTIONS,
   RENAME_SESSION,
+  EDIT_COLUMNS,
 } from './types';
 
 const initialState: SessionState = {
@@ -211,6 +212,18 @@ export const sessionReducer = (
         session: {
           ...state.session,
           name: action.payload,
+        },
+      };
+
+    case EDIT_COLUMNS:
+      if (!state.session) {
+        return state;
+      }
+      return {
+        ...state,
+        session: {
+          ...state.session,
+          columns: action.payload,
         },
       };
 

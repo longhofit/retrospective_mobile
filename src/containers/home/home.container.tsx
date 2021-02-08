@@ -78,7 +78,6 @@ export const HomeContainer: React.FunctionComponent<NavigationInjectedProps> = (
 
   return (
     <Home
-
       onBoardPress={onBoardPress}
       onCreateBoard={onCreateBoard}
       boards={boards.concat(privateBoards)}
