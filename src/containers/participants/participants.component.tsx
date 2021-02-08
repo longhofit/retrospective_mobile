@@ -26,7 +26,7 @@ const ParticipantsComponent: React.FunctionComponent<ParticipantsProps> = (props
             source={{ uri: `https://www.gravatar.com/avatar/$%7Bmd5(${item})%7D?d=retro` }}
             style={themedStyle.image}
           />
-          <Text style={{marginHorizontal:pxPhone(5), width:'80%'}}>{item.name}</Text>
+          <Text style={{marginHorizontal:pxPhone(5)}}>{item.name}</Text>
         </View>
         <Text style={{width: '30%', textAlign:'center', alignSelf: 'center'}}>{item.accountType}</Text>
         <TouchableOpacity style={{width: '10%', alignItems:'center', alignSelf: 'center'}}>
