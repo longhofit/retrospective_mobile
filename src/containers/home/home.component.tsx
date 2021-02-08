@@ -130,10 +130,11 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
 
     var timeDiff = Math.abs(currentDate.getTime() - boardCreatedDateTime.getTime());
     var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    var convertYear: number = (diffDays - 1) / 365;
-    var monthRemainder: number = (diffDays - 1) % 365;
-    var convertMonth: number = monthRemainder / 30;
-    var convertDate: number = monthRemainder % 30;
+    
+    var convertYear: number = parseInt(String((diffDays - 1) / 365));
+    var monthRemainder: number = (diffDays - 1) - 365*convertYear;
+    var convertMonth: number = parseInt(String(monthRemainder / 30));
+    var convertDate: number = monthRemainder - 30*convertMonth;
 
 
     if (convertYear == 1) {
