@@ -51,7 +51,7 @@ export const BoardContainer: React.FunctionComponent<NavigationInjectedProps> = 
   );
 
   useEffect(() => {
-    const newSocket = io('http://10.0.2.2:8082');
+    const newSocket = io('http://retrospective.ai');
     setSocket(newSocket);
 
     const send = sendFactory(newSocket, sessionId);

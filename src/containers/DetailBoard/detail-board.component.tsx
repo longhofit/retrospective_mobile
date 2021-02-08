@@ -46,7 +46,7 @@ const DetailBoardComponent: React.FunctionComponent<DetailBoardProps> = (props) 
         </Text>
         <TouchableOpacity
           style={{ position: 'absolute', right: pxPhone(12) }}
-          onPress={() => Clipboard.setString(`http://localhost:3000/game/${props.session.id}`)}
+          onPress={() => Clipboard.setString(`http://retrospective.ai/game/${props.session.id}`)}
           activeOpacity={0.75}>
           {ShareIcon(themedStyle.iconShare)}
         </TouchableOpacity>
