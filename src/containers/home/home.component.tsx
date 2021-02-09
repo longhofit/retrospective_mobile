@@ -205,6 +205,13 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
       { cancelable: true },
     );
   }
+  const renderDeleteIcon = (idBoard): React.ReactElement => {
+    if(props.user.accountType !== 'anonymous'){
+      return <TouchableOpacity onPress={() => onPressDeleteBoard(idBoard)}>
+      {TrashIcon(themedStyle.buttonDelete)}
+    </TouchableOpacity>
+    }
+  }
   const renderBoard = (board: BoardMetaData): React.ReactElement => {
     return (
       <TouchableOpacity
@@ -214,9 +221,7 @@ const HomeComponent: React.FunctionComponent<HomeProps> = (props) => {
         <View style={themedStyle.sectionText}>
           <View style={themedStyle.viewBoardDelete}>
             <Text style={themedStyle.txtBoardTitle}>{convertDateTime(String(board.created))}</Text>
-            <TouchableOpacity onPress={() => onPressDeleteBoard(board.id)}>
-              {TrashIcon(themedStyle.buttonDelete)}
-            </TouchableOpacity>
+            {renderDeleteIcon(board.id)}
           </View>
           <Text style={themedStyle.txtRetrospective}>{'My Retrospective'}</Text>
           <Text style={themedStyle.txtBoardTitle}>
